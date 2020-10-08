@@ -11,15 +11,15 @@
 	distributed under the License is distributed on an "AS IS" BASIS,
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
-limitations under the License.
+	limitations under the License.
 */
 
 /*
-animal3D SDK: Minimal 3D Animation Framework
-By Daniel S. Buckstein
+	animal3D SDK: Minimal 3D Animation Framework
+	By Daniel S. Buckstein
 	
-a3_SpatialPose.h
-Description of a spatial pose with rotation, translation and scale.
+	a3_SpatialPose.h
+	Description of a spatial pose with rotation, translation and scale.
 */
 
 #ifndef __ANIMAL3D_SPATIALPOSE_H
@@ -123,8 +123,17 @@ a3i32 a3spatialPoseReset(a3_SpatialPose* spatialPose);
 // convert single node pose to matrix
 a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatialPose_in, const a3_SpatialPoseChannel channel, const a3_SpatialPoseEulerOrder order);
 
+// restore single node pose from matrix
+a3i32 a3spatialPoseRestore(a3_SpatialPose* spatialPose, const a3_SpatialPoseChannel channel, const a3_SpatialPoseEulerOrder order);
+
 // copy operation for single node pose
 a3i32 a3spatialPoseCopy(a3_SpatialPose* spatialPose_out, const a3_SpatialPose* spatialPose_in);
+
+// concat
+a3i32 a3spatialPoseConcat(a3_SpatialPose* spatialPose_out, const a3_SpatialPose* spatialPose_lhs, const a3_SpatialPose* spatialPose_rhs);
+
+// lerp
+a3i32 a3spatialPoseLerp(a3_SpatialPose* spatialPose_out, const a3_SpatialPose* spatialPose_0, const a3_SpatialPose* spatialPose_1, const a3real u);
 
 
 //-----------------------------------------------------------------------------
