@@ -55,7 +55,7 @@ struct a3_ClipController
 	// current time relative to start of clip; should always be between 0 and current clip's duration
 	a3f32 clipTime;
 
-	// normalized keyframe time; should always be between 0 and 1. 
+	// normalized clip time; should always be between 0 and 1. 
 	a3f32 clipParameter;
 
 	// index of current keyframe in referenced keyframe pool
@@ -68,7 +68,7 @@ struct a3_ClipController
 	a3f32 keyframeParameter;
 
 	// the active behavior of playback; try +1 for forward and -1 for reverse
-	a3ui32 playbackDirection;
+	a3f32 speed;
 
 	// true if paused and false if playing
 	a3boolean isPaused;

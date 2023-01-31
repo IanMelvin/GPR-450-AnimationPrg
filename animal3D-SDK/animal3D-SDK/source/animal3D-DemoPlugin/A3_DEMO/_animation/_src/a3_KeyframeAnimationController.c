@@ -40,7 +40,7 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 	clipCtrl_out->keyframe = 0;
 	clipCtrl_out->keyframeTime = 0;
 	clipCtrl_out->keyframeParameter = 0;
-	clipCtrl_out->playbackDirection = 0;
+	clipCtrl_out->speed = 1;
 
 	clipCtrl_out->isPaused = a3false;
 

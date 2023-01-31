@@ -31,54 +31,56 @@
 
 inline a3boolean ec_clipController_processTerminusAction(a3_ClipController* clipCtrl)
 {
+	a3_Clip* currentClip = &( clipCtrl->clipPool->clip[clipCtrl->clipIndex] );
+
 	//Don't process terminus action if not yet hit
-	if (0 <= clipCtrl->playhead.time && clipCtrl->playhead.time < clipCtrl->currentClip->duration) return 0;
+	if (0 <= clipCtrl->clipTime && clipCtrl->clipTime < clipCtrl->clipPool->clip[clipCtrl->clipIndex].duration) return 0;
 
 	//Detect which terminus action to process
-	ec_terminusAction* action = sign(clipCtrl->playhead.time) > 0 ? clipCtrl->currentClip->forwardTerminusAction : clipCtrl->currentClip->reverseTerminusAction);
+	ec_terminusAction* action = sign(clipCtrl->clipTime) > 0 ? currentClip->forwardTerminusAction : currentClip->reverseTerminusAction);
 	a3i8 entryDirection = (action->flags&EC_TERMINUSACTION_REVERSE ? -1 : 0) + (action->flags&EC_TERMINUSACTION_FORWARD ? 1 : 0);
 
 	//Ensure good
-	assert(sign(clipCtrl->playhead.time) == sign(clipCtrl->playhead.speed));
+	assert(sign(clipCtrl->clipTime) == sign(clipCtrl->speed));
 	assert(action->flags != 0); //Must have some form of terminus action
 	assert(!( action->flags&EC_TERMINUSACTION_REVERSE && action->flags&EC_TERMINUSACTION_FORWARD )); //Cannot be both forward and reverse
 	assert(entryDirection != 0 || action->flags == EC_TERMINUSACTION_PAUSE); //Only allow missing entry direction if our only instruction is to pause
 
 	//Calculate overstep
-	float overstep = clipCtrl->playhead.speed > 0 //Take away duration of clip we just processed
-		? clipCtrl->playhead.time - clipCtrl->currentClip->duration //Forward playback case: Leave at duration
-		: -clipCtrl->playhead.time; //Reverse playback case: Leave at 0
+	float overstep = clipCtrl->speed > 0 //Take away duration of clip we just processed
+		? clipCtrl->clipTime - currentClip->duration //Forward playback case: Leave at duration
+		: -clipCtrl->clipTime; //Reverse playback case: Leave at 0
 	assert(overstep >= 0);
 
 	//Special case for pause
 	if (action->flags & EC_TERMINUSACTION_PAUSE)
 	{
-		clipCtrl->paused = true;
+		clipCtrl->isPaused = a3true;
 		overstep = 0; //Ignore all overstep
 	}
 
 	//Play next clip, if it exists. Otherwise take no action, as we will just operate on the current clip.
-	if (action->targetClip) clipCtrl->currentClip = action->targetClip;
+	if (action->targetClip) clipCtrl->clipIndex = action->targetClip;
 
 	//Process forward/reverse entry
 	clipCtrl->speed = entryDirection * abs(clipCtrl->speed);
 	if (action->flags & EC_TERMINUSACTION_FORWARD)
 	{
 		//Forward playback case: Enter at t=0
-		clipCtrl->playhead.time = overstep;
+		clipCtrl->clipTime = overstep;
 		clipCtrl->playhead.keyframePrev = 0;
 		clipCtrl->playhead.keyframeNext = 1;
 	}
 	if (action->flags & EC_TERMINUSACTION_REVERSE)
 	{
 		//Reverse playback case: Enter at t=duration
-		clipCtrl->playhead.time = clipCtrl->currentClip->duration - overstep;
-		clipCtrl->playhead.keyframePrev = clipCtrl->currentClip->keyframeCount - 2;
-		clipCtrl->playhead.keyframeNext = clipCtrl->currentClip->keyframeCount - 1;
+		clipCtrl->clipTime = currentClip->duration - overstep;
+		clipCtrl->playhead.keyframePrev = currentClip->keyframeCount - 2;
+		clipCtrl->playhead.keyframeNext = currentClip->keyframeCount - 1;
 	}
 
 	//Process >> and << (skip first/last)
-	if (action->flags & EC_TERMINUSACTION_SKIP) clipCtrl->playhead.time += entryDirection * timePerFrame;
+	if (action->flags & EC_TERMINUSACTION_SKIP) clipCtrl->clipTime += entryDirection * timePerFrame;
 
 	return ! (action->flags & EC_TERMINUSACTION_PAUSE); //Keep processing unless we hit a pause action
 }
@@ -87,21 +89,21 @@ inline a3boolean ec_clipController_processTerminusAction(a3_ClipController* clip
 inline a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 {
 	//Negative speed = reverse
-	if (!clipCtrl->paused) clipCtrl->playhead.time += dt*clipCtrl->speed;
+	if (!clipCtrl->isPaused) clipCtrl->clipTime += dt*clipCtrl->speed;
 
 	//Process overstep & terminus actions
 	while (ec_clipController_processTerminusAction(clipCtrl));
 
-	assert(0 <= clipCtrl->playhead.time && clipCtrl->playhead.time < clipCtrl->currentClip->duration);
+	a3_Clip* currentClip = &(clipCtrl->clipPool->clip[clipCtrl->clipIndex]);
+	assert(0 <= clipCtrl->clipTime && clipCtrl->clipTime < currentClip->duration);
 
 	//Update keyframe pointers & normalized parameter
 	//TODO @rsc linear or binary search to find next
-	clipCtrl->playhead.keyframePrev = ???;
-	clipCtrl->playhead.keyframeNext = ???;
-	clipCtrl->playhead.keyframeParam = inverseLerp(
-		clipCtrl->currentClip->keyframes[clipCtrl->playhead.keyframePrev].time,
-		clipCtrl->currentClip->keyframes[clipCtrl->playhead.keyframeNext].time,
-		clipCtrl->playhead.time
+	clipCtrl->keyframe = ???;
+	clipCtrl->keyframeParameter = a3lerpInverse( //TODO need special case for last keyframe and paused
+		currentClip->keyframePool->keyframe[clipCtrl->keyframe  ].time,
+		currentClip->keyframePool->keyframe[clipCtrl->keyframe+1].time,
+		clipCtrl->clipTime
 	);
 
 	return -1; //TODO @rsc what is this supposed to return?
