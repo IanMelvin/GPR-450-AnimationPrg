@@ -29,10 +29,59 @@
 
 //-----------------------------------------------------------------------------
 
+inline a3i8 ec_clipController_processTerminusAction(a3_ClipController* clipCtrl)
+{
+	//Don't process terminus action if not yet hit
+	if (abs(clipCtrl->playhead.time) < clipCtrl->currentClip->duration) return 0;
+
+	//Detect which terminus action to process
+	ec_terminusAction* action = sign(clipCtrl->playhead.time) > 0 ? clipCtrl->currentClip->forwardTerminusAction : clipCtrl->currentClip->reverseTerminusAction);
+	a3i8 entryDirection = (action->flags&EC_TERMINUSACTION_REVERSE ? -1 : 0) + (action->flags&EC_TERMINUSACTION_FORWARD ? 1 : 0);
+
+	//Calculate overstep
+	float overstep = abs(clipCtrl->playhead.time) - clipCtrl->currentClip->duration; //Otherwise take away duration of clip we just processed
+
+	//Play next clip, if queued
+	if (action->targetClip) clipCtrl->currentClip = action->targetClip;
+
+	//Process forward/reverse entry
+	clipCtrl->speed = entryDirection * abs(clipCtrl->speed);
+	clipCtrl->playhead.time = overstep;
+
+	//Special case for pause
+	if (action->flags & EC_TERMINUSACTION_PAUSE)
+	{
+		clipCtrl->speed = 0; //Entry is paused
+		clipCtrl->playhead.time = 0; //Ignore all overstep
+	}
+	
+	//Process >> and << (skip first/last)
+	if (action->flags & EC_TERMINUSACTION_SKIP) clipCtrl->playhead.time += entryDirection * timePerFrame;
+
+	return ! (action->flags & EC_TERMINUSACTION_PAUSE); //Keep processing unless we hit a pause action
+}
+
 // update clip controller
 inline a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 {
-	return -1;
+	//Negative speed = reverse
+	//Playhead time = playhead time - clip duration
+	clipCtrl->playhead.time += dt*clipCtrl->speed;
+
+	//Process overstep & terminus actions
+	while (ec_clipController_processTerminusAction(clipCtrl));
+
+	//Update keyframe pointers & normalized parameter
+	//TODO @rsc linear or binary search to find next
+	clipCtrl->playhead.keyframePrev = ???;
+	clipCtrl->playhead.keyframeNext = ???;
+	clipCtrl->playhead.keyframeParam = inverseLerp(
+		clipCtrl->currentClip->keyframes[clipCtrl->playhead.keyframePrev].time,
+		clipCtrl->currentClip->keyframes[clipCtrl->playhead.keyframeNext].time,
+		clipCtrl->playhead.time
+	);
+
+	return -1; //TODO @rsc what is this supposed to return?
 }
 
 // set clip to play
