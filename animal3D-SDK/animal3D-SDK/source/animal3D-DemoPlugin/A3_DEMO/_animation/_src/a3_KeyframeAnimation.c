@@ -36,10 +36,18 @@
 //-----------------------------------------------------------------------------
 
 // allocate keyframe pool initializing all to default values.
+// Need to initialize to default values
 a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count)
 {
 	keyframePool_out->keyframe = malloc(count * sizeof(a3_Keyframe));
 	keyframePool_out->count = count;
+	
+	for (a3ui32 i = 0; i < keyframePool_out->count; i++)
+	{
+		keyframePool_out->keyframe[i].index = i; //Come back to later
+		a3keyframeInit(&keyframePool_out->keyframe[i], 0, 0);
+	}
+
 	return 1;
 }
 
@@ -61,6 +69,7 @@ a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3u
 
 
 // allocate clip pool
+// Need to initialize to default values
 a3i32 a3clipPoolCreate(a3_ClipPool* clipPool_out, const a3ui32 count)
 {
 	clipPool_out->clip = malloc(count * sizeof(a3_Clip));
@@ -88,7 +97,7 @@ a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_na
 
 // get clip index from pool
 a3i32 a3clipGetIndexInPool(const a3_ClipPool* clipPool, const a3byte clipName[a3keyframeAnimation_nameLenMax])
-{;
+{
 	for (a3ui32 i = 0; i < clipPool->count; i++)
 	{
 		if (clipPool->clip[i].name == clipName)

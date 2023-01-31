@@ -44,7 +44,7 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 
 	clipCtrl_out->isPaused = a3false;
 
-	return -1;
+	return 1;
 }
 
 
