@@ -58,6 +58,15 @@ struct a3_Keyframe
 {
 	// index in keyframe pool
 	a3ui32 index;
+
+	// interval of time for which this keyframe is active; cannot be zero
+	a3f32 duration;
+
+	// reciprocal of duration
+	a3f32 durationInv;
+
+	// value of the sample described by a keyframe
+	a3ui32 data;
 };
 
 // pool of keyframe descriptors
@@ -92,6 +101,24 @@ struct a3_Clip
 
 	// index in clip pool
 	a3ui32 index;
+
+	// duration of clip; can be calculated as the sum of all of the referenced keyframes or set first and distributed uniformly across keyframes; cannot be zero
+	a3f32 duration;
+
+	// reciprocal of duration
+	a3f32 durationInv;
+
+	// number of keyframes referenced by clip (including first and last)
+	a3ui32 keyframeCount;
+
+	// index of first keyframe in pool referenced by clip
+	a3ui32 firstKeyframe;
+
+	// index of final keyframe in pool referenced by clip
+	a3ui32 lastKeyframe;
+
+	// array of keyframePools
+	a3_KeyframePool* keyframePool;
 };
 
 // group of clips
