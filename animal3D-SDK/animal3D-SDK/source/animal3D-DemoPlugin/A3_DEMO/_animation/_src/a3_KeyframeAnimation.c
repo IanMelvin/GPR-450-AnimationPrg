@@ -39,13 +39,14 @@
 // Need to initialize to default values
 a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count)
 {
-	keyframePool_out->keyframe = malloc(count * sizeof(a3_Keyframe));
+	keyframePool_out->keyframe = (a3_Keyframe*)malloc(count * sizeof(a3_Keyframe));
 	keyframePool_out->count = count;
 	
 	for (a3ui32 i = 0; i < keyframePool_out->count; i++)
 	{
-		keyframePool_out->keyframe[i].index = i; //Come back to later
+		// //Come back to later
 		a3keyframeInit(&keyframePool_out->keyframe[i], 0, 0);
+		keyframePool_out->keyframe[i].index = i;
 	}
 
 	return 1;
@@ -72,8 +73,15 @@ a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3u
 // Need to initialize to default values
 a3i32 a3clipPoolCreate(a3_ClipPool* clipPool_out, const a3ui32 count)
 {
-	clipPool_out->clip = malloc(count * sizeof(a3_Clip));
+	clipPool_out->clip = (a3_Clip*)malloc(count * sizeof(a3_Clip));
 	clipPool_out->count = count;
+
+	for (a3ui32 i = 0; i < count; i++)
+	{
+		a3clipInit(&clipPool_out->clip[i], NULL, NULL, 0, 0);
+		clipPool_out->clip[i].index = i;
+	}
+
 	return 1;
 }
 
