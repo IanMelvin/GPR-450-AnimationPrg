@@ -97,8 +97,4 @@ a3i32 a3clipControllerSetClip(a3_ClipController* clipCtrl, const a3_ClipPool* cl
 }
 #endif	// __cplusplus
 
-
-#include "_inl/a3_KeyframeAnimationController.inl"
-
-
 #endif	// !__ANIMAL3D_KEYFRAMEANIMATIONCONTROLLER_H

@@ -235,9 +235,6 @@
     <None Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\_inl\a3_KeyframeAnimation.inl">
       <Filter>Header Files\A3_DEMO\_animation\_inl</Filter>
     </None>
-    <None Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\_inl\a3_KeyframeAnimationController.inl">
-      <Filter>Header Files\A3_DEMO\_animation\_inl</Filter>
-    </None>
     <None Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\_inl\a3_Kinematics.inl">
       <Filter>Header Files\A3_DEMO\_animation\_inl</Filter>
     </None>
