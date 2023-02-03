@@ -179,8 +179,12 @@ struct a3_DemoState
 	a3boolean stencilTest;
 	a3boolean skipIntermediatePasses;
 
-	//Ian Melvin added thuis
+	//Ian Melvin added this
 	a3boolean iJustWantToTestTheCode;
+	a3boolean togglePlay;
+	a3boolean toggleSlowMode;
+	a3boolean reset;
+
 	//-------------------------------------------------------------------------
 	// object arrays: organized as anonymous unions for two reasons: 
 	//	1. easy to manage entire sets of the same type of object using the 

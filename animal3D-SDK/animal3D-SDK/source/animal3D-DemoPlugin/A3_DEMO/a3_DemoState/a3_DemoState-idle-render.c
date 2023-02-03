@@ -81,7 +81,7 @@ void a3demo_render_controls(a3_DemoState const* demoState,
 	// global controls
 	textOffset = -0.7f;
 	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
-		"Test Lab 1: '/' (start)");
+		"Test Lab 1: '/' (start), ']' (play/pause), '[' (slowMotion), 'r' reset");
 	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
 		"Toggle text display:        't' (toggle) | 'T' (alloc/dealloc) ");
 	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
