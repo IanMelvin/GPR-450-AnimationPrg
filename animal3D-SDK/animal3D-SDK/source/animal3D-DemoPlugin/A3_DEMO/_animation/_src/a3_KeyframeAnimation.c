@@ -22,6 +22,13 @@
 	Implementation of keyframe animation interfaces.
 */
 
+/*
+	Modified by Ian Melvin and Robert Christensen
+	Purpose: Hold the implementation of the functions related to Keyframe,KeyFramepool, clip and clippool
+	Ian - Implemented functions
+	Robert - Modified and polished functions
+*/
+
 #include "../a3_KeyframeAnimation.h"
 
 #include <stdlib.h>
@@ -41,6 +48,7 @@ a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count
 	keyframePool_out->keyframe = (a3_Keyframe*)malloc(count * sizeof(a3_Keyframe));
 	keyframePool_out->count = count;
 
+	//Define default values
 	for (a3ui32 i = 0; i < keyframePool_out->count; i++)
 	{
 		a3keyframeInit(&keyframePool_out->keyframe[i], 0, 0);
@@ -73,6 +81,7 @@ a3i32 a3clipPoolCreate(a3_ClipPool* clipPool_out, const a3ui32 count)
 	clipPool_out->clip = (a3_Clip*)malloc(count * sizeof(a3_Clip));
 	clipPool_out->count = count;
 
+	//Define Default values
 	for (a3ui32 i = 0; i < count; i++)
 	{
 		a3clipInit(&clipPool_out->clip[i], "", NULL, 0, 0);
@@ -110,6 +119,7 @@ a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_na
 // get clip index from pool
 a3i32 a3clipGetIndexInPool(const a3_ClipPool* clipPool, const a3byte clipName[a3keyframeAnimation_nameLenMax])
 {;
+ 	// Iterate through clip pool looking for correct clip
 	for (a3ui32 i = 0; i < clipPool->count; i++)
 	{
 		if (clipPool->clip[i].name == clipName)
