@@ -69,7 +69,7 @@ void a3starter_load(a3_DemoState const* demoState, a3_DemoMode0_Starter* demoMod
 	a3_DemoProjector* projector;
 
 	//TEMP TESTING
-	a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
+	/*a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
 	a3keyframePoolCreate(keyframes, 3);
 	a3keyframeInit(&keyframes->keyframe[0], 1, 0);
 	a3keyframeInit(&keyframes->keyframe[1], 1, 4);
@@ -82,7 +82,7 @@ void a3starter_load(a3_DemoState const* demoState, a3_DemoMode0_Starter* demoMod
 	a3clipInit(&clips->clip[1], "Ping-pong", keyframes, 1, 2); a3clipCalculateDuration(&clips->clip[1]);
 	clips->clip[1].forwardTransition.flags = EC_TERMINUSACTION_REVERSE;
 	clips->clip[1].reverseTransition.flags = EC_TERMINUSACTION_FORWARD;
-	a3clipControllerInit((a3_ClipController*)&demoState->testAnimator, "Test Animator", clips, 0);
+	a3clipControllerInit((a3_ClipController*)&demoState->testAnimator, "Test Animator", clips, 0);*/
 
 	// camera's starting orientation depends on "vertical" axis
 	// we want the exact same view in either case

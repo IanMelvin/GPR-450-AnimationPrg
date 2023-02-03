@@ -48,10 +48,36 @@ void a3demo_update_pointLight(a3_DemoSceneObject* obj_camera, a3_DemoPointLight*
 
 void a3demo_applyScale_internal(a3_DemoSceneObject* sceneObject, a3real4x4p s);
 
+
+//Ian Added This
+#include <stdio.h>
+a3real slowModeValue = .5;
+
 void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a3f64 const dt)
 {
 	//TEMP TESTING
-	a3clipControllerUpdate(&demoState->testAnimator, (a3real)dt);
+	a3real modifiedDT = (a3real)dt;
+
+	if (demoState->toggleSlowMode)
+	{
+		//printf("slowmode");
+		modifiedDT = (a3real)dt * slowModeValue;
+	}
+	else 
+	{
+		//printf("normal");
+		modifiedDT = (a3real)dt;
+	}
+	if (demoState->togglePlay && demoState->iJustWantToTestTheCode)
+	{
+		printf("play");
+		a3clipControllerUpdate(&demoState->testAnimator, modifiedDT);
+	}
+	else 
+	{
+		printf("pause");
+	}
+	
 
 	a3ui32 i;
 	a3_DemoModelMatrixStack matrixStack[starterMaxCount_sceneObject];
