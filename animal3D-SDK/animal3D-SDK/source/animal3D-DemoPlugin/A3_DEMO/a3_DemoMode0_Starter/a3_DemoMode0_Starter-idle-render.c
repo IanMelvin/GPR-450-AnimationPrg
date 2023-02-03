@@ -122,6 +122,17 @@ void a3starter_render_controls(a3_DemoState const* demoState, a3_DemoMode0_Start
 }
 
 
+//Added by Ian
+#include <stdio.h>
+
+a3boolean runWhenISaySo = a3true;
+
+void InitilizeCode()
+{
+	printf("test");
+	runWhenISaySo = a3false;
+}
+
 //-----------------------------------------------------------------------------
 
 //void a3demo_render_bloomIteration(a3_DemoState const* demoState, a3real2 pixelSize, a3_Framebuffer const* fbo_prev,
@@ -598,7 +609,14 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 				a3demo_drawModelSimple(modelViewProjectionMat.m, viewProjectionMat.m, currentSceneObject->modelMat.m, currentDemoProgram);
 		}
 	}
+
+	if (demoState->iJustWantToTestTheCode && runWhenISaySo)
+	{
+		InitilizeCode();
+	}
 }
+
+
 
 
 //-----------------------------------------------------------------------------

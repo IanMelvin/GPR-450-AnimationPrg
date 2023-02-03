@@ -35,6 +35,7 @@
 #include "../_a3_demo_utilities/a3_DemoMacros.h"
 
 
+
 //-----------------------------------------------------------------------------
 // INPUT SUB-ROUTINES
 
@@ -173,6 +174,18 @@ void a3demo_input_keyCharPress(a3_DemoState* demoState, a3i32 const asciiKey)
 
 		// toggle stencil test
 		a3demoCtrlCaseToggle(demoState->skipIntermediatePasses, 'I');
+
+		// toggle stencil test
+		a3demoCtrlCaseToggle(demoState->iJustWantToTestTheCode, '/');
+
+		// toggle stencil test
+		a3demoCtrlCaseToggle(demoState->togglePlay, ']');
+
+		// toggle stencil test
+		a3demoCtrlCaseToggle(demoState->toggleSlowMode, '[');
+
+		// toggle stencil test
+		a3demoCtrlCaseToggle(demoState->reset, 'r');
 	}
 
 
