@@ -22,6 +22,13 @@
 	Implementation of keyframe animation controller.
 */
 
+/*
+	Modified by Ian Melvin and Robert Christensen
+	Purpose: Hold the implementation of the functions related to Keyframe,KeyFramepool, clip and clippool
+	Ian - Implemented a3clipControllerInit
+	Robert - Implemented a3ClipControllerUpdate and ec_clipController_processTerminusAction
+*/
+
 #include "../a3_KeyframeAnimationController.h"
 
 #include <string.h>
@@ -140,6 +147,7 @@ a3i32 a3clipControllerSetClip(a3_ClipController* clipCtrl, const a3_ClipPool* cl
 // initialize clip controller
 a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlName[a3keyframeAnimation_nameLenMax], const a3_ClipPool* clipPool, const a3ui32 clipIndex_pool)
 {
+	//Assign default values
 	strcpy_s(clipCtrl_out->name, a3keyframeAnimation_nameLenMax, ctrlName);
 	clipCtrl_out->clipPool = (a3_ClipPool*)clipPool;
 	clipCtrl_out->clipIndex = clipIndex_pool;
