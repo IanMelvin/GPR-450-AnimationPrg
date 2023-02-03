@@ -51,31 +51,63 @@ void a3demo_applyScale_internal(a3_DemoSceneObject* sceneObject, a3real4x4p s);
 
 //Ian Added This
 #include <stdio.h>
+#include <malloc.h>
 a3real slowModeValue = .5;
+a3boolean runWhenISaySo = a3true;
+
+void InitilizeCode(a3_DemoState const* demoState)
+{
+	printf("test");
+	a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
+	a3keyframePoolCreate(keyframes, 3);
+	a3keyframeInit(&keyframes->keyframe[0], 1, 0);
+	a3keyframeInit(&keyframes->keyframe[1], 1, 4);
+	a3keyframeInit(&keyframes->keyframe[2], 1, 5);
+	a3_ClipPool* clips = malloc(sizeof(a3_ClipPool));
+	a3clipPoolCreate(clips, 2);
+	a3clipInit(&clips->clip[0], "Entry", keyframes, 0, 1); a3clipCalculateDuration(&clips->clip[0]);
+	clips->clip[0].forwardTransition.flags = EC_TERMINUSACTION_FORWARD; clips->clip[0].forwardTransition.targetClipID = 1;
+	clips->clip[0].reverseTransition.flags = EC_TERMINUSACTION_REVERSE; clips->clip[0].reverseTransition.targetClipID = 1;
+	a3clipInit(&clips->clip[1], "Ping-pong", keyframes, 1, 2); a3clipCalculateDuration(&clips->clip[1]);
+	clips->clip[1].forwardTransition.flags = EC_TERMINUSACTION_REVERSE;
+	clips->clip[1].reverseTransition.flags = EC_TERMINUSACTION_FORWARD;
+	a3clipControllerInit((a3_ClipController*)&demoState->testAnimator, "Test Animator", clips, 0);
+	runWhenISaySo = a3false;
+}
 
 void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a3f64 const dt)
 {
 	//TEMP TESTING
 	a3real modifiedDT = (a3real)dt;
 
+	if (demoState->initializeCode)
+	{
+		InitilizeCode(demoState);
+	}
+
 	if (demoState->toggleSlowMode)
 	{
-		//printf("slowmode");
 		modifiedDT = (a3real)dt * slowModeValue;
 	}
 	else 
 	{
-		//printf("normal");
 		modifiedDT = (a3real)dt;
 	}
-	if (demoState->togglePlay && demoState->iJustWantToTestTheCode)
+
+	if (demoState->togglePlay && demoState->initializeCode)
 	{
 		printf("play");
 		a3clipControllerUpdate(&demoState->testAnimator, modifiedDT);
 	}
-	else 
+
+	if (demoState->reset)
 	{
-		printf("pause");
+		a3clipPoolRelease(demoState->testAnimator.clipPool);
+		demoState->reset = a3false;
+		demoState->togglePlay = a3true;
+		demoState->toggleSlowMode = a3false;
+		demoState->initializeCode = a3false;
+		runWhenISaySo = a3true;
 	}
 	
 

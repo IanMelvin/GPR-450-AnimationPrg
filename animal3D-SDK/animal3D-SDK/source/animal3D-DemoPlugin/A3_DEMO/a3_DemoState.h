@@ -180,7 +180,7 @@ struct a3_DemoState
 	a3boolean skipIntermediatePasses;
 
 	//Ian Melvin added this
-	a3boolean iJustWantToTestTheCode;
+	a3boolean initializeCode;
 	a3boolean togglePlay;
 	a3boolean toggleSlowMode;
 	a3boolean reset;

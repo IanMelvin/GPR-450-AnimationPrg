@@ -176,7 +176,7 @@ void a3demo_input_keyCharPress(a3_DemoState* demoState, a3i32 const asciiKey)
 		a3demoCtrlCaseToggle(demoState->skipIntermediatePasses, 'I');
 
 		// toggle stencil test
-		a3demoCtrlCaseToggle(demoState->iJustWantToTestTheCode, '/');
+		a3demoCtrlCaseToggle(demoState->initializeCode, '/');
 
 		// toggle stencil test
 		a3demoCtrlCaseToggle(demoState->togglePlay, ']');

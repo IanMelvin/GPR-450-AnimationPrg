@@ -148,10 +148,10 @@ void a3demo_load(a3_DemoState* demoState)
 	demoState->skipIntermediatePasses = a3false;
 
 	//Ian Added This
-	demoState->iJustWantToTestTheCode = a3false; // true = turn on code, false = leave it alone
+	demoState->initializeCode = a3false; // true = turn on code, false = leave it alone
 	demoState->togglePlay = a3true; // true = play, false = pause
 	demoState->toggleSlowMode = a3false; // true = slow, false = normal
-	demoState->reset = false; // true = reset, false = keep
+	demoState->reset = a3false; // true = reset, false = keep
 
 	// demo modes
 	demoState->demoMode = demoState_modeStarter;
