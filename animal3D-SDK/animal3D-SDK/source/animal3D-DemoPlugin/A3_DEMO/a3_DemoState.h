@@ -44,7 +44,7 @@
 #include "_a3_demo_utilities/a3_DemoShaderProgram.h"
 
 #include "a3_DemoMode0_Starter.h"
-
+#include "A3_DEMO/_animation/a3_KeyframeAnimationController.h" //TEMP TESTING
 
 //-----------------------------------------------------------------------------
 
@@ -305,6 +305,9 @@ struct a3_DemoState
 
 	// managed objects, no touchie
 	a3_VertexDrawable dummyDrawable[1];
+
+	//TEMP TESTING
+	a3_ClipController testAnimator;
 
 
 	//-------------------------------------------------------------------------

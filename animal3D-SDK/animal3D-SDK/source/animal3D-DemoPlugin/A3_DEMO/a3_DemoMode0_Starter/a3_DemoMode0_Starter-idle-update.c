@@ -50,6 +50,9 @@ void a3demo_applyScale_internal(a3_DemoSceneObject* sceneObject, a3real4x4p s);
 
 void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a3f64 const dt)
 {
+	//TEMP TESTING
+	a3clipControllerUpdate(&demoState->testAnimator, (a3real)dt);
+
 	a3ui32 i;
 	a3_DemoModelMatrixStack matrixStack[starterMaxCount_sceneObject];
 
