@@ -147,6 +147,9 @@ void a3demo_load(a3_DemoState* demoState)
 	demoState->stencilTest = a3false;
 	demoState->skipIntermediatePasses = a3false;
 
+	//Ian Added This
+	demoState->iJustWantToTestTheCode = a3false;
+
 
 	// demo modes
 	demoState->demoMode = demoState_modeStarter;
