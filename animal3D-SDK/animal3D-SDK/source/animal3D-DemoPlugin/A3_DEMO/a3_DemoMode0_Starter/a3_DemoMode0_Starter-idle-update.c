@@ -80,7 +80,7 @@ void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a
 	//TEMP TESTING
 	a3real modifiedDT = (a3real)dt;
 
-	if (demoState->initializeCode)
+	if (demoState->initializeCode && runWhenISaySo)
 	{
 		InitilizeCode(demoState);
 	}
