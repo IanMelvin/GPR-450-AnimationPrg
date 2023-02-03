@@ -28,6 +28,12 @@
 	****************************************************
 */
 
+/*
+	Modified by Ian Melvin
+	Purpose: Demo state function implemenntationns
+	Ian - Added on 4 switch cases to the a3demo_input_keyCharPress function
+*/
+
 //-----------------------------------------------------------------------------
 
 #include "../a3_DemoState.h"
@@ -175,16 +181,16 @@ void a3demo_input_keyCharPress(a3_DemoState* demoState, a3i32 const asciiKey)
 		// toggle stencil test
 		a3demoCtrlCaseToggle(demoState->skipIntermediatePasses, 'I');
 
-		// toggle stencil test
+		// toggle initialization of test Code
 		a3demoCtrlCaseToggle(demoState->initializeCode, '/');
 
-		// toggle stencil test
+		// toggle play/pause
 		a3demoCtrlCaseToggle(demoState->togglePlay, ']');
 
-		// toggle stencil test
+		// toggle slowmode
 		a3demoCtrlCaseToggle(demoState->toggleSlowMode, '[');
 
-		// toggle stencil test
+		// toggle reset
 		a3demoCtrlCaseToggle(demoState->reset, 'r');
 	}
 
