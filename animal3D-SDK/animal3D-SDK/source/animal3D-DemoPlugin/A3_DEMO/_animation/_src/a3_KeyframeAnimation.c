@@ -98,6 +98,12 @@ a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_na
 	clip_out->firstKeyframe = firstKeyframeIndex;
 	clip_out->lastKeyframe = finalKeyframeIndex;
 
+	// Default transition: loop self
+	clip_out->forwardTransition.flags = EC_TERMINUSACTION_FORWARD;
+	clip_out->forwardTransition.targetClipID = NULL_CLIP_ID;
+	clip_out->reverseTransition.flags = EC_TERMINUSACTION_REVERSE;
+	clip_out->reverseTransition.targetClipID = NULL_CLIP_ID;
+
 	return 1;
 }
 
