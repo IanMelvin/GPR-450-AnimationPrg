@@ -94,7 +94,7 @@ void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a
 		modifiedDT = (a3real)dt;
 	}
 
-	if (demoState->togglePlay && demoState->initializeCode)
+	if (demoState->togglePlay && runWhenISaySo)
 	{
 		printf("play");
 		a3clipControllerUpdate(&demoState->testAnimator, modifiedDT);
