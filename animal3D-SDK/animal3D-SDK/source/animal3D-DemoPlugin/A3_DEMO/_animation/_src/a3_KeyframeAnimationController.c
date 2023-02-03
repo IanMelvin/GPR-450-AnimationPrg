@@ -124,8 +124,9 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 	currentClip = &(clipCtrl->clipPool->clip[clipCtrl->clipIndex]);
 	assert(0 <= clipCtrl->clipTime && clipCtrl->clipTime < currentClip->duration);
 
-	//Update keyframe normalized parameter
-	clipCtrl->keyframeParameter = clipCtrl->keyframeTime / currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration;
+	//Update normalized parameters
+	clipCtrl->keyframeParameter = clipCtrl->keyframeTime * currentClip->keyframePool->keyframe[clipCtrl->keyframe].durationInv;
+	clipCtrl->    clipParameter = clipCtrl->    clipTime * currentClip->                                           durationInv;
 
 	return a3true; //TODO @rsc what is this supposed to return?
 }
