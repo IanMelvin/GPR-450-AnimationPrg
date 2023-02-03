@@ -109,7 +109,7 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 	//Absolute method: more reliable but slower
 	//Keyframe time = clip time - duration of previous keyframes
 	clipCtrl->keyframe = 0;
-	clipCtrl->keyframeTime = 0;
+	clipCtrl->keyframeTime = clipCtrl->clipTime;
 #endif
 	//Resolve keyframe overstep
 	while (clipCtrl->keyframeTime >= currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration && clipCtrl->keyframe < currentClip->keyframeCount)
