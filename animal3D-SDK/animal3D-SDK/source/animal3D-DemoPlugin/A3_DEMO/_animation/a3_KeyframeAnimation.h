@@ -22,6 +22,13 @@
 	Data structures for fundamental keyframe animation.
 */
 
+/*
+	Modified by Ian Melvin and Robert Christensen
+	Purpose: Hold the defininition for Keyframe,KeyFramePool, clip and clipPool
+	Ian - Defined variables for Keyframe,KeyFramePool, clip and clipPool
+	Robert - Defined variables for clipPool
+*/
+
 #ifndef __ANIMAL3D_KEYFRAMEANIMATION_H
 #define __ANIMAL3D_KEYFRAMEANIMATION_H
 
