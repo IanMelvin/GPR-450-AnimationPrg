@@ -23,6 +23,13 @@
 	limited in what one can do with this; could potentially be so much more.
 */
 
+/*
+	Modified by Ian Melvin and Robert Christensen
+	Purpose: Define the clip controller and it's functions
+	Ian - Defined variables
+	Robert - Defined variables
+*/
+
 #ifndef __ANIMAL3D_KEYFRAMEANIMATIONCONTROLLER_H
 #define __ANIMAL3D_KEYFRAMEANIMATIONCONTROLLER_H
 
