@@ -28,6 +28,7 @@
 
 
 #include "a3_KeyframeAnimation.h"
+#include "ec_TerminusAction.h"
 
 
 //-----------------------------------------------------------------------------
@@ -42,13 +43,44 @@ typedef struct a3_ClipController			a3_ClipController;
 
 //-----------------------------------------------------------------------------
 
+//Option: Use relative vs absolute keyframe time calculation (see usage in a3clipControllerUpdate for more details)
+#define EC_USE_RELATIVE_KEYFRAME_DT 0
+//#define EC_USE_RELATIVE_KEYFRAME_DT 1
+
 // clip controller
 // metaphor: playhead
 struct a3_ClipController
 {
+	// controller name
 	a3byte name[a3keyframeAnimation_nameLenMax];
-};
 
+	// index of clip to control in referenced clip pool
+	a3ui32 clipIndex;
+
+	// current time relative to start of clip; should always be between 0 and current clip's duration
+	a3f32 clipTime;
+
+	// normalized clip time; should always be between 0 and 1. 
+	a3f32 clipParameter;
+
+	// index of current keyframe in referenced keyframe pool
+	a3ui32 keyframe;
+
+	// current time relative to current keyframe; should always be between 0 and current keyframe's duration
+	a3f32 keyframeTime;
+
+	// normalized keyframe time; should always be between 0 and 1
+	a3f32 keyframeParameter;
+
+	// the active behavior of playback; try +1 for forward and -1 for reverse
+	a3f32 speed;
+
+	// true if paused and false if playing
+	a3boolean isPaused;
+
+	// pointer to clip pool
+	a3_ClipPool* clipPool;
+};
 
 //-----------------------------------------------------------------------------
 
@@ -68,9 +100,5 @@ a3i32 a3clipControllerSetClip(a3_ClipController* clipCtrl, const a3_ClipPool* cl
 #ifdef __cplusplus
 }
 #endif	// __cplusplus
-
-
-#include "_inl/a3_KeyframeAnimationController.inl"
-
 
 #endif	// !__ANIMAL3D_KEYFRAMEANIMATIONCONTROLLER_H
