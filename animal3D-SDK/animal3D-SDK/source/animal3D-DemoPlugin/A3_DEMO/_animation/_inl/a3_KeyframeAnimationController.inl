@@ -22,6 +22,12 @@
 	inline definitions for keyframe animation controller.
 */
 
+/*
+	Modified by Robert Christensen
+	Purpose: Prototype a3clipControllerUpdate and ec_clipController_processTerminusAction
+	Robert - Prototyped a3clipControllerUpdate and ec_clipController_processTerminusAction
+*/
+
 #ifdef __ANIMAL3D_KEYFRAMEANIMATIONCONTROLLER_H
 #ifndef __ANIMAL3D_KEYFRAMEANIMATIONCONTROLLER_INL
 #define __ANIMAL3D_KEYFRAMEANIMATIONCONTROLLER_INL
