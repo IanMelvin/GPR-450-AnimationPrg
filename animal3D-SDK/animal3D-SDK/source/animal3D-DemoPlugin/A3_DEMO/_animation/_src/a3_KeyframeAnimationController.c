@@ -85,7 +85,7 @@ a3boolean ec_clipController_processTerminusAction(a3_ClipController* clipCtrl)
 	}
 	
 	//Process >> and << (skip first/last)
-	if (action->flags & EC_TERMINUSACTION_SKIP) clipCtrl->clipTime += entryDirection * timePerFrame;
+	//if (action->flags & EC_TERMINUSACTION_SKIP) clipCtrl->clipTime += entryDirection * timePerFrame;
 
 	return !(action->flags & EC_TERMINUSACTION_PAUSE); //Keep processing unless we hit a pause action
 }
