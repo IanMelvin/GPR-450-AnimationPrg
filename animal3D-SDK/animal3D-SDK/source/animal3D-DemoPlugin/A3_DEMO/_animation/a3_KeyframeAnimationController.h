@@ -28,6 +28,7 @@
 
 
 #include "a3_KeyframeAnimation.h"
+#include "ec_TerminusAction.h"
 
 
 //-----------------------------------------------------------------------------
@@ -41,6 +42,10 @@ typedef struct a3_ClipController			a3_ClipController;
 
 
 //-----------------------------------------------------------------------------
+
+//Option: Use relative vs absolute keyframe time calculation (see usage in a3clipControllerUpdate for more details)
+#define EC_USE_RELATIVE_KEYFRAME_DT 0
+//#define EC_USE_RELATIVE_KEYFRAME_DT 1
 
 // clip controller
 // metaphor: playhead
@@ -76,7 +81,6 @@ struct a3_ClipController
 	// pointer to clip pool
 	a3_ClipPool* clipPool;
 };
-
 
 //-----------------------------------------------------------------------------
 

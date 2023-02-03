@@ -29,6 +29,7 @@
 #include "animal3D-A3DM/a3math/a3vector.h"
 #include "animal3D-A3DM/a3math/a3interpolation.h"
 
+#include "ec_TerminusAction.h"
 
 //-----------------------------------------------------------------------------
 
@@ -116,6 +117,9 @@ struct a3_Clip
 
 	// index of final keyframe in pool referenced by clip
 	a3ui32 lastKeyframe;
+
+	ec_terminusAction forwardTransition;
+	ec_terminusAction reverseTransition;
 
 	// array of keyframePools
 	a3_KeyframePool* keyframePool;
