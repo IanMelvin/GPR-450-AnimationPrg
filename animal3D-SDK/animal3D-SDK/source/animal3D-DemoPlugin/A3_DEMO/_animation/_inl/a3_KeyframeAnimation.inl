@@ -22,6 +22,12 @@
 	Inline definitions for keyframe animation.
 */
 
+/*
+	Modified by Ian Melvin
+	Purpose: Hold the implementation of the functions related to determining clip Duration
+	Ian - Implemented functions
+*/
+
 #ifdef __ANIMAL3D_KEYFRAMEANIMATION_H
 #ifndef __ANIMAL3D_KEYFRAMEANIMATION_INL
 #define __ANIMAL3D_KEYFRAMEANIMATION_INL
@@ -34,6 +40,7 @@ inline a3i32 a3clipCalculateDuration(a3_Clip* clip)
 {
 	clip->duration = 0;
 
+	//Sum up keyframe duration
 	for (a3ui32 i = clip->firstKeyframe; i < clip->lastKeyframe; i++)
 	{
 		clip->duration += clip->keyframePool->keyframe[i].duration;
@@ -52,6 +59,7 @@ inline a3i32 a3clipDistributeDuration(a3_Clip* clip, const a3real newClipDuratio
 	a3real keyframeDur = newClipDuration / clip->keyframeCount;
 	a3real keyframeDurInv = 1 / keyframeDur;
 
+	//Set duration for each keyframe
 	for (a3ui32 i = clip->firstKeyframe; i < clip->lastKeyframe; i++)
 	{
 		clip->keyframePool->keyframe[i].duration = keyframeDur;
