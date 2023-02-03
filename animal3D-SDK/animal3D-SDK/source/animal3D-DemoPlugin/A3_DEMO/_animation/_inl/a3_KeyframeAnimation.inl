@@ -41,6 +41,8 @@ inline a3i32 a3clipCalculateDuration(a3_Clip* clip)
 
 	clip->durationInv = 1 / clip->duration;
 
+	clip->keyframeCount = clip->keyframePool->count;
+
 	return 1;
 }
 
