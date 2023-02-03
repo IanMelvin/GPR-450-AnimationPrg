@@ -76,8 +76,8 @@ void a3starter_load(a3_DemoState const* demoState, a3_DemoMode0_Starter* demoMod
 	a3keyframeInit(&keyframes->keyframe[2], 1, 5);
 	a3_ClipPool* clips = malloc(sizeof(a3_ClipPool));
 	a3clipPoolCreate(clips, 2);
-	a3clipInit(&clips->clip[0], "Entry"    , keyframes, 0, 1);
-	a3clipInit(&clips->clip[1], "Ping-pong", keyframes, 1, 2);
+	a3clipInit(&clips->clip[0], "Entry"    , keyframes, 0, 1); a3clipCalculateDuration(&clips->clip[0]);
+	a3clipInit(&clips->clip[1], "Ping-pong", keyframes, 1, 2); a3clipCalculateDuration(&clips->clip[1]);
 	a3clipControllerInit((a3_ClipController*)&demoState->testAnimator, "Test Animator", clips, 0);
 
 	// camera's starting orientation depends on "vertical" axis
