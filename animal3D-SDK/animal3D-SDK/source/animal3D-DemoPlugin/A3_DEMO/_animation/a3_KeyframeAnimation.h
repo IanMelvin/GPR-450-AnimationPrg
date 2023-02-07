@@ -59,6 +59,16 @@ enum
 	a3keyframeAnimation_nameLenMax = 32,
 };
 
+typedef a3f32 a3_Keyframe_data_t;
+
+typedef enum ec_KeyframeInterpolationMode ec_KeyframeInterpolationMode;
+enum ec_KeyframeInterpolationMode
+{
+	EC_INTERPOLATE_CONSTANT = 1,
+	EC_INTERPOLATE_LINEAR = 2,
+
+	EC_INTERPOLATE_DEFAULT = EC_INTERPOLATE_LINEAR
+};
 
 // description of single keyframe
 // metaphor: moment
@@ -74,7 +84,10 @@ struct a3_Keyframe
 	a3f32 durationInv;
 
 	// value of the sample described by a keyframe
-	a3ui32 data;
+	a3_Keyframe_data_t data;
+
+	// how to interpolate data
+	ec_KeyframeInterpolationMode interpolationMode;
 };
 
 // pool of keyframe descriptors
@@ -95,7 +108,7 @@ a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count
 a3i32 a3keyframePoolRelease(a3_KeyframePool* keyframePool);
 
 // initialize keyframe
-a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3ui32 value_x);
+a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3_Keyframe_data_t value_x);
 
 
 //-----------------------------------------------------------------------------

@@ -97,6 +97,9 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 // update clip controller
 a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt);
 
+// evaluate the current value
+a3_Keyframe_data_t ec_clipController_evaluateValue(a3_ClipController const* clipCtrl);
+
 // time-ticking functions
 a3i32 ec_clipController_incrementTimeScaled(a3_ClipController* clipCtrl, a3real wallDt); // tick using wall time
 a3i32 ec_clipController_incrementTimeUnscaled(a3_ClipController* clipCtrl, a3real animDt); // tick using animation time

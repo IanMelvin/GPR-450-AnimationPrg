@@ -80,6 +80,25 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 	return a3true; //TODO @rsc what is this supposed to return?
 }
 
+// evaluate the current value
+a3_Keyframe_data_t ec_clipController_evaluateValue(a3_ClipController const* clipCtrl)
+{
+	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
+	a3_Keyframe* x0 = &( currentClip->keyframePool->keyframe[clipCtrl->keyframe  ] );
+	if (clipCtrl->keyframe == currentClip->keyframeCount) return x0->data; //Special case for very last keyframe
+	a3_Keyframe* x1 = &( currentClip->keyframePool->keyframe[clipCtrl->keyframe+1] );
+
+	assert(x0->interpolationMode);
+
+	switch (x0->interpolationMode)
+	{
+	case EC_INTERPOLATE_CONSTANT: return x0->data;
+	case EC_INTERPOLATE_LINEAR  : return a3lerp(x0->data, x1->data, clipCtrl->keyframeParameter);
+
+	default: assert(false); return 0;
+	}
+}
+
 // time-ticking functions
 a3i32 ec_clipController_incrementTimeScaled(a3_ClipController* clipCtrl, a3real wallDt) //Uses wall clock time
 {
@@ -93,7 +112,6 @@ a3i32 ec_clipController_incrementTimeUnscaled(a3_ClipController* clipCtrl, a3rea
 	clipCtrl->clipTime += animDt;
 
 	//Update keyframe time
-	a3_Clip* currentClip = &clipCtrl->clipPool->clip[clipCtrl->clipIndex];
 #if EC_USE_RELATIVE_KEYFRAME_DT
 	//Relative method: potential floating point error, but more performant
 	clipCtrl->keyframeTime += animDt;
@@ -104,6 +122,7 @@ a3i32 ec_clipController_incrementTimeUnscaled(a3_ClipController* clipCtrl, a3rea
 	clipCtrl->keyframeTime = clipCtrl->clipTime;
 #endif
 	//Resolve keyframe overstep
+	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
 	while (clipCtrl->keyframeTime >= currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration && clipCtrl->keyframe < currentClip->keyframeCount)
 	{
 		clipCtrl->keyframeTime -= currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration;

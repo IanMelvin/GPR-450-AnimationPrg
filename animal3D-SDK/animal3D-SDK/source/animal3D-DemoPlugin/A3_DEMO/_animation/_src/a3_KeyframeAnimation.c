@@ -66,11 +66,12 @@ a3i32 a3keyframePoolRelease(a3_KeyframePool* keyframePool)
 }
 
 // initialize keyframe
-a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3ui32 value_x)
+a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3_Keyframe_data_t value_x)
 {
 	keyframe_out->duration = duration;
 	keyframe_out->durationInv = 1 / duration;
 	keyframe_out->data = value_x;
+	keyframe_out->interpolationMode = EC_INTERPOLATE_DEFAULT;
 	return 1;
 }
 
