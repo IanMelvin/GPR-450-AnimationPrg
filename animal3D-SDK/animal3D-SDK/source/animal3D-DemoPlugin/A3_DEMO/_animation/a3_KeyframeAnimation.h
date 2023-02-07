@@ -26,7 +26,7 @@
 	Modified by Ian Melvin and Robert Christensen
 	Purpose: Hold the defininition for Keyframe,KeyFramePool, clip and clipPool
 	Ian - Defined variables for Keyframe,KeyFramePool, clip and clipPool
-	Robert - Defined variables for clipPool, added utility functions ec_clip_getTerminusAction and ec_terminusActionFlags_getDirection
+	Robert - Defined variables for clipPool, added ec_KeyframeInterpolationMode, added utility functions ec_clip_getTerminusAction and ec_terminusActionFlags_getDirection
 */
 
 #ifndef __ANIMAL3D_KEYFRAMEANIMATION_H
@@ -48,6 +48,8 @@ typedef struct a3_Keyframe					a3_Keyframe;
 typedef struct a3_KeyframePool				a3_KeyframePool;
 typedef struct a3_Clip						a3_Clip;
 typedef struct a3_ClipPool					a3_ClipPool;
+typedef enum ec_KeyframeInterpolationMode ec_KeyframeInterpolationMode;
+typedef a3f32 a3_Keyframe_data_t;
 #endif	// __cplusplus
 
 
@@ -57,17 +59,6 @@ typedef struct a3_ClipPool					a3_ClipPool;
 enum
 {
 	a3keyframeAnimation_nameLenMax = 32,
-};
-
-typedef a3f32 a3_Keyframe_data_t;
-
-typedef enum ec_KeyframeInterpolationMode ec_KeyframeInterpolationMode;
-enum ec_KeyframeInterpolationMode
-{
-	EC_INTERPOLATE_CONSTANT = 1,
-	EC_INTERPOLATE_LINEAR = 2,
-
-	EC_INTERPOLATE_DEFAULT = EC_INTERPOLATE_LINEAR
 };
 
 // description of single keyframe
@@ -88,6 +79,22 @@ struct a3_Keyframe
 
 	// how to interpolate data
 	ec_KeyframeInterpolationMode interpolationMode;
+};
+
+// how to blend between a3_Keyframe.data
+enum ec_KeyframeInterpolationMode
+{
+	EC_INTERPOLATE_INVALID = 0,
+
+	EC_INTERPOLATE_CONSTANT,
+	EC_INTERPOLATE_NEAREST,
+	EC_INTERPOLATE_LINEAR,
+
+	//NOT IMPLEMENTED YET - see ec_clipController_evaluateValue
+	EC_INTERPOLATE_CATMULL_ROM,
+	EC_INTERPOLATE_CUBIC_HERMITE,
+
+	EC_INTERPOLATE_DEFAULT = EC_INTERPOLATE_LINEAR
 };
 
 // pool of keyframe descriptors

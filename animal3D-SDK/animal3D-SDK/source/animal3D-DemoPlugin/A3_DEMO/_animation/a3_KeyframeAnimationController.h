@@ -112,7 +112,7 @@ a3i32 a3clipControllerSetClip(a3_ClipController* clipCtrl, const a3_ClipPool* cl
 a3_Clip* ec_clipController_getClip(a3_ClipController const* clipCtrl);
 
 // check if time is within bounds
-a3boolean ec_clipController_isTimeWithinBounds(a3_ClipController const* clipCtrl);
+a3boolean ec_clipController_isTimeWithinBounds(a3_ClipController const* clipCtrl, a3boolean endInclusive /* = a3false*/);
 
 // calculate how far out of bounds time is
 a3real ec_clipController_getClipOverstep(a3_ClipController const* clipCtrl);

@@ -66,7 +66,7 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 	ec_clipController_incrementTimeScaled(clipCtrl, dt);
 	
 	//Resolve clip overstep & terminus actions
-	while (!clipCtrl->isPaused && !ec_clipController_isTimeWithinBounds(clipCtrl))
+	while (!clipCtrl->isPaused && !ec_clipController_isTimeWithinBounds(clipCtrl, a3false))
 	{
 		ec_clipController_processTerminusAction(
 			clipCtrl,
@@ -93,6 +93,7 @@ a3_Keyframe_data_t ec_clipController_evaluateValue(a3_ClipController const* clip
 	switch (x0->interpolationMode)
 	{
 	case EC_INTERPOLATE_CONSTANT: return x0->data;
+	case EC_INTERPOLATE_NEAREST : return clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data;
 	case EC_INTERPOLATE_LINEAR  : return a3lerp(x0->data, x1->data, clipCtrl->keyframeParameter);
 
 	default: assert(false); return 0;
@@ -154,11 +155,12 @@ a3_Clip* ec_clipController_getClip(a3_ClipController const* clipCtrl)
 }
 
 // check if time is within bounds
-a3boolean ec_clipController_isTimeWithinBounds(a3_ClipController const* clipCtrl)
+a3boolean ec_clipController_isTimeWithinBounds(a3_ClipController const* clipCtrl, a3boolean endInclusive /* = a3false*/)
 {
 	assert(clipCtrl);
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
-	return 0 <= clipCtrl->clipTime && clipCtrl->clipTime <= currentClip->duration; //FIXME this second comparison should probably be a <
+	if (!endInclusive) return 0 <= clipCtrl->clipTime && clipCtrl->clipTime <  currentClip->duration;
+	else               return 0 <= clipCtrl->clipTime && clipCtrl->clipTime <= currentClip->duration;
 }
 
 // calculate how far out of bounds time is
@@ -173,7 +175,7 @@ a3real ec_clipController_getClipOverstep(a3_ClipController const* clipCtrl)
 // process the indicated terminus action (does not check conditions!)
 a3i32 ec_clipController_processTerminusAction(a3_ClipController* clipCtrl, ec_terminusAction* action)
 {
-	assert(!ec_clipController_isTimeWithinBounds(clipCtrl));
+	assert(!ec_clipController_isTimeWithinBounds(clipCtrl, false));
 
 	a3i8 entryDirection = ec_terminusActionFlags_getDirection(action->flags);
 	assert(entryDirection != 0 || action->flags == EC_TERMINUSACTION_PAUSE); //Only allow full stop if our only instruction is to pause
