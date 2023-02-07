@@ -97,9 +97,25 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 // update clip controller
 a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt);
 
+// time-ticking functions
+a3i32 ec_clipController_incrementTimeScaled(a3_ClipController* clipCtrl, a3real wallDt); // tick using wall time
+a3i32 ec_clipController_incrementTimeUnscaled(a3_ClipController* clipCtrl, a3real animDt); // tick using animation time
+a3i32 ec_clipController_updateParameterTime(a3_ClipController* clipCtrl); // update clipParameter, keyframeParameter
+
 // set clip to play
 a3i32 a3clipControllerSetClip(a3_ClipController* clipCtrl, const a3_ClipPool* clipPool, const a3ui32 clipIndex_pool);
 
+// get currently played clip
+a3_Clip* ec_clipController_getClip(a3_ClipController const* clipCtrl);
+
+// check if time is within bounds
+a3boolean ec_clipController_isTimeWithinBounds(a3_ClipController const* clipCtrl);
+
+// calculate how far out of bounds time is
+a3real ec_clipController_getClipOverstep(a3_ClipController const* clipCtrl);
+
+// process the indicated terminus action (does not check conditions!)
+a3i32 ec_clipController_processTerminusAction(a3_ClipController* clipCtrl, ec_terminusAction* action);
 
 //-----------------------------------------------------------------------------
 
@@ -107,5 +123,7 @@ a3i32 a3clipControllerSetClip(a3_ClipController* clipCtrl, const a3_ClipPool* cl
 #ifdef __cplusplus
 }
 #endif	// __cplusplus
+
+#include "_inl/a3_KeyframeAnimationController.inl"
 
 #endif	// !__ANIMAL3D_KEYFRAMEANIMATIONCONTROLLER_H

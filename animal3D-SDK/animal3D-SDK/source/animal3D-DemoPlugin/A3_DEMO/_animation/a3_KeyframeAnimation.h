@@ -26,7 +26,7 @@
 	Modified by Ian Melvin and Robert Christensen
 	Purpose: Hold the defininition for Keyframe,KeyFramePool, clip and clipPool
 	Ian - Defined variables for Keyframe,KeyFramePool, clip and clipPool
-	Robert - Defined variables for clipPool
+	Robert - Defined variables for clipPool, added utility functions ec_clip_getTerminusAction and ec_terminusActionFlags_getDirection
 */
 
 #ifndef __ANIMAL3D_KEYFRAMEANIMATION_H
@@ -161,6 +161,14 @@ a3i32 a3clipCalculateDuration(a3_Clip* clip);
 // calculate keyframes' durations by distributing clip's duration
 a3i32 a3clipDistributeDuration(a3_Clip* clip, const a3real newClipDuration);
 
+
+typedef a3i8 ec_sign;
+
+// retrieve the indicated terminus action
+ec_terminusAction* ec_clip_getTerminusAction(a3_Clip* clip, ec_sign direction);
+
+// get the direction indicated by flags
+ec_sign ec_terminusActionFlags_getDirection(ec_terminusActionFlags flags);
 
 //-----------------------------------------------------------------------------
 

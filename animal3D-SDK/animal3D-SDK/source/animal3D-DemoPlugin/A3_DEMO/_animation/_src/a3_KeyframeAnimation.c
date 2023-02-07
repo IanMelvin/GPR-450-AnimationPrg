@@ -33,7 +33,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-
+#include <cassert>
 
 // macros to help with names
 #define A3_CLIP_DEFAULTNAME		("unnamed clip")
@@ -128,6 +128,22 @@ a3i32 a3clipGetIndexInPool(const a3_ClipPool* clipPool, const a3byte clipName[a3
 		}
 	}
 	return 1;
+}
+
+// retrieve the indicated terminus action
+ec_terminusAction* ec_clip_getTerminusAction(a3_Clip* clip, ec_sign direction)
+{
+	assert(direction != 0);
+	assert(clip);
+	return direction>0 ? &clip->forwardTransition : &clip->reverseTransition;
+}
+
+// get the direction indicated by flags
+ec_sign ec_terminusActionFlags_getDirection(ec_terminusActionFlags flags)
+{
+	assert(flags != 0); //Must have some form of terminus action
+	assert(!(flags&EC_TERMINUSACTION_REVERSE && flags&EC_TERMINUSACTION_FORWARD)); //Cannot be both forward and reverse
+	return (flags&EC_TERMINUSACTION_REVERSE ? -1 : 0) + (flags&EC_TERMINUSACTION_FORWARD ? 1 : 0);
 }
 
 

@@ -26,7 +26,7 @@
 	Modified by Ian Melvin and Robert Christensen
 	Purpose: Hold the implementation of the functions related to Keyframe,KeyFramepool, clip and clippool
 	Ian - Implemented a3clipControllerInit
-	Robert - Implemented a3ClipControllerUpdate and ec_clipController_processTerminusAction
+	Robert - Implemented a3ClipControllerUpdate and ec_clipController_*
 */
 
 #include "../a3_KeyframeAnimationController.h"
@@ -40,27 +40,128 @@
 
 //-----------------------------------------------------------------------------
 
-a3boolean ec_clipController_processTerminusAction(a3_ClipController* clipCtrl)
+// initialize clip controller
+a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlName[a3keyframeAnimation_nameLenMax], const a3_ClipPool* clipPool, const a3ui32 clipIndex_pool)
 {
-	a3_Clip* currentClip = &( clipCtrl->clipPool->clip[clipCtrl->clipIndex] );
+	//Assign default values
+	strcpy_s(clipCtrl_out->name, a3keyframeAnimation_nameLenMax, ctrlName);
+	clipCtrl_out->clipPool = (a3_ClipPool*)clipPool;
+	clipCtrl_out->clipIndex = clipIndex_pool;
+	clipCtrl_out->clipTime = 0;
+	clipCtrl_out->clipParameter = 0;
+	clipCtrl_out->keyframe = 0;
+	clipCtrl_out->keyframeTime = 0;
+	clipCtrl_out->keyframeParameter = 0;
+	clipCtrl_out->speed = 1;
 
-	//Don't process terminus action if not yet hit
-	if (0 <= clipCtrl->clipTime && clipCtrl->clipTime < currentClip->duration) return 0;
+	clipCtrl_out->isPaused = a3false;
 
-	//Detect which terminus action to process
-	ec_terminusAction* action = sign(clipCtrl->clipTime) > 0 ? &currentClip->forwardTransition : &currentClip->reverseTransition;
-	a3i8 entryDirection = (action->flags&EC_TERMINUSACTION_REVERSE ? -1 : 0) + (action->flags&EC_TERMINUSACTION_FORWARD ? 1 : 0);
+	return -1;
+}
 
-	assert(sign(clipCtrl->clipTime) == sign(clipCtrl->speed)); //Ensure we didn't understep
-	assert(action->flags != 0); //Must have some form of terminus action
-	assert(!( action->flags&EC_TERMINUSACTION_REVERSE && action->flags&EC_TERMINUSACTION_FORWARD )); //Cannot be both forward and reverse
-	assert(entryDirection != 0 || action->flags == EC_TERMINUSACTION_PAUSE); //Only allow missing entry direction if our only instruction is to pause
+// update clip controller
+a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
+{
+	//Tick time
+	ec_clipController_incrementTimeScaled(clipCtrl, dt);
+	
+	//Resolve clip overstep & terminus actions
+	while (!clipCtrl->isPaused && !ec_clipController_isTimeWithinBounds(clipCtrl))
+	{
+		ec_clipController_processTerminusAction(
+			clipCtrl,
+			ec_clip_getTerminusAction(ec_clipController_getClip(clipCtrl), sign(clipCtrl->clipTime))
+		);
+	}
+
+	//Update normalized parameters
+	ec_clipController_updateParameterTime(clipCtrl);
+
+	return a3true; //TODO @rsc what is this supposed to return?
+}
+
+// time-ticking functions
+a3i32 ec_clipController_incrementTimeScaled(a3_ClipController* clipCtrl, a3real wallDt) //Uses wall clock time
+{
+	a3real effectiveDt = !clipCtrl->isPaused ? wallDt * clipCtrl->speed : 0;
+	ec_clipController_incrementTimeUnscaled(clipCtrl, effectiveDt);
+	return a3true;
+}
+a3i32 ec_clipController_incrementTimeUnscaled(a3_ClipController* clipCtrl, a3real animDt) //Uses animation time
+{
+	//Update clip time
+	clipCtrl->clipTime += animDt;
+
+	//Update keyframe time
+	a3_Clip* currentClip = &clipCtrl->clipPool->clip[clipCtrl->clipIndex];
+#if EC_USE_RELATIVE_KEYFRAME_DT
+	//Relative method: potential floating point error, but more performant
+	clipCtrl->keyframeTime += animDt;
+#else
+	//Absolute method: more reliable but slower
+	//Keyframe time = clip time - duration of previous keyframes
+	clipCtrl->keyframe = 0;
+	clipCtrl->keyframeTime = clipCtrl->clipTime;
+#endif
+	//Resolve keyframe overstep
+	while (clipCtrl->keyframeTime >= currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration && clipCtrl->keyframe < currentClip->keyframeCount)
+	{
+		clipCtrl->keyframeTime -= currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration;
+		clipCtrl->keyframe++;
+	}
+
+	return a3true;
+}
+a3i32 ec_clipController_updateParameterTime(a3_ClipController* clipCtrl)
+{
+	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
+	clipCtrl->keyframeParameter = clipCtrl->keyframeTime * currentClip->keyframePool->keyframe[clipCtrl->keyframe].durationInv;
+	clipCtrl->    clipParameter = clipCtrl->    clipTime * currentClip->                                           durationInv;
+	return a3true;
+}
+
+// set clip to play
+a3i32 a3clipControllerSetClip(a3_ClipController* clipCtrl, const a3_ClipPool* clipPool, const a3ui32 clipIndex_pool)
+{
+	return -1;
+}
+
+// get currently played clip
+a3_Clip* ec_clipController_getClip(a3_ClipController const* clipCtrl)
+{
+	assert(clipCtrl);
+	assert(0 <= clipCtrl->clipIndex && clipCtrl->clipIndex < clipCtrl->clipPool->count);
+	return &(clipCtrl->clipPool->clip[clipCtrl->clipIndex]);
+}
+
+// check if time is within bounds
+a3boolean ec_clipController_isTimeWithinBounds(a3_ClipController const* clipCtrl)
+{
+	assert(clipCtrl);
+	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
+	return 0 <= clipCtrl->clipTime && clipCtrl->clipTime <= currentClip->duration; //FIXME this second comparison should probably be a <
+}
+
+// calculate how far out of bounds time is
+a3real ec_clipController_getClipOverstep(a3_ClipController const* clipCtrl)
+{
+	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
+	assert(clipCtrl->speed);
+	if (clipCtrl->speed > 0) return clipCtrl->clipTime - currentClip->duration; //Forward playback case: Exits at duration
+	else                     return -clipCtrl->clipTime; //Reverse playback case: Exits at 0
+}
+
+// process the indicated terminus action (does not check conditions!)
+a3i32 ec_clipController_processTerminusAction(a3_ClipController* clipCtrl, ec_terminusAction* action)
+{
+	assert(!ec_clipController_isTimeWithinBounds(clipCtrl));
+
+	a3i8 entryDirection = ec_terminusActionFlags_getDirection(action->flags);
+	assert(entryDirection != 0 || action->flags == EC_TERMINUSACTION_PAUSE); //Only allow full stop if our only instruction is to pause
 
 	//Calculate overstep
-	float overstep = clipCtrl->speed > 0 //Take away duration of clip we just processed
-		? clipCtrl->clipTime - currentClip->duration //Forward playback case: Leave at duration
-		: -clipCtrl->clipTime; //Reverse playback case: Leave at 0
-	assert(overstep >= 0);
+	float overstep = ec_clipController_getClipOverstep(clipCtrl); //Take away duration of clip we just processed
+	assert(overstep >= 0); //Ensure we didn't understep
 
 	//Special case for pause
 	if (action->flags & EC_TERMINUSACTION_PAUSE)
@@ -85,6 +186,7 @@ a3boolean ec_clipController_processTerminusAction(a3_ClipController* clipCtrl)
 	if (action->flags & EC_TERMINUSACTION_REVERSE)
 	{
 		//Reverse playback case: Enter at t=duration
+		a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
 		clipCtrl->clipTime = currentClip->duration - overstep;
 		clipCtrl->keyframe = currentClip->keyframeCount - 1;
 		clipCtrl->keyframeTime = currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration;
@@ -94,74 +196,7 @@ a3boolean ec_clipController_processTerminusAction(a3_ClipController* clipCtrl)
 	//Process >> and << (skip first/last)
 	//if (action->flags & EC_TERMINUSACTION_SKIP) clipCtrl->clipTime += entryDirection * timePerFrame;
 
-	return !(action->flags & EC_TERMINUSACTION_PAUSE); //Keep processing unless we hit a pause action
+	return a3true;
 }
-
-// update clip controller
-a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
-{
-	a3real effectiveDt = !clipCtrl->isPaused ? dt * clipCtrl->speed : 0;
-
-	//Negative speed = reverse
-
-	//Update clip time
-	clipCtrl->clipTime += effectiveDt;
-
-	//Update keyframe time
-	a3_Clip* currentClip = &clipCtrl->clipPool->clip[clipCtrl->clipIndex];
-#if EC_USE_RELATIVE_KEYFRAME_DT
-	//Relative method: potential floating point error, but more performant
-	clipCtrl->keyframeTime += effectiveDt;
-#else
-	//Absolute method: more reliable but slower
-	//Keyframe time = clip time - duration of previous keyframes
-	clipCtrl->keyframe = 0;
-	clipCtrl->keyframeTime = clipCtrl->clipTime;
-#endif
-	//Resolve keyframe overstep
-	while (clipCtrl->keyframeTime >= currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration && clipCtrl->keyframe < currentClip->keyframeCount)
-	{
-		clipCtrl->keyframeTime -= currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration;
-		clipCtrl->keyframe++;
-	}
-
-	//Resolve clip overstep & terminus actions
-	while (!clipCtrl->isPaused && ec_clipController_processTerminusAction(clipCtrl));
-
-	currentClip = &(clipCtrl->clipPool->clip[clipCtrl->clipIndex]);
-	assert(0 <= clipCtrl->clipTime && clipCtrl->clipTime < currentClip->duration);
-
-	//Update normalized parameters
-	clipCtrl->keyframeParameter = clipCtrl->keyframeTime * currentClip->keyframePool->keyframe[clipCtrl->keyframe].durationInv;
-	clipCtrl->    clipParameter = clipCtrl->    clipTime * currentClip->                                           durationInv;
-
-	return a3true; //TODO @rsc what is this supposed to return?
-}
-
-// set clip to play
-a3i32 a3clipControllerSetClip(a3_ClipController* clipCtrl, const a3_ClipPool* clipPool, const a3ui32 clipIndex_pool)
-{
-	return -1;
-}
-
-// initialize clip controller
-a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlName[a3keyframeAnimation_nameLenMax], const a3_ClipPool* clipPool, const a3ui32 clipIndex_pool)
-{
-	//Assign default values
-	strcpy_s(clipCtrl_out->name, a3keyframeAnimation_nameLenMax, ctrlName);
-	clipCtrl_out->clipPool = (a3_ClipPool*)clipPool;
-	clipCtrl_out->clipIndex = clipIndex_pool;
-	clipCtrl_out->clipTime = 0;
-	clipCtrl_out->clipParameter = 0;
-	clipCtrl_out->keyframe = 0;
-	clipCtrl_out->keyframeTime = 0;
-	clipCtrl_out->keyframeParameter = 0;
-	clipCtrl_out->speed = 1;
-
-	clipCtrl_out->isPaused = a3false;
-
-	return -1;
-}
-
 
 //-----------------------------------------------------------------------------

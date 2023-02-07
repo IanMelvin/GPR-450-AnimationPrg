@@ -197,9 +197,6 @@
     <ClInclude Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\a3_SpatialPose.h">
       <Filter>Header Files\A3_DEMO\_animation</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\ec_TerminusAction.h">
-      <Filter>Header Files\A3_DEMO\_animation</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\resource\glsl\4x\fs\drawColorAttrib_fs4x.glsl">
@@ -288,6 +285,9 @@
     </None>
     <None Include="..\..\..\resource\glsl\4x\gs\00-common\utilCommon_gs4x.glsl">
       <Filter>Resource Files\A3_DEMO\glsl\4x\gs\00-common</Filter>
+    </None>
+    <None Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\_inl\a3_KeyframeAnimationController.inl">
+      <Filter>Header Files\A3_DEMO\_animation\_inl</Filter>
     </None>
   </ItemGroup>
 </Project>
