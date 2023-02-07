@@ -84,9 +84,9 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 a3_Keyframe_data_t ec_clipController_evaluateValue(a3_ClipController const* clipCtrl)
 {
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
-	a3_Keyframe* x0 = &( currentClip->keyframePool->keyframe[clipCtrl->keyframe  ] );
-	if (clipCtrl->keyframe == currentClip->keyframeCount) return x0->data; //Special case for very last keyframe
-	a3_Keyframe* x1 = &( currentClip->keyframePool->keyframe[clipCtrl->keyframe+1] );
+	a3_Keyframe* x0 = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe);
+	if (clipCtrl->keyframe == currentClip->keyframeCount-1) return x0->data; //Special case for very last keyframe
+	a3_Keyframe* x1 = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe+1);
 
 	assert(x0->interpolationMode);
 
@@ -123,9 +123,9 @@ a3i32 ec_clipController_incrementTimeUnscaled(a3_ClipController* clipCtrl, a3rea
 #endif
 	//Resolve keyframe overstep
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
-	while (clipCtrl->keyframeTime >= currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration && clipCtrl->keyframe < currentClip->keyframeCount)
+	while (clipCtrl->keyframeTime >= ec_clip_getKeyframe(currentClip, clipCtrl->keyframe)->duration && clipCtrl->keyframe < currentClip->keyframeCount)
 	{
-		clipCtrl->keyframeTime -= currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration;
+		clipCtrl->keyframeTime -= ec_clip_getKeyframe(currentClip, clipCtrl->keyframe)->duration;
 		clipCtrl->keyframe++;
 	}
 
@@ -134,8 +134,8 @@ a3i32 ec_clipController_incrementTimeUnscaled(a3_ClipController* clipCtrl, a3rea
 a3i32 ec_clipController_updateParameterTime(a3_ClipController* clipCtrl)
 {
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
-	clipCtrl->keyframeParameter = clipCtrl->keyframeTime * currentClip->keyframePool->keyframe[clipCtrl->keyframe].durationInv;
-	clipCtrl->    clipParameter = clipCtrl->    clipTime * currentClip->                                           durationInv;
+	clipCtrl->keyframeParameter = clipCtrl->keyframeTime * ec_clip_getKeyframe(currentClip, clipCtrl->keyframe)->durationInv;
+	clipCtrl->    clipParameter = clipCtrl->    clipTime * currentClip->                                         durationInv;
 	return a3true;
 }
 
@@ -208,7 +208,7 @@ a3i32 ec_clipController_processTerminusAction(a3_ClipController* clipCtrl, ec_te
 		a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
 		clipCtrl->clipTime = currentClip->duration - overstep;
 		clipCtrl->keyframe = currentClip->keyframeCount - 1;
-		clipCtrl->keyframeTime = currentClip->keyframePool->keyframe[clipCtrl->keyframe].duration;
+		clipCtrl->keyframeTime = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe)->duration;
 		clipCtrl->keyframeParameter = 1;
 	}
 	

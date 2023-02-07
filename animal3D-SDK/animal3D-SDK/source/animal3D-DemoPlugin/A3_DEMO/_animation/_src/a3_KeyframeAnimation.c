@@ -131,6 +131,13 @@ a3i32 a3clipGetIndexInPool(const a3_ClipPool* clipPool, const a3byte clipName[a3
 	return 1;
 }
 
+// get a keyframe by id
+a3_Keyframe* ec_clip_getKeyframe(a3_Clip const* clip, a3ui32 id)
+{
+	assert(0 <= id && id < clip->keyframeCount);
+	return &(clip->keyframePool->keyframe[clip->firstKeyframe + id]);
+}
+
 // retrieve the indicated terminus action
 ec_terminusAction* ec_clip_getTerminusAction(a3_Clip* clip, ec_sign direction)
 {

@@ -174,6 +174,8 @@ a3i32 a3clipCalculateDuration(a3_Clip* clip);
 // calculate keyframes' durations by distributing clip's duration
 a3i32 a3clipDistributeDuration(a3_Clip* clip, const a3real newClipDuration);
 
+// get a keyframe by id
+a3_Keyframe* ec_clip_getKeyframe(a3_Clip const* clip, a3ui32 id);
 
 typedef a3i8 ec_sign;
 
