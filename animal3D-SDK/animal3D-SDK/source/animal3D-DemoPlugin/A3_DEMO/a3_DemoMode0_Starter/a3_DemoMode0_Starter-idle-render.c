@@ -356,6 +356,8 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 				currentSceneObject <= endSceneObject;
 				++j, ++currentSceneObject)
 			{
+				a3mat4 tmp = a3mat4_identity;
+				tmp.m00 = 2;
 				// send data and draw
 				i = (j * 2 + 11) % hueCount;
 				currentDrawable = drawable[currentSceneObject - demoMode->obj_skybox];
@@ -586,7 +588,6 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 			a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, viewProjectionMat.mm);
 			a3vertexDrawableRenderActive();
 		}
-
 		// individual objects
 		if (demoState->displayObjectAxes)
 		{
