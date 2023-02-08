@@ -55,6 +55,8 @@ void a3demo_applyScale_internal(a3_DemoSceneObject* sceneObject, a3real4x4p s);
 a3real slowModeValue = .1f;
 a3boolean runWhenISaySo = a3true;
 
+a3_TextureAtlas testAtlas;
+
 void InitilizeCode(a3_DemoState const* demoState)
 {
 	printf("test");

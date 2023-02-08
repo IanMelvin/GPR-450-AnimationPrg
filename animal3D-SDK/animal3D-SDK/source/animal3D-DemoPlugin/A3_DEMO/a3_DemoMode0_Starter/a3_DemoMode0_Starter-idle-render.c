@@ -172,10 +172,22 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 		{ 0.5f, 0.5f, 0.5f, 1.0f },	// solid grey
 		{ 0.5f, 0.5f, 0.5f, 0.5f },	// translucent grey
 	};
+	const a3vec4 blackNWhite[] = {						// Added by Ian Melvin
+		{ 1.00f, 1.00f, 1.00f, 1.00f }, // white		// Added by Ian Melvin
+		{ 0.00f, 0.00f, 0.00f, 0.00f }, // black		// Added by Ian Melvin
+	};
+
+	a3_Texture testTexture = *demoState->tex_testsprite;
+	a3_TextureAtlas testAtlas;
+	a3textureAtlasSetTexture(&testAtlas, &testTexture);
+	a3textureAtlasAllocateEvenCells(&testAtlas, 8, 8);
+	a3textureAtlasSendToShaderProgram(&testAtlas, 0, 0, 2, 4, 6, 8);
+
 	const a3real
 		* const red = rgba4[0].v, * const orange = rgba4[2].v, * const yellow = rgba4[4].v, * const lime = rgba4[6].v,
 		* const green = rgba4[8].v, * const aqua = rgba4[10].v, * const cyan = rgba4[12].v, * const sky = rgba4[14].v,
 		* const blue = rgba4[16].v, * const purple = rgba4[18].v, * const magenta = rgba4[20].v, * const rose = rgba4[22].v,
+		* const white = blackNWhite[0].v, * const black = blackNWhite[1].v,
 		* const grey = grey4[0].v, * const grey_t = grey4[1].v;
 	const a3ui32 hueCount = sizeof(rgba4) / sizeof(*rgba4);
 
@@ -200,14 +212,14 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 
 	// temp texture pointers
 	const a3_Texture* texture_dm[] = {
-		demoState->tex_checker,		// skybox (not actually used)
-		demoState->tex_checker,		// plane
-		demoState->tex_checker,		// box
-		demoState->tex_checker,		// sphere
-		demoState->tex_checker,		// cylinder
-		demoState->tex_checker,		// capsule
-		demoState->tex_checker,		// torus
-		demoState->tex_checker,		// teapot
+		demoState->tex_checker,			// skybox (not actually used)
+		demoState->tex_testsprite,		// plane
+		demoState->tex_checker,			// box
+		demoState->tex_checker,			// sphere
+		demoState->tex_checker,			// cylinder
+		demoState->tex_checker,			// capsule
+		demoState->tex_checker,			// torus
+		demoState->tex_checker,			// teapot
 	};
 
 	// forward pipeline shader programs
@@ -269,6 +281,8 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 		 0.0f,  0.0f,  2.0f, 0.0f,
 		-1.0f, -1.0f, -1.0f, 1.0f,
 	};
+
+	
 
 	// final model matrix and full matrix stack
 	a3mat4 viewProjectionMat = activeCamera->viewProjectionMat;
@@ -364,7 +378,8 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 				a3textureActivate(texture_dm[j], a3tex_unit00);
 				a3real4x4Product(modelViewProjectionMat.m, viewProjectionMat.m, currentSceneObject->modelMat.m);
 				a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, modelViewProjectionMat.mm);
-				a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, rgba4[i].v);
+				if(currentSceneObject == demoMode->obj_plane) a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, white);
+				else a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, rgba4[i].v);
 				a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uIndex, 1, &j);
 				a3vertexDrawableActivateAndRender(currentDrawable);
 			}
