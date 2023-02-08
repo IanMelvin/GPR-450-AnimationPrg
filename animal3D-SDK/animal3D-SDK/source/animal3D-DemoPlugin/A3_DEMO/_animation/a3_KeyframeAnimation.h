@@ -114,9 +114,11 @@ a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count
 // release keyframe pool
 a3i32 a3keyframePoolRelease(a3_KeyframePool* keyframePool);
 
+// load a keyframe pool from a file
+a3i32 ec_keyframePool_loadFile(a3_KeyframePool* keyframePool_out, char const* filepath);
+
 // initialize keyframe
 a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3_Keyframe_data_t value_x);
-
 
 //-----------------------------------------------------------------------------
 
@@ -171,6 +173,9 @@ a3i32 a3clipPoolRelease(a3_ClipPool* clipPool);
 
 // initialize clip with first and last indices
 a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_nameLenMax], const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex);
+
+// load clips from file
+a3i32 ec_clipPool_loadFile(a3_ClipPool* clipool_out, const char* filepath);
 
 // get clip index from pool
 a3i32 a3clipGetIndexInPool(const a3_ClipPool* clipPool, const a3byte clipName[a3keyframeAnimation_nameLenMax]);

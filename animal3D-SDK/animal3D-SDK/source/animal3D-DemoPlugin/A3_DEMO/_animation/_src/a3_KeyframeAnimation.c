@@ -39,6 +39,11 @@
 #define A3_CLIP_DEFAULTNAME		("unnamed clip")
 #define A3_CLIP_SEARCHNAME		((clipName && *clipName) ? clipName : A3_CLIP_DEFAULTNAME)
 
+// file io
+#include <stdio.h>
+#include "animal3D/a3utility/a3_Stream.h"
+#define fileLineMaxLength ((size_t)256)
+
 
 //-----------------------------------------------------------------------------
 
@@ -63,6 +68,113 @@ a3i32 a3keyframePoolRelease(a3_KeyframePool* keyframePool)
 {
 	free(keyframePool->keyframe); //Alternate way to do it: realloc(keyframePool->keyframe, 0)
 	return 1;
+}
+
+char fpeek(FILE* file)
+{
+	char c = fgetc(file);
+	ungetc(c, file);
+	return c;
+}
+
+a3i32 __skipComments(a3_FileStream const* in)
+{
+	char c = fgetc(in->stream);
+	if (c != '#')
+	{
+		ungetc(c, in->stream); //Not a comment, don't skip anything
+		return 0;
+	}
+
+	a3i32 nSkipped = 0; //Includes '#', but we will always overscan by 1, so it evens out
+
+	while (!feof(in->stream) && (c = fgetc(in->stream)) && c != '\n') ++nSkipped; //Skip until we see a newline
+	ungetc(c, in->stream); //Overscanned, put one back
+	
+	return nSkipped;
+}
+
+//Can be used both to skip whitespace and to capture fields
+//All params except in can be left as NULL to ignore
+a3i32 __capture(a3_FileStream const* in, char* bytesOut, const char* include, const char* exclude)
+{
+	char c;
+	a3i32 bytesRead = 0;
+	while (!feof(in->stream))
+	{
+		c = fgetc(in->stream);
+
+		//Check against characters we should skip
+		if ((!include || strchr(include, c)) && (!exclude || !strchr(exclude, c)))
+		{
+			if (bytesOut) bytesOut[bytesRead] = c;
+			++bytesRead; //Skip until we see a newline
+		}
+		else
+		{
+			ungetc(c, in->stream); //Overscanned, put one back
+			return bytesRead;
+		}
+	}
+
+	//We reached EOF
+	return bytesRead;
+}
+
+size_t __decodeKeyframe(a3_Keyframe* keyframes_out, a3_FileStream const* in)
+{
+	char bytes[fileLineMaxLength]; //256 is hard-set as max length
+	size_t bytesRead = 0;
+
+	//Seek to data
+	__capture(in, NULL, " \t", "@");
+
+	//"@ " prefix
+	bytesRead = __capture(in, bytes, "@ \t", "\n");
+	assert(bytesRead > 0);
+	assert(bytes[0] == '@');
+
+	//Read data
+	for (int i = 0; (!__skipComments(in)) & (fpeek(in->stream) != '\n'); ++i)
+	{
+		a3_Keyframe_data_t value;
+		sscanf_s(bytes, "%f", &value);
+
+		a3keyframeInit(&keyframes_out[i], -1, value); //Duration will have to be initialized later
+
+		//Seek to next field (or comment)
+		while (__capture(in, NULL, " \t", "\n") || __skipComments(in));
+	}
+	
+	return bytesRead;
+}
+
+a3i32 ec_keyframePool_loadFile(a3_KeyframePool* keyframePool_out, char const* filepath)
+{
+	//Open file
+	a3_FileStream in = { 0 };
+	a3ret good = a3fileStreamOpenRead(&in, filepath);
+	assert(good == a3true);
+
+	char buf[fileLineMaxLength]; //256 is hard-set as max length
+	memset(buf, 0, fileLineMaxLength);
+	a3ui16 readIndex = 0;
+
+	//Seek to data line
+	while (__capture(&in, NULL, " \t", "@") || __skipComments(&in));
+
+	a3ret nRead;
+	while ((nRead = a3fileStreamReadObject(&in, buf, (a3_FileStreamReadFunc)__decodeKeyframe)) > 0)
+	{
+		if (buf[readIndex] == '\n' || buf[readIndex] == '\r')
+		{
+			memset(buf, 0, fileLineMaxLength);
+		}
+		else readIndex++;
+	}
+
+	a3fileStreamClose(&in);
+	return a3true;
 }
 
 // initialize keyframe

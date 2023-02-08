@@ -58,12 +58,23 @@ a3boolean runWhenISaySo = a3true;
 void InitilizeCode(a3_DemoState const* demoState)
 {
 	printf("test");
+
 	a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
+	a3_ClipPool* clips = malloc(sizeof(a3_ClipPool));
+
+	//Read keyframes from file
+	ec_keyframePool_loadFile(keyframes, "../../../../resource/animdata/slime_anim.txt");
+	//ec_clipPool_loadFile(clips, "../../../../resource/animdata/slime_cells.txt");
+
+	/*
+
+	//Manually init keyframe data
 	a3keyframePoolCreate(keyframes, 3);
 	a3keyframeInit(&keyframes->keyframe[0], 1, 0);
 	a3keyframeInit(&keyframes->keyframe[1], 1, 4);
 	a3keyframeInit(&keyframes->keyframe[2], 1, 5);
-	a3_ClipPool* clips = malloc(sizeof(a3_ClipPool));
+
+	//Manually init clips from keyframes
 	a3clipPoolCreate(clips, 2);
 	a3clipInit(&clips->clip[0], "Entry", keyframes, 0, 1); a3clipCalculateDuration(&clips->clip[0]);
 	clips->clip[0].forwardTransition.flags = EC_TERMINUSACTION_FORWARD; clips->clip[0].forwardTransition.targetClipID = 1;
@@ -71,6 +82,9 @@ void InitilizeCode(a3_DemoState const* demoState)
 	a3clipInit(&clips->clip[1], "Ping-pong", keyframes, 1, 2); a3clipCalculateDuration(&clips->clip[1]);
 	clips->clip[1].forwardTransition.flags = EC_TERMINUSACTION_REVERSE;
 	clips->clip[1].reverseTransition.flags = EC_TERMINUSACTION_FORWARD;
+
+	*/
+
 	a3clipControllerInit((a3_ClipController*)&demoState->testAnimator, "Test Animator", clips, 0);
 	runWhenISaySo = a3false;
 }
