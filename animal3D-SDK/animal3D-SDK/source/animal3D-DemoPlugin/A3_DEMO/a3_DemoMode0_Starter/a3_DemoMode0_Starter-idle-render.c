@@ -200,14 +200,14 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 
 	// temp texture pointers
 	const a3_Texture* texture_dm[] = {
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
+		demoState->tex_checker,		// skybox (not actually used)
+		demoState->tex_checker,		// plane
+		demoState->tex_checker,		// box
+		demoState->tex_checker,		// sphere
+		demoState->tex_checker,		// cylinder
+		demoState->tex_checker,		// capsule
+		demoState->tex_checker,		// torus
+		demoState->tex_checker,		// teapot
 	};
 
 	// forward pipeline shader programs
