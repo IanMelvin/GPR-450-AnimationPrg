@@ -177,12 +177,6 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 		{ 0.00f, 0.00f, 0.00f, 0.00f }, // black		// Added by Ian Melvin
 	};
 
-	a3_Texture testTexture = *demoState->tex_testsprite;
-	a3_TextureAtlas testAtlas;
-	a3textureAtlasSetTexture(&testAtlas, &testTexture);
-	a3textureAtlasAllocateEvenCells(&testAtlas, 8, 8);
-	a3textureAtlasSendToShaderProgram(&testAtlas, 0, 0, 2, 4, 6, 8);
-
 	const a3real
 		* const red = rgba4[0].v, * const orange = rgba4[2].v, * const yellow = rgba4[4].v, * const lime = rgba4[6].v,
 		* const green = rgba4[8].v, * const aqua = rgba4[10].v, * const cyan = rgba4[12].v, * const sky = rgba4[14].v,
@@ -340,6 +334,15 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 	//	- light data
 	//	- activate shared textures including atlases if using
 	//	- shared animation data
+#include <assert.h>
+	a3mat4 tmp = a3mat4_identity;
+	tmp.m00 = .5, tmp.m11 = .5;
+	a3_Texture testTexture = *demoState->tex_testsprite;
+	assert(testTexture.handle);
+	a3_TextureAtlas testAtlas;
+	a3textureAtlasSetTexture(&testAtlas, &testTexture);
+	//a3textureAtlasAllocateEvenCells(&testAtlas, 8, 8);
+	//a3textureAtlasSendToShaderProgram(&testAtlas, 0, 0, 2, 4, 6, 8);
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP, 1, activeCamera->projectionMat.mm);
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP_inv, 1, activeCamera->projectionMatInv.mm);
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uPB, 1, projectionBiasMat.mm);
@@ -347,6 +350,7 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, a3mat4_identity.mm);
 	a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, hueCount, rgba4->v);
 	a3shaderUniformSendDouble(a3unif_single, currentDemoProgram->uTime, 1, &demoState->timer_display->totalTime);
+	
 
 	// select pipeline algorithm
 	glDisable(GL_BLEND);
@@ -370,8 +374,6 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 				currentSceneObject <= endSceneObject;
 				++j, ++currentSceneObject)
 			{
-				a3mat4 tmp = a3mat4_identity;
-				tmp.m00 = 2;
 				// send data and draw
 				i = (j * 2 + 11) % hueCount;
 				currentDrawable = drawable[currentSceneObject - demoMode->obj_skybox];
