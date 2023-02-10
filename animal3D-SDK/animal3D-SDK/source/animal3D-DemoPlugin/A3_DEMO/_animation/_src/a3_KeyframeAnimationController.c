@@ -33,6 +33,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
 //See https://stackoverflow.com/a/4609795
 #define sign(val) ( (0 < val) - (val < 0) )
@@ -135,7 +136,7 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 	clipCtrl->keyframeParameter = clipCtrl->keyframeTime * currentClip->keyframePool->keyframe[clipCtrl->keyframe].durationInv;
 	clipCtrl->    clipParameter = clipCtrl->    clipTime * currentClip->                                           durationInv;
 
-	return a3true; //TODO @rsc what is this supposed to return?
+	return clipCtrl->keyframe; //TODO @rsc what is this supposed to return?
 }
 
 // set clip to play

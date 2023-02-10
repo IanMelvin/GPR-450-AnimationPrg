@@ -26,6 +26,11 @@
 	********************************************
 */
 
+/*
+	Modifed by Ian Melvin
+	Added martix and values for colors and textureAtlas usage
+*/
+
 //-----------------------------------------------------------------------------
 
 #include "../a3_DemoMode0_Starter.h"
@@ -337,9 +342,9 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 #include <assert.h>
 	a3mat4 tmp = a3mat4_identity;
 	tmp.m00 = .5, tmp.m11 = .5;
-	const a3mat4 atlasMat = {
-			demoState->testAtlas.cells[2].relativeSize[0],  0.0f,  0.0f, demoState->testAtlas.cells[2].relativeOffset[0],
-			0.0f,  demoState->testAtlas.cells[2].relativeSize[1],  0.0f, demoState->testAtlas.cells[2].relativeOffset[1],
+	a3mat4 atlasMat = {
+			demoState->testAtlas.cells[2].relativeSize[0], 0.0f,  0.0f, demoState->testAtlas.cells[demoState->index].pixelOffset[0] / (a3real)demoState->testAtlas.texture->width,
+			0.0f,  demoState->testAtlas.cells[2].relativeSize[1],  0.0f, demoState->testAtlas.cells[demoState->index].pixelOffset[1] / (a3real)demoState->testAtlas.texture->height,
 			0.0f,  0.0f,  1.0f, 0.0f,
 			0.0f,  0.0f,  0.0f, 1.0f,
 	};
@@ -347,7 +352,7 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP_inv, 1, activeCamera->projectionMatInv.mm);
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uPB, 1, projectionBiasMat.mm);
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uPB_inv, 1, projectionBiasMat_inv.mm);
-	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, atlasMat.mm);
+	a3shaderUniformSendFloatMat(a3unif_mat4, 1, currentDemoProgram->uAtlas, 1, atlasMat.mm);
 	a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, hueCount, rgba4->v);
 	a3shaderUniformSendDouble(a3unif_single, currentDemoProgram->uTime, 1, &demoState->timer_display->totalTime);
 	
