@@ -685,6 +685,10 @@ void a3demo_loadTextures(a3_DemoState* demoState)
 		a3textureChangeRepeatMode(a3tex_repeatClamp, a3tex_repeatClamp);	// clamp both axes
 	}
 
+	//demoState->testAtlas.texture = &testTexture;
+	a3_TextureAtlas* atlasPtr = &demoState->testAtlas;
+	atlasPtr->texture = demoState->tex_testsprite;
+	a3textureAtlasAllocateEvenCells(&demoState->testAtlas, 8, 8);
 
 	// done
 	a3textureDeactivate(a3tex_unit00);
