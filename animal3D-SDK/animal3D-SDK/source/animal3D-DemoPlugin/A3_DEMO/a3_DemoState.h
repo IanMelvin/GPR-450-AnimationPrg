@@ -295,6 +295,8 @@ struct a3_DemoState
 		};
 	};
 
+	//Adding Texture Atlas
+	a3_TextureAtlas testAtlas;
 
 	// framebuffers
 	union {

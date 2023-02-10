@@ -339,10 +339,15 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 	tmp.m00 = .5, tmp.m11 = .5;
 	a3_Texture testTexture = *demoState->tex_testsprite;
 	assert(testTexture.handle);
-	a3_TextureAtlas testAtlas;
-	a3textureAtlasSetTexture(&testAtlas, &testTexture);
-	//a3textureAtlasAllocateEvenCells(&testAtlas, 8, 8);
-	//a3textureAtlasSendToShaderProgram(&testAtlas, 0, 0, 2, 4, 6, 8);
+	
+	demoState->testAtlas.texture = testTexture;
+	a3textureAtlasAllocateEvenCells(&demoState->testAtlas, 8, 8);
+	const a3mat4 atlasMat = {
+			demoState->testAtlas.cells[2].relativeSize[0],  0.0f,  0.0f, demoState->testAtlas.cells[2].relativeOffset[0],
+			0.0f,  demoState->testAtlas.cells[2].relativeSize[1],  0.0f, demoState->testAtlas.cells[2].relativeOffset[1],
+			0.0f,  0.0f,  1.0f, 0.0f,
+			0.0f,  0.0f,  0.0f, 1.0f,
+	};
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP, 1, activeCamera->projectionMat.mm);
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP_inv, 1, activeCamera->projectionMatInv.mm);
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uPB, 1, projectionBiasMat.mm);
