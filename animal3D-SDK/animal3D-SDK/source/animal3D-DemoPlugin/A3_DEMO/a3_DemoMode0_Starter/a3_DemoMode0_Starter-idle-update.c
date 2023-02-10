@@ -107,7 +107,11 @@ void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a
 
 	if (demoState->togglePlay && !runWhenISaySo)
 	{
-		demoState->index = a3clipControllerUpdate(&demoState->testAnimator, modifiedDT);
+		//Run Update
+		a3clipControllerUpdate(&demoState->testAnimator, modifiedDT);
+
+		//get current index
+		demoState->index = (a3ui32)ec_clipController_evaluateValue(&demoState->testAnimator);
 	}
 
 	if (demoState->reset)

@@ -78,7 +78,7 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 	//Update normalized parameters
 	ec_clipController_updateParameterTime(clipCtrl);
 
-	return a3true; //TODO @rsc what is this supposed to return?
+	return clipCtrl->keyframe; //TODO @rsc what is this supposed to return?
 }
 
 // evaluate the current value
