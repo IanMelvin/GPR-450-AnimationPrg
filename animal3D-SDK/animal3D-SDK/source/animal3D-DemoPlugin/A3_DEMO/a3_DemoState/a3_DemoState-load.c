@@ -27,6 +27,10 @@
 	***     LOADING in this file.                    ***
 	****************************************************
 */
+/*
+	Modified by Ian Melvin
+	Added initialization for new values
+*/
 
 //-----------------------------------------------------------------------------
 
@@ -685,6 +689,12 @@ void a3demo_loadTextures(a3_DemoState* demoState)
 		a3textureChangeRepeatMode(a3tex_repeatClamp, a3tex_repeatClamp);	// clamp both axes
 	}
 
+	//demoState->testAtlas.texture = &testTexture;
+	a3_TextureAtlas* atlasPtr = &demoState->testAtlas;
+	atlasPtr->texture = demoState->tex_testsprite;
+	a3textureAtlasAllocateEvenCells(&demoState->testAtlas, 8, 8);
+	//set default index
+	demoState->index = 0;
 
 	// done
 	a3textureDeactivate(a3tex_unit00);

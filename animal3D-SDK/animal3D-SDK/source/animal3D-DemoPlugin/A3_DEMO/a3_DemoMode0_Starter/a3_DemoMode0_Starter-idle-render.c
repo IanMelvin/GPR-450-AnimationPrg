@@ -26,6 +26,11 @@
 	********************************************
 */
 
+/*
+	Modifed by Ian Melvin
+	Added martix and values for colors and textureAtlas usage
+*/
+
 //-----------------------------------------------------------------------------
 
 #include "../a3_DemoMode0_Starter.h"
@@ -172,10 +177,16 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 		{ 0.5f, 0.5f, 0.5f, 1.0f },	// solid grey
 		{ 0.5f, 0.5f, 0.5f, 0.5f },	// translucent grey
 	};
+	const a3vec4 blackNWhite[] = {						// Added by Ian Melvin
+		{ 1.00f, 1.00f, 1.00f, 1.00f }, // white		// Added by Ian Melvin
+		{ 0.00f, 0.00f, 0.00f, 0.00f }, // black		// Added by Ian Melvin
+	};
+
 	const a3real
 		* const red = rgba4[0].v, * const orange = rgba4[2].v, * const yellow = rgba4[4].v, * const lime = rgba4[6].v,
 		* const green = rgba4[8].v, * const aqua = rgba4[10].v, * const cyan = rgba4[12].v, * const sky = rgba4[14].v,
 		* const blue = rgba4[16].v, * const purple = rgba4[18].v, * const magenta = rgba4[20].v, * const rose = rgba4[22].v,
+		* const white = blackNWhite[0].v, * const black = blackNWhite[1].v,
 		* const grey = grey4[0].v, * const grey_t = grey4[1].v;
 	const a3ui32 hueCount = sizeof(rgba4) / sizeof(*rgba4);
 
@@ -200,14 +211,14 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 
 	// temp texture pointers
 	const a3_Texture* texture_dm[] = {
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
-		demoState->tex_checker,
+		demoState->tex_checker,			// skybox (not actually used)
+		demoState->tex_testsprite,		// plane
+		demoState->tex_checker,			// box
+		demoState->tex_checker,			// sphere
+		demoState->tex_checker,			// cylinder
+		demoState->tex_checker,			// capsule
+		demoState->tex_checker,			// torus
+		demoState->tex_checker,			// teapot
 	};
 
 	// forward pipeline shader programs
@@ -270,6 +281,8 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 		-1.0f, -1.0f, -1.0f, 1.0f,
 	};
 
+	
+
 	// final model matrix and full matrix stack
 	a3mat4 viewProjectionMat = activeCamera->viewProjectionMat;
 	a3mat4 modelViewProjectionMat = viewProjectionMat;
@@ -326,13 +339,23 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 	//	- light data
 	//	- activate shared textures including atlases if using
 	//	- shared animation data
+#include <assert.h>
+	a3mat4 tmp = a3mat4_identity;
+	tmp.m00 = .5, tmp.m11 = .5;
+	a3mat4 atlasMat = {
+			demoState->testAtlas.cells[2].relativeSize[0], 0.0f,  0.0f, demoState->testAtlas.cells[demoState->index].pixelOffset[0] / (a3real)demoState->testAtlas.texture->width,
+			0.0f,  demoState->testAtlas.cells[2].relativeSize[1],  0.0f, demoState->testAtlas.cells[demoState->index].pixelOffset[1] / (a3real)demoState->testAtlas.texture->height,
+			0.0f,  0.0f,  1.0f, 0.0f,
+			0.0f,  0.0f,  0.0f, 1.0f,
+	};
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP, 1, activeCamera->projectionMat.mm);
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP_inv, 1, activeCamera->projectionMatInv.mm);
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uPB, 1, projectionBiasMat.mm);
 	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uPB_inv, 1, projectionBiasMat_inv.mm);
-	a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, a3mat4_identity.mm);
+	a3shaderUniformSendFloatMat(a3unif_mat4, 1, currentDemoProgram->uAtlas, 1, atlasMat.mm);
 	a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, hueCount, rgba4->v);
 	a3shaderUniformSendDouble(a3unif_single, currentDemoProgram->uTime, 1, &demoState->timer_display->totalTime);
+	
 
 	// select pipeline algorithm
 	glDisable(GL_BLEND);
@@ -362,7 +385,8 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 				a3textureActivate(texture_dm[j], a3tex_unit00);
 				a3real4x4Product(modelViewProjectionMat.m, viewProjectionMat.m, currentSceneObject->modelMat.m);
 				a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, modelViewProjectionMat.mm);
-				a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, rgba4[i].v);
+				if(currentSceneObject == demoMode->obj_plane) a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, white);
+				else a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, rgba4[i].v);
 				a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uIndex, 1, &j);
 				a3vertexDrawableActivateAndRender(currentDrawable);
 			}
@@ -586,7 +610,6 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 			a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, viewProjectionMat.mm);
 			a3vertexDrawableRenderActive();
 		}
-
 		// individual objects
 		if (demoState->displayObjectAxes)
 		{

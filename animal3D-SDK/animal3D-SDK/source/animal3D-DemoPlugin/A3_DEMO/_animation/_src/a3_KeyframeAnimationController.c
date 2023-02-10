@@ -33,6 +33,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
 //See https://stackoverflow.com/a/4609795
 #define sign(val) ( (0 < val) - (val < 0) )
