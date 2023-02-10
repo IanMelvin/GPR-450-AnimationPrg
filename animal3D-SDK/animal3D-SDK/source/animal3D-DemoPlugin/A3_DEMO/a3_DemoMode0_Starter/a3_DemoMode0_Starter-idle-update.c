@@ -18,7 +18,7 @@
 	animal3D SDK: Minimal 3D Animation Framework
 	By Daniel S. Buckstein
 	
-	a3_DemoMode0_Starter_idle-update.c
+	a3_DemoMode0_Starter-idle-update.c
 	Demo mode implementations: starter scene.
 
 	********************************************
@@ -144,7 +144,7 @@ void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a
 
 	a3demo_update_defaultAnimation(demoState, dt, demoMode->obj_box, 6, 2);
 
-	// apply scales to starter objects
+	// apply scales to objects
 	for (i = 0; i < starterMaxCount_sceneObject; ++i)
 		a3demo_applyScale_internal(demoMode->object_scene + i, scaleMat.m);
 
