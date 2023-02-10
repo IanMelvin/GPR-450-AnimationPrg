@@ -63,8 +63,8 @@ void InitilizeCode(a3_DemoState const* demoState)
 	a3_ClipPool* clips = malloc(sizeof(a3_ClipPool));
 
 	//Read keyframes from file
-	ec_keyframePool_loadFile(keyframes, "../../../../resource/animdata/slime_anim.txt");
-	//ec_clipPool_loadFile(clips, "../../../../resource/animdata/slime_cells.txt");
+	ec_keyframePool_loadFile(keyframes, "../../../../resource/animdata/slime_cells.txt");
+	//ec_clipPool_loadFile    (clips,     "../../../../resource/animdata/slime_anim.txt");
 
 	/*
 

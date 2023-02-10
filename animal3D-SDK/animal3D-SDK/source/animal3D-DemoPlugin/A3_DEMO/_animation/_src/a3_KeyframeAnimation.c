@@ -77,6 +77,29 @@ char fpeek(FILE* file)
 	return c;
 }
 
+a3boolean fgetline(FILE* file, char* buf_out)
+{
+	char* end = buf_out + fileLineMaxLength;
+
+	char c;
+	do {
+		//Read stream
+		c = fgetc(file);
+		
+		//Write value
+		*buf_out = c;
+		++buf_out;
+		assert(buf_out != end);
+	}
+	while (c != '\n' && c != '\r');
+
+	//Undo overscan
+	ungetc(c, file);
+	*buf_out = 0;
+
+	return a3true;
+}
+
 a3i32 __skipComments(a3_FileStream const* in)
 {
 	char c = fgetc(in->stream);
@@ -121,32 +144,44 @@ a3i32 __capture(a3_FileStream const* in, char* bytesOut, const char* include, co
 	return bytesRead;
 }
 
-size_t __decodeKeyframe(a3_Keyframe* keyframes_out, a3_FileStream const* in)
+a3ret __decodeKeyframe(a3_Keyframe* keyframe_out, size_t channelIndex, char* buf)
 {
-	char bytes[fileLineMaxLength]; //256 is hard-set as max length
-	size_t bytesRead = 0;
+	char* end = buf + fileLineMaxLength;
 
-	//Seek to data
-	__capture(in, NULL, " \t", "@");
+	//Remove leading whitespace
+	while (strchr(" \t", *buf)) ++buf;
+	assert(buf < end);
 
 	//"@ " prefix
-	bytesRead = __capture(in, bytes, "@ \t", "\n");
-	assert(bytesRead > 0);
-	assert(bytes[0] == '@');
+	assert(buf[0] == '@');
 
-	//Read data
-	for (int i = 0; (!__skipComments(in)) & (fpeek(in->stream) != '\n'); ++i)
+	//Remove leading whitespace
+	while (strchr(" \t", *buf)) ++buf;
+	assert(buf < end);
+
+	//Read name
+	//char name[fileLineMaxLength] = { 0 };
+	//memcpy(name, buf, strchr(buf, '\t')-buf);
+
+	//Seek to data point
+	for (size_t i = 0; i < channelIndex; ++i)
 	{
-		a3_Keyframe_data_t value;
-		sscanf_s(bytes, "%f", &value);
-
-		a3keyframeInit(&keyframes_out[i], -1, value); //Duration will have to be initialized later
-
-		//Seek to next field (or comment)
-		while (__capture(in, NULL, " \t", "\n") || __skipComments(in));
+		while (*buf == '\t') ++buf; //Skip all whitespace
+		while (*buf != '\t') ++buf; //Skip all non-whitespace
 	}
+
+	//Find end of value field
+	char* valEnd = strchr(buf, '\t');
+	valEnd = min(valEnd, end);
+
+	//Copy value field (still in string form)
+	char valStr[fileLineMaxLength] = { 0 };
+	memcpy(valStr, buf, valEnd-buf);
 	
-	return bytesRead;
+	a3_Keyframe_data_t value = (a3_Keyframe_data_t) atof(valStr); //FIXME data type abstraction
+	a3keyframeInit(keyframe_out, -1, value); //Duration will have to be initialized later
+
+	return true;
 }
 
 a3i32 ec_keyframePool_loadFile(a3_KeyframePool* keyframePool_out, char const* filepath)
@@ -156,21 +191,26 @@ a3i32 ec_keyframePool_loadFile(a3_KeyframePool* keyframePool_out, char const* fi
 	a3ret good = a3fileStreamOpenRead(&in, filepath);
 	assert(good == a3true);
 
-	char buf[fileLineMaxLength]; //256 is hard-set as max length
-	memset(buf, 0, fileLineMaxLength);
+	char buf[fileLineMaxLength] = { 0 }; //256 is hard-set as max length
 	a3ui16 readIndex = 0;
 
 	//Seek to data line
-	while (__capture(&in, NULL, " \t", "@") || __skipComments(&in));
+	while (__capture(&in, NULL, " \t\n\r", "@") || __skipComments(&in));
 
-	a3ret nRead;
-	while ((nRead = a3fileStreamReadObject(&in, buf, (a3_FileStreamReadFunc)__decodeKeyframe)) > 0)
+	//Capture cell count
+	__capture(&in, buf, NULL, "\t\n\r");
+	int cellCount = atoi(buf);
+
+	//Seek to data line
+	while (__capture(&in, NULL, " \t\n\r", "@") || __skipComments(&in));
+
+	for (int i = 0; i < cellCount; ++i)
 	{
-		if (buf[readIndex] == '\n' || buf[readIndex] == '\r')
-		{
-			memset(buf, 0, fileLineMaxLength);
-		}
-		else readIndex++;
+		memset(buf, 0, fileLineMaxLength);
+		fgetline(in.stream, buf);
+
+		//TODO @rsc
+		//__decodeKeyframe()
 	}
 
 	a3fileStreamClose(&in);
