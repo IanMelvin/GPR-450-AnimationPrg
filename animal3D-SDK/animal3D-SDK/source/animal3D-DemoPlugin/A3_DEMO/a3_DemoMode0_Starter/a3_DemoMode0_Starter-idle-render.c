@@ -343,8 +343,8 @@ void a3starter_render(a3_DemoState const* demoState, a3_DemoMode0_Starter const*
 	a3mat4 tmp = a3mat4_identity;
 	tmp.m00 = .5, tmp.m11 = .5;
 	a3mat4 atlasMat = {
-			demoState->testAtlas.cells[2].relativeSize[0], 0.0f,  0.0f, demoState->testAtlas.cells[demoState->index].pixelOffset[0] / (a3real)demoState->testAtlas.texture->width,
-			0.0f,  demoState->testAtlas.cells[2].relativeSize[1],  0.0f, demoState->testAtlas.cells[demoState->index].pixelOffset[1] / (a3real)demoState->testAtlas.texture->height,
+			demoState->testAtlas.cells[demoState->index].relativeSize[0], 0.0f,  0.0f, demoState->testAtlas.cells[demoState->index].pixelOffset[0] / (a3real)demoState->testAtlas.texture->width,
+			0.0f,  demoState->testAtlas.cells[demoState->index].relativeSize[1],  0.0f, demoState->testAtlas.cells[demoState->index].pixelOffset[1] / (a3real)demoState->testAtlas.texture->height,
 			0.0f,  0.0f,  1.0f, 0.0f,
 			0.0f,  0.0f,  0.0f, 1.0f,
 	};

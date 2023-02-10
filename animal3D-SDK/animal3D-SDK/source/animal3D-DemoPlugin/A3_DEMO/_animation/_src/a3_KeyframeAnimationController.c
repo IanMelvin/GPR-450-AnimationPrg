@@ -57,7 +57,7 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 
 	clipCtrl_out->isPaused = a3false;
 
-	return -1;
+	return 1;
 }
 
 // update clip controller
@@ -77,8 +77,7 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 
 	//Update normalized parameters
 	ec_clipController_updateParameterTime(clipCtrl);
-
-	return clipCtrl->keyframe; //TODO @rsc what is this supposed to return?
+	return 1; //TODO @rsc what is this supposed to return?
 }
 
 // evaluate the current value
