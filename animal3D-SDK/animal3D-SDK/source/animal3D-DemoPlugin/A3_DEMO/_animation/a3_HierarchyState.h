@@ -63,6 +63,21 @@ struct a3_HierarchyPoseGroup
 
 	// number of hierarchical poses
 	a3ui32 poseCount;
+
+	// number of spatial poses hierarchicalPoseCount x hierarchy node count
+	a3ui32 spartialPoseCount;
+
+	// Array of SpatialPoses
+	a3_SpatialPose* spatialPosePool;
+
+	// Array of Hierarchal Poses
+	a3_HierarchyPose* hierarchalPoses;
+
+	// Array of SpatialPose Channels
+	a3_SpatialPoseChannel* channels;
+
+	// Some global flag for the pool that describes the concatenation order of orientation channels
+	a3boolean eulerOrder;
 };
 
 
