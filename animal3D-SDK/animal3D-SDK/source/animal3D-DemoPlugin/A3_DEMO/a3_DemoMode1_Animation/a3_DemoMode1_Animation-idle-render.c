@@ -34,6 +34,8 @@
 
 #include "../_a3_demo_utilities/a3_DemoRenderUtils.h"
 
+#include "A3_DEMO/_animation/a3_Kinematics.h"
+
 
 // OpenGL
 #ifdef _WIN32
