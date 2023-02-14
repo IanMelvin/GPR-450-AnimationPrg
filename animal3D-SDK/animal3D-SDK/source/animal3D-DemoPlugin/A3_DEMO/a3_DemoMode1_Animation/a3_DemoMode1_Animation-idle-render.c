@@ -34,6 +34,8 @@
 
 #include "../_a3_demo_utilities/a3_DemoRenderUtils.h"
 
+#include "A3_DEMO/_animation/a3_Kinematics.h"
+
 
 // OpenGL
 #ifdef _WIN32
@@ -495,7 +497,8 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				const a3i32 flag[1] = { demoState->displayTangentBases * 3 + demoState->displayWireframe * 4 };
 				const a3f32 size[1] = { 0.0625f };
 
-				currentDemoProgram = demoState->prog_drawTangentBasis;
+				//currentDemoProgram = demoState->prog_drawTangentBasis;
+				currentDemoProgram = demoState->prog_drawColorUnif;
 				a3shaderProgramActivate(currentDemoProgram->program);
 
 				// projection matrix
@@ -510,7 +513,25 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uFlag, 1, flag);
 
 				// draw skeleton joint bases
+#pragma region TEMP
+				a3mat4 tmpLMVP; //full stack
+				a3mat4 tmpL; //bone matrix for single joint, result of forward kinematics
+				a3mat4 tmpS = a3mat4_identity; //shared scale
+				a3real4x4SetScale(tmpS.m, 0.05f);
 
+				a3_HierarchyState* hierarchy = demoState->hierarchyState; //FIXME
+				a3kinematicsSolveForward(hierarchy);
+
+				a3vertexDrawableActivate(demoState->draw_node);
+				for (a3ui32 i = 0; i < hierarchy->hierarchy->numNodes; ++i)
+				{
+					a3_SpatialPose* node = &hierarchy->samplePose->spatialPose[i];
+					a3real4x4Product(tmpL.m, node->transform.m, tmpS.m);
+					a3real4x4Product(tmpLMVP.m, viewProjectionMat.m, tmpL.m);
+					a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, tmpLMVP.mm);
+					a3vertexDrawableRenderActive();
+				}
+#pragma endregion
 			}
 
 			// display color target with scene overlays
