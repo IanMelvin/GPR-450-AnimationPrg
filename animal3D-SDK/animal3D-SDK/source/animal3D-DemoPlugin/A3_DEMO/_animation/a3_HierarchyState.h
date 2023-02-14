@@ -88,13 +88,16 @@ struct a3_HierarchyState
 	const a3_Hierarchy* hierarchy;
 
 	//A hierarchical pose representing each node's animated pose at the current time.
-	a3_HierarchyPose* samplePose;
+	//Result of step 2
+	a3_HierarchyPose samplePose;
 
 	//A hierarchical pose representing each node's transformation relative to its parent's space.
-	a3_HierarchyPose* localPose;
+	//Result of step 3
+	a3_HierarchyPose localPose;
 
 	//A hierarchical pose representing each node's transformation relative to the root's parent space (the actual object that the hierarchy represents).
-	a3_HierarchyPose* objectPose;
+	//Result of step 4
+	a3_HierarchyPose objectPose;
 };
 
 
