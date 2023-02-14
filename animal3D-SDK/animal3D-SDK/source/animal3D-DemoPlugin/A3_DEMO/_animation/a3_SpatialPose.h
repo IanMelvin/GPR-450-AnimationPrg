@@ -115,7 +115,7 @@ struct a3_SpatialPose
 
 //-----------------------------------------------------------------------------
 
-a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose, a3_SpatialPoseChannel channel, a3_SpatialPoseEulerOrder eulerOrder);
+a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose, a3_SpatialPoseEulerOrder eulerOrder);
 
 // set rotation values for a single node pose
 a3i32 a3spatialPoseSetRotation(a3_SpatialPose* spatialPose, const a3f32 rx_degrees, const a3f32 ry_degrees, const a3f32 rz_degrees);

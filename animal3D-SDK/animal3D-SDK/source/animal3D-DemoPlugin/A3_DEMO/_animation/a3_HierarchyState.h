@@ -120,7 +120,7 @@ a3i32 a3hierarchyPoseConvert(const a3_HierarchyPose* pose_inout, const a3ui32 no
 a3i32 a3hierarchyPoseCopy(const a3_HierarchyPose* pose_out, const a3_HierarchyPose* pose_in, const a3ui32 nodeCount);
 
 // init a3hierarchyPose
-a3i32 a3hierarchyPoseInit(const a3_HierarchyPose* pose, a3_SpatialPose* spatialPose_in);
+a3i32 a3hierarchyPoseInit(a3_HierarchyPose* pose_out, a3ui32 poseCount);
 
 
 //-----------------------------------------------------------------------------

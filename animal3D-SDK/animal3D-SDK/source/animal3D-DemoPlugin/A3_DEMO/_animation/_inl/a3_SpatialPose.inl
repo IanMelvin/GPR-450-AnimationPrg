@@ -31,7 +31,7 @@
 
 //-----------------------------------------------------------------------------
 
-inline a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose, a3_SpatialPoseChannel channel, a3_SpatialPoseEulerOrder eulerOrder)
+inline a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose, a3_SpatialPoseEulerOrder eulerOrder)
 {
 	spatialPose->transform = a3mat4_identity;
 	spatialPose->orientation = a3vec3_zero;
@@ -104,16 +104,53 @@ inline a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatial
 {
 	if (mat_out && spatialPose_in)
 	{
-		a3mat4 transformAndScaleMatrix = {
-			{spatialPose_in->scale.x, 0.0f, 0.0f, spatialPose_in->translation.x,
-			0.0f, spatialPose_in->scale.y, 0.0f, spatialPose_in->translation.y,
-			0.0f, 0.0f, spatialPose_in->scale.z, spatialPose_in->translation.z,
-			0.0f, 0.0f, 0.0f, 0.0f}
+		//Scale matrix
+		a3mat4 scaleMatrix = {
+			{spatialPose_in->scale.x, 0.0f, 0.0f, 0.0f,
+			0.0f, spatialPose_in->scale.y, 0.0f, 0.0f,
+			0.0f, 0.0f, spatialPose_in->scale.z, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f}
 		};
 
-		a3mat4 orientationMatrix;
+		//transform matrix
+		a3mat4 transformMatrix = {
+			{1.0f, 0.0f, 0.0f, spatialPose_in->translation.x,
+			0.0f, 1.0f, 0.0f, spatialPose_in->translation.y,
+			0.0f, 0.0f, 1.0f, spatialPose_in->translation.z,
+			0.0f, 0.0f, 0.0f, 1.0f}
+		};
 
-		mat_out = a3real4x4Concat(transformAndScaleMatrix.m, transformAndScaleMatrix.m);
+		//Orientation matrices
+		a3mat4 orientationMatrixX = {
+			{1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, a3cosd(spatialPose_in->orientation.x), a3sind(spatialPose_in->orientation.x), 0.0f,
+			0.0f, -a3sind(spatialPose_in->orientation.x), a3cosd(spatialPose_in->orientation.x), 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f}
+		};
+
+		a3mat4 orientationMatrixY = {
+			{a3cosd(spatialPose_in->orientation.y), 0.0f, -a3sind(spatialPose_in->orientation.y), 0.0f,
+			0.0f, 1.0, 0.0f, 0.0f,
+			a3sind(spatialPose_in->orientation.y), 0.0f, a3cosd(spatialPose_in->orientation.y), 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f}
+		};
+
+		a3mat4 orientationMatrixZ = {
+			{a3cosd(spatialPose_in->orientation.z), -a3sind(spatialPose_in->orientation.z), 0.0f, 0.0f,
+			a3sind(spatialPose_in->orientation.z), a3cosd(spatialPose_in->orientation.z), 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f}
+		};
+
+		//Combine orientation matricies
+		a3real4x4Product(mat_out->m, orientationMatrixX.m, orientationMatrixY.m);
+		a3real4x4Product(mat_out->m, mat_out->m, orientationMatrixZ.m);
+
+		//Combine scale and orientation matricices
+		a3real4x4Product(mat_out->m, scaleMatrix.m, mat_out->m);
+
+		//Combine transform with result of combining scale and orientation matricies
+		a3real4x4Product(mat_out->m, transformMatrix.m, mat_out->m);
 
 		return 1;
 	}

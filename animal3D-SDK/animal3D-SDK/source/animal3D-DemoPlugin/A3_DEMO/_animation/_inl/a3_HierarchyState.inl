@@ -58,7 +58,7 @@ inline a3i32 a3hierarchyPoseReset(const a3_HierarchyPose* pose_inout, const a3ui
 {
 	if (pose_inout && nodeCount)
 	{
-
+		pose_inout->poseCount = nodeCount;
 	}
 	return -1;
 }
@@ -78,14 +78,23 @@ inline a3i32 a3hierarchyPoseCopy(const a3_HierarchyPose* pose_out, const a3_Hier
 {
 	if (pose_out && pose_in && nodeCount)
 	{
+		pose_out->spatialPose = pose_in->spatialPose;
+		pose_out->poseCount = nodeCount;
 
 	}
 	return -1;
 }
 
-inline a3i32 a3hierarchyPoseInit(const a3_HierarchyPose* pose, a3_SpatialPose* spatialPose_in)
+inline a3i32 a3hierarchyPoseInit(a3_HierarchyPose* pose_out, a3ui32 poseCount)
 {
-	//pose->spatialPose = *spatialPose_in;
+	pose_out->spatialPose = (a3_SpatialPose*)malloc(poseCount * sizeof(a3_SpatialPose));
+	pose_out->poseCount = poseCount;
+
+	//Define default values
+	for (a3ui32 i = 0; i < pose_out->poseCount; i++)
+	{
+		a3spatialPoseInit(&pose_out->spatialPose[i], a3poseEulerOrder_xyz);
+	}
 	return 1;
 }
 
