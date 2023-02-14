@@ -33,7 +33,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <cassert>
+#include <assert.h>
 
 // macros to help with names
 #define A3_CLIP_DEFAULTNAME		("unnamed clip")
