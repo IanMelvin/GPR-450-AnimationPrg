@@ -51,7 +51,11 @@ typedef struct a3_HierarchyState		a3_HierarchyState;
 // makes algorithms easier to keep this as a separate data type
 struct a3_HierarchyPose
 {
+	//  A pointer to the start of the individual node pose array (data actually owned by the next structure)
 	a3_SpatialPose* spatialPose;
+
+	// poseCount
+	a3ui32 poseCount;
 };
 
 
@@ -77,7 +81,7 @@ struct a3_HierarchyPoseGroup
 	a3_SpatialPoseChannel* channels;
 
 	// Some global flag for the pool that describes the concatenation order of orientation channels
-	a3boolean eulerOrder;
+	a3_SpatialPoseEulerOrder eulerOrder;
 };
 
 
@@ -114,6 +118,9 @@ a3i32 a3hierarchyPoseConvert(const a3_HierarchyPose* pose_inout, const a3ui32 no
 
 // copy full hierarchy pose
 a3i32 a3hierarchyPoseCopy(const a3_HierarchyPose* pose_out, const a3_HierarchyPose* pose_in, const a3ui32 nodeCount);
+
+// init a3hierarchyPose
+a3i32 a3hierarchyPoseInit(const a3_HierarchyPose* pose, a3_SpatialPose* spatialPose_in);
 
 
 //-----------------------------------------------------------------------------

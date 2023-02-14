@@ -1,3 +1,4 @@
+#include "a3_HierarchyState.h"
 /*
 	Copyright 2011-2020 Daniel S. Buckstein
 
@@ -80,6 +81,12 @@ inline a3i32 a3hierarchyPoseCopy(const a3_HierarchyPose* pose_out, const a3_Hier
 
 	}
 	return -1;
+}
+
+inline a3i32 a3hierarchyPoseInit(const a3_HierarchyPose* pose, a3_SpatialPose* spatialPose_in)
+{
+	//pose->spatialPose = *spatialPose_in;
+	return 1;
 }
 
 
