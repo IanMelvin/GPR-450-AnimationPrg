@@ -498,7 +498,7 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				const a3f32 size[1] = { 0.0625f };
 
 				//currentDemoProgram = demoState->prog_drawTangentBasis;
-				currentDemoProgram = demoState->prog_drawColorUnif;  //****hax
+				currentDemoProgram = demoState->prog_drawColorUnif;
 				a3shaderProgramActivate(currentDemoProgram->program);
 
 				// projection matrix
@@ -513,31 +513,25 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uFlag, 1, flag);
 
 				// draw skeleton joint bases
-				// ****hax
+#pragma region TEMP
+				a3mat4 tmpLMVP; //full stack
+				a3mat4 tmpL; //bone matrix for single joint, result of forward kinematics
+				a3mat4 tmpS = a3mat4_identity; //shared scale
+				a3real4x4SetScale(tmpS.m, 0.05f);
+				
+				const a3_HierarchyState* hierarchy = demoMode->hierarchyState_skel; //FIXME
+				a3kinematicsSolveForward(hierarchy);
+
+				a3vertexDrawableActivate(demoState->draw_node);
+				for (a3ui32 i = 0; i < hierarchy->hierarchy->numNodes; ++i)
 				{
-					a3ui32 i, n = demoMode->hierarchy_skel->numNodes; // n = number of joints
-					
-					a3mat4 tmpLMVP, tmpL, tmpS;
-					// tmpLMVP: full stack for single joint
-					// tmpL: bone matrix for single joint (Forward Kinematics output)
-					// tmpS: shared scale
-
-					a3vertexDrawableActivate(demoState->draw_node);
-
-					// init tmpS here: just a scale matrix
-					a3real4x4SetScale(tmpS.m, 0.05f);
-
-					for (i = 0; i < n; i++) {
-						// tmpL: grab result of forward kinematics
-						//	-> multiply by tmpS on the right
-						//		tmpL = FK for this joint * tmpS
-						// tmpLMVP: full stack
-						//a3real4x4Product(tmpL.m, ???, tmpS.m);
-						a3real4x4Product(tmpLMVP.m, viewProjectionMat.m, tmpL.m); //same as concat but this has more parameters
-						a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, tmpLMVP.mm);
-						a3vertexDrawableRenderActive();
-					}
+					a3_SpatialPose* node = &hierarchy->samplePose.spatialPose[i];
+					a3real4x4Product(tmpL.m, node->transform.m, tmpS.m);
+					a3real4x4Product(tmpLMVP.m, viewProjectionMat.m, tmpL.m);
+					a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, tmpLMVP.mm);
+					a3vertexDrawableRenderActive();
 				}
+#pragma endregion
 			}
 
 			// display color target with scene overlays
