@@ -99,11 +99,23 @@ enum a3_SpatialPoseChannel
 // single pose for a single node
 struct a3_SpatialPose
 {
+	// transformation matrix
 	a3mat4 transform;
+
+	// orientation vector
+	a3vec3 orientation;
+
+	// translation vector
+	a3vec3 translation;
+
+	// scale vector
+	a3vec3 scale;
 };
 
 
 //-----------------------------------------------------------------------------
+
+a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose, a3_SpatialPoseChannel channel, a3_SpatialPoseEulerOrder eulerOrder);
 
 // set rotation values for a single node pose
 a3i32 a3spatialPoseSetRotation(a3_SpatialPose* spatialPose, const a3f32 rx_degrees, const a3f32 ry_degrees, const a3f32 rz_degrees);
