@@ -45,8 +45,18 @@ a3i32 a3hierarchyPoseGroupCreate(a3_HierarchyPoseGroup *poseGroup_out, const a3_
 		// set pointers
 		poseGroup_out->hierarchy = hierarchy;
 		poseGroup_out->poseCount = poseCount;
+		poseGroup_out->spatialPoseCount = poseCount * poseGroup_out->hierarchy->numNodes;
 
 		// reset all data
+		for (a3ui32 i = 0; i < poseGroup_out->spatialPoseCount; i++)
+		{
+			a3spatialPoseInit(&poseGroup_out->spatialPosePool[i], a3poseEulerOrder_xyz);
+		}
+
+		for (a3ui32 i = 0; i < poseCount; i++)
+		{
+			poseGroup_out->hierarchalPoses[i].spatialPose = poseGroup_out->spatialPosePool;
+		}
 
 		// done
 		return 1;
@@ -87,11 +97,16 @@ a3i32 a3hierarchyStateCreate(a3_HierarchyState *state_out, const a3_Hierarchy *h
 
 		// allocate everything (one malloc)
 		//??? = (...)malloc(sz);
+		state_out->hierarchy = (a3_Hierarchy*)malloc(sizeof(a3_Hierarchy));
 
 		// set pointers
 		state_out->hierarchy = hierarchy;
 
 		// reset all data
+		//for (int i = 0; i < hierarchy->numNodes; i++)
+		//{
+		//	state_out->hierarchy->nodes[i] = ;
+		//}
 
 		// done
 		return 1;
