@@ -519,13 +519,15 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				a3mat4 tmpS = a3mat4_identity; //shared scale
 				a3real4x4SetScale(tmpS.m, 0.05f);
 				
-				const a3_HierarchyState* hierarchy = demoMode->hierarchyState_skel; //FIXME
-				a3kinematicsSolveForward(hierarchy);
+				a3kinematicsInterpolateDeltas(demoMode->hierarchyState_skel); //Step 1: Animate and interpolate between local deltas
+				a3kinematicsPoseConcat       (demoMode->hierarchyState_skel); //Step 2: Concat local deltas onto base poses
+				a3kinematicsPosesToMatrices  (demoMode->hierarchyState_skel); //Step 3: Convert pose channels to matrices (in node-local space)
+				a3kinematicsSolveForward     (demoMode->hierarchyState_skel); //Step 4: Forward kinematics, concat local matrices to make object matrices
 
 				a3vertexDrawableActivate(demoState->draw_node);
-				for (a3ui32 i = 0; i < hierarchy->hierarchy->numNodes; ++i)
+				for (a3ui32 i = 0; i < demoMode->hierarchyState_skel->hierarchy->numNodes; ++i)
 				{
-					a3_SpatialPose* node = &hierarchy->samplePose.spatialPose[i];
+					a3_SpatialPose* node = &demoMode->hierarchyState_skel->samplePose.spatialPose[i];
 					a3real4x4Product(tmpL.m, node->transform.m, tmpS.m);
 					a3real4x4Product(tmpLMVP.m, viewProjectionMat.m, tmpL.m);
 					a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, tmpLMVP.mm);
