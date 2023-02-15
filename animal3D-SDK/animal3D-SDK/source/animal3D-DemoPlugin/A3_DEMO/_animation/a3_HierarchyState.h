@@ -53,9 +53,6 @@ struct a3_HierarchyPose
 {
 	//  A pointer to the start of the individual node pose array (data actually owned by the next structure)
 	a3_SpatialPose* spatialPose;
-
-	// poseCount
-	a3ui32 poseCount;
 };
 
 
@@ -69,7 +66,7 @@ struct a3_HierarchyPoseGroup
 	a3ui32 poseCount;
 
 	// number of spatial poses hierarchicalPoseCount x hierarchy node count
-	a3ui32 spartialPoseCount;
+	a3ui32 spatialPoseCount;
 
 	// Array of SpatialPoses
 	a3_SpatialPose* spatialPosePool;
