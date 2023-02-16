@@ -27,6 +27,34 @@
 
 //-----------------------------------------------------------------------------
 
+a3i32 a3kinematicsPoseConcat(const a3_HierarchyState* hierarchyState)
+{
+	for (a3ui32 i = 0; i < hierarchyState->localPose.poseCount; ++i)
+	{
+		//TODO @rsc fill out
+		a3_SpatialPose* basePose;
+		a3_SpatialPose* deltaPose;
+		a3_SpatialPose* finalPose;
+		
+		a3real3Mul(&finalPose->scale      .v, basePose->scale      .v, deltaPose->scale      .v); //Scale first
+		a3real3Sum(&finalPose->orientation.v, basePose->orientation.v, deltaPose->orientation.v); //Then rotate
+		a3real3Sum(&finalPose->translation.v, basePose->translation.v, deltaPose->translation.v); //Then translate
+	}
+
+	return 1;
+}
+
+a3i32 a3kinematicsPosesToMatrices(const a3_HierarchyState* hierarchyState)
+{
+	for (a3ui32 i = 0; i < hierarchyState->localPose.poseCount; ++i)
+	{
+		a3_SpatialPose* pose = &hierarchyState->localPose.spatialPose[i];
+		a3spatialPoseConvert(&pose->transform, &pose[i], pose->channelMask, pose->eulerOrder);
+	}
+	
+	return 1;
+}
+
 // partial FK solver
 a3i32 a3kinematicsSolveForwardPartial(const a3_HierarchyState *hierarchyState, const a3ui32 firstIndex, const a3ui32 nodeCount)
 {
