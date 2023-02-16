@@ -31,14 +31,7 @@ a3i32 a3kinematicsPoseConcat(const a3_HierarchyState* hierarchyState)
 {
 	for (a3ui32 i = 0; i < hierarchyState->localPose.poseCount; ++i)
 	{
-		//TODO @rsc fill out
-		a3_SpatialPose* basePose;
-		a3_SpatialPose* deltaPose;
-		a3_SpatialPose* finalPose;
-		
-		a3real3Mul(&finalPose->scale      .v, basePose->scale      .v, deltaPose->scale      .v); //Scale first
-		a3real3Sum(&finalPose->orientation.v, basePose->orientation.v, deltaPose->orientation.v); //Then rotate
-		a3real3Sum(&finalPose->translation.v, basePose->translation.v, deltaPose->translation.v); //Then translate
+		a3spatialPoseConcat(hierarchyState->localPose.spatialPose);
 	}
 
 	return 1;

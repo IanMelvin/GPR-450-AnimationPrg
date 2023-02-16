@@ -114,10 +114,21 @@ inline a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatial
 		a3mat4 orientationMatrix;
 
 		mat_out = a3real4x4Concat(transformAndScaleMatrix.m, transformAndScaleMatrix.m);
-
+		
 		return 1;
 	}
 	return -1;
+}
+
+inline a3i32 a3spatialPoseConcat(a3_SpatialPose* finalPose, const a3_SpatialPose* basePose, const a3_SpatialPose* deltaPose)
+{
+	//Scale first
+	finalPose->scale.x = basePose->scale.x * deltaPose->scale.x;
+	finalPose->scale.y = basePose->scale.y * deltaPose->scale.y;
+	finalPose->scale.z = basePose->scale.z * deltaPose->scale.z;
+
+	a3real3Sum(finalPose->orientation.v, basePose->orientation.v, deltaPose->orientation.v); //Then rotate
+	a3real3Sum(finalPose->translation.v, basePose->translation.v, deltaPose->translation.v); //Then translate
 }
 
 // copy operation for single node pose
