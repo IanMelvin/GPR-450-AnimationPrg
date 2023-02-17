@@ -47,14 +47,29 @@ typedef struct a3_SpatialPose			a3_SpatialPose;
 // list of Euler angle product orders
 enum a3_SpatialPoseEulerOrder
 {
-	a3poseEulerOrder_xyz,
-	a3poseEulerOrder_yzx,
-	a3poseEulerOrder_zxy,
-	a3poseEulerOrder_yxz,
-	a3poseEulerOrder_xzy,
-	a3poseEulerOrder_zyx,
+	//Raw IDs of each axis
+	a3poseEulerOrder_idx = 0x1,
+	a3poseEulerOrder_idy = 0x2,
+	a3poseEulerOrder_idz = 0x3,
+
+	//Masks: Filter order flags
+	a3poseEulerOrder_order1 = 4*0,
+	a3poseEulerOrder_order2 = 4*1,
+	a3poseEulerOrder_order3 = 4*2,
+
+	// Construct order flag like: id << offset
+	// Select by index: id>>offset & 0xf
+
+	//Main euler orders, aliases built using flags
+	a3poseEulerOrder_xyz = a3poseEulerOrder_idx<<a3poseEulerOrder_order1 | a3poseEulerOrder_idy<<a3poseEulerOrder_order2 | a3poseEulerOrder_idz<<a3poseEulerOrder_order3,
+	a3poseEulerOrder_yzx = a3poseEulerOrder_idy<<a3poseEulerOrder_order1 | a3poseEulerOrder_idz<<a3poseEulerOrder_order2 | a3poseEulerOrder_idx<<a3poseEulerOrder_order3,
+	a3poseEulerOrder_zxy = a3poseEulerOrder_idz<<a3poseEulerOrder_order1 | a3poseEulerOrder_idx<<a3poseEulerOrder_order2 | a3poseEulerOrder_idy<<a3poseEulerOrder_order3,
+	a3poseEulerOrder_yxz = a3poseEulerOrder_idy<<a3poseEulerOrder_order1 | a3poseEulerOrder_idx<<a3poseEulerOrder_order2 | a3poseEulerOrder_idz<<a3poseEulerOrder_order3,
+	a3poseEulerOrder_xzy = a3poseEulerOrder_idx<<a3poseEulerOrder_order1 | a3poseEulerOrder_idz<<a3poseEulerOrder_order2 | a3poseEulerOrder_idy<<a3poseEulerOrder_order3,
+	a3poseEulerOrder_zyx = a3poseEulerOrder_idz<<a3poseEulerOrder_order1 | a3poseEulerOrder_idy<<a3poseEulerOrder_order2 | a3poseEulerOrder_idx<<a3poseEulerOrder_order3,
 };
 
+a3mat4 ec_eulerToMat4x4(const a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order);
 
 //-----------------------------------------------------------------------------
 
