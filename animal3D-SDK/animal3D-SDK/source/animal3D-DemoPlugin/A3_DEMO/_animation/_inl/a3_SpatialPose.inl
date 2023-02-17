@@ -40,30 +40,30 @@ inline a3mat4 ec_eulerToMat4x4(const a3vec3 eulerAngles, const a3_SpatialPoseEul
 
 	a3real sinRotX = a3sind(eulerAngles.x);
 	a3real cosRotX = a3cosd(eulerAngles.x);
-	a3mat4 matRotX = {
+	a3mat4 matRotX = {{
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, cosRotX, -sinRotX, 0.0f,
 		0.0f, sinRotX, cosRotX, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-	};
+	}};
 
 	a3real sinRotY = a3sind(eulerAngles.y);
 	a3real cosRotY = a3cosd(eulerAngles.y);
-	a3mat4 matRotY = {
+	a3mat4 matRotY = {{
 		cosRotY, 0.0f, sinRotY, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		-sinRotY, 0.0f, cosRotY, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-	};
+	}};
 
 	a3real sinRotZ = a3sind(eulerAngles.z);
 	a3real cosRotZ = a3cosd(eulerAngles.z);
-	a3mat4 matRotZ = {
-		cosRotX, sinRotX, 0.0f, 0.0f,
-		-sinRotX, cosRotX, 0.0f, 0.0f,
+	a3mat4 matRotZ = {{
+		cosRotX, -sinRotX, 0.0f, 0.0f,
+		sinRotX, cosRotX, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
-	};
+	}};
 
 
 	// Apply in order

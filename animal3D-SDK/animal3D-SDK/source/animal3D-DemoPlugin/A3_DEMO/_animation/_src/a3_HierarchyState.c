@@ -104,18 +104,20 @@ a3i32 a3hierarchyStateCreate(a3_HierarchyState *state_out, const a3_Hierarchy *h
 
 		// set pointers
 		state_out->hierarchy = hierarchy;
+		state_out->eulerOrder = a3poseEulerOrder_zxy;
 
 		state_out->sampledDeltaPose = NULL; //Set externally
 		state_out->bindPose         = NULL; //Set externally
-		state_out->samplePose       = malloc(sizeof(a3_SpatialPose       )*hierarchy->numNodes);
-		state_out->localPose        = malloc(sizeof(a3_HierarchyPose     )*hierarchy->numNodes);
-		state_out->objectPose       = malloc(sizeof(a3_HierarchyPose     )*hierarchy->numNodes);
-		state_out->channels         = malloc(sizeof(a3_SpatialPoseChannel)*hierarchy->numNodes);
+		state_out->samplePose       = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
+		state_out->localPose        = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
+		state_out->objectPose       = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
+		state_out->channels         = calloc(hierarchy->numNodes, sizeof(a3_SpatialPoseChannel));
 
-		// reset all data
+		// reset all data to defaults
 		for (a3ui32 i = 0; i < hierarchy->numNodes; i++)
 		{
 			a3spatialPoseInit  (&state_out->samplePose[i]);
+			state_out->channels[i] = ~0;
 			//state_out->hierarchy->nodes[i] = ;
 		}
 		a3hierarchyPoseInit(state_out-> localPose, hierarchy->numNodes);
