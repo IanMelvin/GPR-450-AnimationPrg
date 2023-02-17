@@ -166,11 +166,6 @@ inline a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatial
 	{
 		// Build component matrices
 
-		a3mat4 matTranslate = a3mat4_identity;
-		if (channel & a3poseChannel_translate_x) matTranslate.m30 = spatialPose_in->translation.x;
-		if (channel & a3poseChannel_translate_y) matTranslate.m31 = spatialPose_in->translation.y;
-		if (channel & a3poseChannel_translate_z) matTranslate.m32 = spatialPose_in->translation.z;
-
 		a3mat4 matScale = a3mat4_identity;
 		if (channel & a3poseChannel_scale_x) matScale.m00 = spatialPose_in->scale.x;
 		if (channel & a3poseChannel_scale_y) matScale.m11 = spatialPose_in->scale.y;
@@ -187,7 +182,9 @@ inline a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatial
 
 		*mat_out = matScale;
 		a3real4x4ConcatL(mat_out->m, matRotate.m);
-		a3real4x4ConcatL(mat_out->m, matTranslate.m);
+		if (channel & a3poseChannel_translate_x) mat_out->m30 = spatialPose_in->translation.x;
+		if (channel & a3poseChannel_translate_y) mat_out->m31 = spatialPose_in->translation.y;
+		if (channel & a3poseChannel_translate_z) mat_out->m32 = spatialPose_in->translation.z;
 		
 		return 1;
 	}

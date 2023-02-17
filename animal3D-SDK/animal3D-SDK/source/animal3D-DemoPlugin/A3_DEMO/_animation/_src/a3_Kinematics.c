@@ -73,7 +73,7 @@ a3i32 a3kinematicsSolveForwardPartial(const a3_HierarchyState *hierarchyState, c
 				a3real4x4ProductTransform(
 					hierarchyState->objectPose[node->index].transform.m, //Write to own object transform
 					hierarchyState->objectPose[node->parentIndex].transform.m, //Parent's object transform
-					hierarchyState->localPose[node->parentIndex].transform.m //Own local transform
+					hierarchyState->localPose[node->index].transform.m //Own local transform
 				);
 			}
 			else
