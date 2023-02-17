@@ -44,7 +44,7 @@ a3i32 a3kinematicsPosesToMatrices(const a3_HierarchyState* hierarchyState)
 		a3spatialPoseConvert(
 			&hierarchyState->localPose[i].transform,
 			&hierarchyState->samplePose[i],
-			hierarchyState->samplePose[i].constraints,
+			hierarchyState->samplePose[i].channels,
 			hierarchyState->eulerOrder
 		);
 	}

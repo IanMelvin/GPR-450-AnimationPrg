@@ -123,13 +123,13 @@ struct a3_SpatialPose
 	// scale vector
 	a3vec3 scale;
 
-	a3_SpatialPoseChannel constraints;
+	a3_SpatialPoseChannel channels;
 };
 
 
 //-----------------------------------------------------------------------------
 
-a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose, a3_SpatialPoseEulerOrder eulerOrder);
+a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose, a3_SpatialPoseChannel channels);
 
 // set rotation values for a single node pose
 a3i32 a3spatialPoseSetRotation(a3_SpatialPose* spatialPose, const a3f32 rx_degrees, const a3f32 ry_degrees, const a3f32 rz_degrees);

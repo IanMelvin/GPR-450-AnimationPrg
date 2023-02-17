@@ -46,16 +46,17 @@ a3i32 a3hierarchyPoseGroupCreate(a3_HierarchyPoseGroup *poseGroup_out, const a3_
 		poseGroup_out->hierarchy = hierarchy;
 		poseGroup_out->poseCount = poseCount;
 		poseGroup_out->spatialPoseCount = poseCount * poseGroup_out->hierarchy->numNodes;
+		poseGroup_out->spatialPosePool = malloc(sizeof(a3_SpatialPose)*poseGroup_out->spatialPoseCount);
 
 		// reset all data
 		for (a3ui32 i = 0; i < poseGroup_out->spatialPoseCount; i++)
 		{
-			a3spatialPoseInit(&poseGroup_out->spatialPosePool[i], a3poseEulerOrder_xyz);
+			a3spatialPoseInit(&poseGroup_out->spatialPosePool[i], ~0);
 		}
 
 		for (a3ui32 i = 0; i < poseCount; i++)
 		{
-			//FIXME @rsc
+			//FIXME @rsc - I don't remember what this does but the program seems to run fine without it
 			//poseGroup_out->hierarchalPoses[i].spatialPose = poseGroup_out->spatialPosePool;
 		}
 
@@ -74,6 +75,7 @@ a3i32 a3hierarchyPoseGroupRelease(a3_HierarchyPoseGroup *poseGroup)
 		// release everything (one free)
 		//free(???);
 		free(poseGroup->hierarchy->nodes);
+		free(poseGroup->spatialPosePool);
 
 		// reset pointers
 		poseGroup->hierarchy = 0;
