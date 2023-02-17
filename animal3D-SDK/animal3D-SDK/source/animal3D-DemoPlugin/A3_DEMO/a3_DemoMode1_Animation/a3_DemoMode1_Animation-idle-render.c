@@ -36,6 +36,7 @@
 
 #include "A3_DEMO/_animation/a3_Kinematics.h"
 
+#include <math.h>
 
 // OpenGL
 #ifdef _WIN32
@@ -519,6 +520,9 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				a3mat4 tmpS = a3mat4_identity; //shared scale
 				a3real4x4SetScale(tmpS.m, 0.05f);
 				
+				//TEST ANIM
+				demoMode->hierarchyState_skel->sampledDeltaPose[0].orientation.x = (a3real)fmod(demoMode->hierarchyState_skel->sampledDeltaPose[0].orientation.x+0.5f, 360);
+
 				//a3kinematicsInterpolateDeltas(demoMode->hierarchyState_skel, demoMode->skeletonAnimator); //Step 1: Animate and interpolate between local deltas
 				a3kinematicsPoseConcat       (demoMode->hierarchyState_skel); //Step 2: Concat local deltas onto base poses
 				a3kinematicsPosesToMatrices  (demoMode->hierarchyState_skel); //Step 3: Convert pose channels to matrices (in node-local space)
