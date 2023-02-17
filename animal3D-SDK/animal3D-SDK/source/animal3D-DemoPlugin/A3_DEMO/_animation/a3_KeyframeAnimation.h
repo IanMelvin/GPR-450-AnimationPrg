@@ -111,6 +111,8 @@ union ec_InterpolationFuncFamily
 		interpolationFunc linear;
 		interpolationFunc catmullRom;
 		interpolationFunc cubicHermite;
+
+		size_t valSize; //For memcpy (equivalent of = for void ptr)
 	};
 	interpolationFunc byMode[EC_INTERPOLATE_MODE_COUNT]; //Index by ec_KeyframeInterpolationMode
 };
@@ -126,9 +128,6 @@ struct a3_KeyframePool
 	
 	// how do we interpolate between keyframe values?
 	const ec_InterpolationFuncFamily* interpolationFuncs;
-
-	// size of keyframe value
-	size_t keyframeValSize;
 };
 
 

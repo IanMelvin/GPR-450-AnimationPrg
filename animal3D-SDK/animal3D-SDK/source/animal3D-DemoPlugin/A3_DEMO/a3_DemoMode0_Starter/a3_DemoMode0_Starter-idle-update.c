@@ -65,6 +65,7 @@ void InitilizeCode(a3_DemoState const* demoState)
 	printf("test");
 
 	floatInterpolateFuncs.linear = a3realLerpWrapper;
+	floatInterpolateFuncs.valSize = sizeof(a3real);
 
 	a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
 	a3keyframePoolCreate(keyframes, 12, &floatInterpolateFuncs);

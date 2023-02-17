@@ -85,7 +85,7 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController const* clipCtrl)
 {
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
-	size_t keyframeValSize = currentClip->keyframePool->keyframeValSize;
+	size_t keyframeValSize = currentClip->keyframePool->interpolationFuncs->valSize;
 
 	a3_Keyframe* x0 = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe);
 
