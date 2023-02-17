@@ -59,8 +59,8 @@ inline a3mat4 ec_eulerToMat4x4(const a3vec3 eulerAngles, const a3_SpatialPoseEul
 	a3real sinRotZ = a3sind(eulerAngles.z);
 	a3real cosRotZ = a3cosd(eulerAngles.z);
 	a3mat4 matRotZ = {{
-		cosRotX, -sinRotX, 0.0f, 0.0f,
-		sinRotX, cosRotX, 0.0f, 0.0f,
+		cosRotZ, -sinRotZ, 0.0f, 0.0f,
+		sinRotZ, cosRotZ, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	}};
