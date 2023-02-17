@@ -67,17 +67,20 @@ a3i32 a3kinematicsSolveForwardPartial(const a3_HierarchyState *hierarchyState, c
 		for (a3ui32 i = firstIndex; i < firstIndex + nodeCount; ++i)
 		{
 			a3_HierarchyNode* node = &hierarchyState->hierarchy->nodes[i];
-			
-			a3mat4 ownDelta = hierarchyState->localPose[node->index].transform;
-
-			if (node->parentIndex != -1) //If not root, concatenate
+			if (node->parentIndex != -1)
 			{
-				a3mat4 parentPosed = hierarchyState->objectPose[node->parentIndex].transform;
-				a3real4x4Concat(parentPosed.m, ownDelta.m);
+				//If not root, concatenate
+				a3real4x4ProductTransform(
+					hierarchyState->objectPose[node->index].transform.m, //Write to own object transform
+					hierarchyState->objectPose[node->parentIndex].transform.m, //Parent's object transform
+					hierarchyState->localPose[node->parentIndex].transform.m //Own local transform
+				);
 			}
-			
-			//Apply
-			hierarchyState->objectPose[node->index].transform = ownDelta;
+			else
+			{
+				//If root, local transform is the same as global transform
+				hierarchyState->objectPose[node->index].transform = hierarchyState->localPose[node->index].transform;
+			}
 		}
 		return 1;
 	}
@@ -93,12 +96,34 @@ a3i32 a3kinematicsSolveInversePartial(const a3_HierarchyState *hierarchyState, c
 	if (hierarchyState && hierarchyState->hierarchy &&
 		firstIndex < hierarchyState->hierarchy->numNodes && nodeCount)
 	{
-		// ****TO-DO: implement inverse kinematics algorithm
 		//	- for all nodes starting at first index
 		//		- if node is not root (has parent node)
 		//			- local matrix = inverse parent object matrix * object matrix
 		//		- else
 		//			- copy object matrix to local matrix
+
+		for (a3ui32 i = firstIndex; i < firstIndex + nodeCount; ++i)
+		{
+			a3_HierarchyNode* node = &hierarchyState->hierarchy->nodes[i];
+			if (node->parentIndex != -1)
+			{
+				//If not root, un-concatenate
+				a3mat4 invParentTransform;
+				a3real4x4GetInverse(invParentTransform.m, hierarchyState->objectPose[node->index].transform.m); //TODO probably slow, optimize
+
+				a3real4x4ProductTransform(
+					hierarchyState->localPose[node->index].transform.m, //Write to own local transform
+					invParentTransform.m, //Inverse of parent's object transform
+					hierarchyState->objectPose[node->index].transform.m //Own object transform
+				);
+			}
+			else
+			{
+				//If root, local transform is the same as global transform
+				hierarchyState->localPose[node->index].transform = hierarchyState->objectPose[node->index].transform;
+			}
+		}
+		return 1;
 	}
 	return -1;
 }
