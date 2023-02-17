@@ -57,23 +57,25 @@ a3boolean runWhenISaySo = a3true;
 
 a3_TextureAtlas testAtlas;
 
+ec_InterpolationFuncFamily floatInterpolateFuncs = { 0 };
+a3real* a3realLerpWrapper(a3real* out, const a3real* val0, const a3real* val1, a3real param) { *out = a3lerpFunc(*val0, *val1, param); return out; }
+
 void InitilizeCode(a3_DemoState const* demoState)
 {
 	printf("test");
+
+	floatInterpolateFuncs.linear = a3realLerpWrapper;
+
 	a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
-	a3keyframePoolCreate(keyframes, 12);
-	a3keyframeInit(&keyframes->keyframe[0], .5f, 0);
-	a3keyframeInit(&keyframes->keyframe[1], .5f, 1);
-	a3keyframeInit(&keyframes->keyframe[2], .5f, 2);
-	a3keyframeInit(&keyframes->keyframe[3], .5f, 3);
-	a3keyframeInit(&keyframes->keyframe[4], .5f, 4);
-	a3keyframeInit(&keyframes->keyframe[5], .5f, 5);
-	a3keyframeInit(&keyframes->keyframe[6], .5f, 6);
-	a3keyframeInit(&keyframes->keyframe[7], .5f, 7);
-	a3keyframeInit(&keyframes->keyframe[8], .5f, 8);
-	a3keyframeInit(&keyframes->keyframe[9], .5f, 9);
-	a3keyframeInit(&keyframes->keyframe[10], .5f, 10);
-	a3keyframeInit(&keyframes->keyframe[11], .5f, 11);
+	a3keyframePoolCreate(keyframes, 12, &floatInterpolateFuncs);
+
+	a3real* testKeyframeValues = malloc(sizeof(a3real) * 12);
+	for (int i = 0; i < 12; ++i)
+	{
+		testKeyframeValues[i] = (a3real)i;
+		a3keyframeInit(&keyframes->keyframe[i], .5f, &testKeyframeValues[i]);
+	}
+
 	a3_ClipPool* clips = malloc(sizeof(a3_ClipPool));
 	a3clipPoolCreate(clips, 2);
 	a3clipInit(&clips->clip[0], "Entry", keyframes, 0, 1); a3clipCalculateDuration(&clips->clip[0]);
@@ -111,7 +113,9 @@ void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a
 		a3clipControllerUpdate(&demoState->testAnimator, modifiedDT);
 
 		//get current index
-		demoState->index = (a3ui32)ec_clipController_evaluateValue(&demoState->testAnimator);
+		a3real v;
+		ec_clipController_evaluateValue(&v, &demoState->testAnimator);
+		demoState->index = (a3ui32)v;
 	}
 
 	if (demoState->reset)

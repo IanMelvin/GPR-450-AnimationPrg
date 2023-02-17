@@ -78,27 +78,57 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 	//Update normalized parameters
 	ec_clipController_updateParameterTime(clipCtrl);
 
-	return clipCtrl->keyframe; //TODO @rsc what is this supposed to return?
+	return 1;
 }
 
 // evaluate the current value
-a3_Keyframe_data_t ec_clipController_evaluateValue(a3_ClipController const* clipCtrl)
+a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController const* clipCtrl)
 {
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
-	a3_Keyframe* x0 = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe);
-	if (clipCtrl->keyframe == currentClip->keyframeCount-1) return x0->data; //Special case for very last keyframe
-	a3_Keyframe* x1 = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe+1);
+	size_t keyframeValSize = currentClip->keyframePool->keyframeValSize;
 
-	assert(x0->interpolationMode);
+	a3_Keyframe* x0 = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe);
+
+	//Special case for very last keyframe
+	if (clipCtrl->keyframe == currentClip->keyframeCount - 1)
+	{
+		//*out = *x0->data;
+		memcpy(out, x0->data, keyframeValSize);
+		return 1;
+	}
+
+	a3_Keyframe* x1 = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe+1);
 
 	switch (x0->interpolationMode)
 	{
-	case EC_INTERPOLATE_CONSTANT: return x0->data;
-	case EC_INTERPOLATE_NEAREST : return clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data;
-	case EC_INTERPOLATE_LINEAR  : return a3lerp(x0->data, x1->data, clipCtrl->keyframeParameter);
+	//Special cases for non-blending modes
+	case EC_INTERPOLATE_CONSTANT:
+		//*out = *x0->data;
+		memcpy(out, x0->data, keyframeValSize);
+		return 1;
+
+	case EC_INTERPOLATE_NEAREST:
+		//*out = clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data;
+		memcpy(out, clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data, keyframeValSize);
+		return 1;
+
+	//Normal blending modes
+	default:
+		assert(currentClip->keyframePool->interpolationFuncs->byMode[x0->interpolationMode]);
+		currentClip->keyframePool->interpolationFuncs->byMode[x0->interpolationMode](out, x0->data, x1->data, clipCtrl->keyframeParameter);
+		return 1;
+	}
+
+	/*
+	switch (x0->interpolationMode)
+	{
+	case EC_INTERPOLATE_CONSTANT: *out = x0->data;
+	case EC_INTERPOLATE_NEAREST : *out = clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data;
+	case EC_INTERPOLATE_LINEAR  : *out = a3lerp(x0->data, x1->data, clipCtrl->keyframeParameter);
 
 	default: assert(false); return 0;
 	}
+	*/
 }
 
 // time-ticking functions

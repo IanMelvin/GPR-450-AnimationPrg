@@ -48,8 +48,9 @@ typedef struct a3_Keyframe					a3_Keyframe;
 typedef struct a3_KeyframePool				a3_KeyframePool;
 typedef struct a3_Clip						a3_Clip;
 typedef struct a3_ClipPool					a3_ClipPool;
-typedef enum ec_KeyframeInterpolationMode ec_KeyframeInterpolationMode;
-typedef a3f32 a3_Keyframe_data_t;
+typedef enum ec_InterpolationMode			ec_InterpolationMode;
+typedef union ec_InterpolationFuncFamily	ec_InterpolationFuncFamily;
+typedef void								a3_Keyframe_data_t;
 #endif	// __cplusplus
 
 
@@ -75,26 +76,43 @@ struct a3_Keyframe
 	a3f32 durationInv;
 
 	// value of the sample described by a keyframe
-	a3_Keyframe_data_t data;
+	// NOTE: stored elsewhere
+	const a3_Keyframe_data_t* data;
 
 	// how to interpolate data
-	ec_KeyframeInterpolationMode interpolationMode;
+	ec_InterpolationMode interpolationMode;
 };
 
 // how to blend between a3_Keyframe.data
-enum ec_KeyframeInterpolationMode
+// when updating here, add to ec_InterpolationFuncFamily
+enum ec_InterpolationMode
 {
-	EC_INTERPOLATE_INVALID = 0,
+	//Special values - non-blending
+	EC_INTERPOLATE_CONSTANT = -0b01,
+	EC_INTERPOLATE_NEAREST  = -0b11,
 
-	EC_INTERPOLATE_CONSTANT,
-	EC_INTERPOLATE_NEAREST,
-	EC_INTERPOLATE_LINEAR,
-
-	//NOT IMPLEMENTED YET - see ec_clipController_evaluateValue
+	//Normal blending
+	EC_INTERPOLATE_LINEAR = 0,
 	EC_INTERPOLATE_CATMULL_ROM,
 	EC_INTERPOLATE_CUBIC_HERMITE,
 
-	EC_INTERPOLATE_DEFAULT = EC_INTERPOLATE_LINEAR
+	//Special values
+	EC_INTERPOLATE_MODE_COUNT, //How many *blending* interpolation modes are there? (not counting constant or nearest)
+	EC_INTERPOLATE_DEFAULT = EC_INTERPOLATE_LINEAR //What is the default interpolation mode?
+};
+
+// description of how to interpolate data
+typedef a3_Keyframe_data_t* (*interpolationFunc)(a3_Keyframe_data_t* out, const a3_Keyframe_data_t* val0, const a3_Keyframe_data_t* val1, a3real param);
+union ec_InterpolationFuncFamily
+{
+	struct {
+		//interpolationFunc constant;
+		//interpolationFunc nearest;
+		interpolationFunc linear;
+		interpolationFunc catmullRom;
+		interpolationFunc cubicHermite;
+	};
+	interpolationFunc byMode[EC_INTERPOLATE_MODE_COUNT]; //Index by ec_KeyframeInterpolationMode
 };
 
 // pool of keyframe descriptors
@@ -105,17 +123,24 @@ struct a3_KeyframePool
 
 	// number of keyframes
 	a3ui32 count;
+	
+	// how do we interpolate between keyframe values?
+	const ec_InterpolationFuncFamily* interpolationFuncs;
+
+	// size of keyframe value
+	size_t keyframeValSize;
 };
 
 
 // allocate keyframe pool
-a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count);
+a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count, const ec_InterpolationFuncFamily* interpolationFuncs);
 
 // release keyframe pool
 a3i32 a3keyframePoolRelease(a3_KeyframePool* keyframePool);
 
 // initialize keyframe
-a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3_Keyframe_data_t value_x);
+// NOTE: value_x stored elsewhere
+a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3_Keyframe_data_t* value_x);
 
 
 //-----------------------------------------------------------------------------
