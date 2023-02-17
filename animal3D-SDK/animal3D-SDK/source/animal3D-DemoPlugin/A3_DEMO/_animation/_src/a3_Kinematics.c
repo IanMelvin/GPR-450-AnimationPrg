@@ -29,9 +29,9 @@
 
 a3i32 a3kinematicsPoseConcat(const a3_HierarchyState* hierarchyState)
 {
-	for (a3ui32 i = 0; i < hierarchyState->localPose.poseCount; ++i)
+	for (a3ui32 i = 0; i < hierarchyState->hierarchy->numNodes; ++i)
 	{
-		a3spatialPoseConcat(hierarchyState->localPose.spatialPose);
+		a3spatialPoseConcat(&hierarchyState->samplePose[i], &hierarchyState->bindPose[i], &hierarchyState->sampledDeltaPose[i]);
 	}
 
 	return 1;
@@ -39,10 +39,14 @@ a3i32 a3kinematicsPoseConcat(const a3_HierarchyState* hierarchyState)
 
 a3i32 a3kinematicsPosesToMatrices(const a3_HierarchyState* hierarchyState)
 {
-	for (a3ui32 i = 0; i < hierarchyState->localPose.poseCount; ++i)
+	for (a3ui32 i = 0; i < hierarchyState->hierarchy->numNodes; ++i)
 	{
-		a3_SpatialPose* pose = &hierarchyState->localPose.spatialPose[i];
-		a3spatialPoseConvert(&pose->transform, &pose[i], pose->channelMask, pose->eulerOrder);
+		a3spatialPoseConvert(
+			&hierarchyState->localPose[i].transform,
+			&hierarchyState->samplePose[i],
+			hierarchyState->samplePose[i].constraints,
+			hierarchyState->eulerOrder
+		);
 	}
 	
 	return 1;
@@ -64,16 +68,16 @@ a3i32 a3kinematicsSolveForwardPartial(const a3_HierarchyState *hierarchyState, c
 		{
 			a3_HierarchyNode* node = &hierarchyState->hierarchy->nodes[i];
 			
-			a3mat4 ownDelta = hierarchyState->localPose.spatialPose[node->index].transform;
+			a3mat4 ownDelta = hierarchyState->localPose[node->index].transform;
 
 			if (node->parentIndex != -1) //If not root, concatenate
 			{
-				a3mat4 parentPosed = hierarchyState->objectPose.spatialPose[node->parentIndex].transform;
+				a3mat4 parentPosed = hierarchyState->objectPose[node->parentIndex].transform;
 				a3real4x4Concat(parentPosed.m, ownDelta.m);
 			}
 			
 			//Apply
-			hierarchyState->objectPose.spatialPose[node->index].transform = ownDelta;
+			hierarchyState->objectPose[node->index].transform = ownDelta;
 		}
 		return 1;
 	}

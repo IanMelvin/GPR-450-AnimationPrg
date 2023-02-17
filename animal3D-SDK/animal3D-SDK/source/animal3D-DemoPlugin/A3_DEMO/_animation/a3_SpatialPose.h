@@ -99,10 +99,7 @@ enum a3_SpatialPoseChannel
 // single pose for a single node
 struct a3_SpatialPose
 {
-	// transformation matrix
-	a3mat4 transform;
-
-	// orientation vector
+	// orientation euler angles
 	a3vec3 orientation;
 
 	// translation vector
@@ -110,6 +107,8 @@ struct a3_SpatialPose
 
 	// scale vector
 	a3vec3 scale;
+
+	a3_SpatialPoseChannel constraints;
 };
 
 

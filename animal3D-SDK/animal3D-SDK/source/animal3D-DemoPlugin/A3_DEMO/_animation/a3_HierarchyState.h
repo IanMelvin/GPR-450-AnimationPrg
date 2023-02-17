@@ -51,11 +51,8 @@ typedef struct a3_HierarchyState		a3_HierarchyState;
 // makes algorithms easier to keep this as a separate data type
 struct a3_HierarchyPose
 {
-	//  A pointer to the start of the individual node pose array (data actually owned by the next structure)
-	a3_SpatialPose* spatialPose;
-
-	// poseCount
-	a3ui32 poseCount;
+	// transform of this node (whether local or global depends on usage)
+	a3mat4 transform;
 };
 
 
@@ -76,12 +73,6 @@ struct a3_HierarchyPoseGroup
 
 	// Array of Hierarchal Poses
 	a3_HierarchyPose* hierarchalPoses;
-
-	// Array of SpatialPose Channels
-	a3_SpatialPoseChannel* channels;
-
-	// Some global flag for the pool that describes the concatenation order of orientation channels
-	a3_SpatialPoseEulerOrder eulerOrder;
 };
 
 
@@ -91,17 +82,24 @@ struct a3_HierarchyState
 	// pointer to hierarcy
 	const a3_Hierarchy* hierarchy;
 
-	//A hierarchical pose representing each node's animated pose at the current time.
-	//Result of step 2
-	a3_HierarchyPose samplePose;
+	//Inputs to step 2
+	a3_SpatialPose* bindPose;
+	a3_SpatialPose* sampledDeltaPose; //Output of step 1
 
-	//A hierarchical pose representing each node's transformation relative to its parent's space.
+	//An array of spatial poses representing each node's animated pose at the current time.
+	//Result of step 2
+	a3_SpatialPose* samplePose;
+
+	//An array of hierarchical poses representing each node's transformation relative to its parent's space.
 	//Result of step 3
-	a3_HierarchyPose localPose;
+	a3_HierarchyPose* localPose;
 
 	//A hierarchical pose representing each node's transformation relative to the root's parent space (the actual object that the hierarchy represents).
 	//Result of step 4
-	a3_HierarchyPose objectPose;
+	a3_HierarchyPose* objectPose;
+
+	// Some global flag for the pool that describes the concatenation order of orientation channels
+	a3_SpatialPoseEulerOrder eulerOrder;
 };
 
 

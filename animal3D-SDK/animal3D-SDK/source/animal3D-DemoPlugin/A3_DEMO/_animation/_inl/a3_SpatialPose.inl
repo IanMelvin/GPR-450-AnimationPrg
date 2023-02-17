@@ -33,7 +33,6 @@
 
 inline a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose, a3_SpatialPoseChannel channel, a3_SpatialPoseEulerOrder eulerOrder)
 {
-	spatialPose->transform = a3mat4_identity;
 	spatialPose->orientation = a3vec3_zero;
 	spatialPose->scale = a3vec3_one;
 	spatialPose->translation = a3vec3_zero;
@@ -91,10 +90,9 @@ inline a3i32 a3spatialPoseReset(a3_SpatialPose* spatialPose)
 {
 	if (spatialPose)
 	{
-		spatialPose->transform = a3mat4_identity;
-		spatialPose->orientation = a3vec3_one;
+		spatialPose->orientation = a3vec3_zero;
 		spatialPose->scale = a3vec3_one;
-		spatialPose->translation = a3vec3_one;
+		spatialPose->translation = a3vec3_zero;
 	}
 	return -1;
 }
@@ -104,6 +102,7 @@ inline a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatial
 {
 	if (mat_out && spatialPose_in)
 	{
+		/*
 		a3mat4 transformAndScaleMatrix = {
 			{spatialPose_in->scale.x, 0.0f, 0.0f, spatialPose_in->translation.x,
 			0.0f, spatialPose_in->scale.y, 0.0f, spatialPose_in->translation.y,
@@ -114,7 +113,7 @@ inline a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatial
 		a3mat4 orientationMatrix;
 
 		mat_out = a3real4x4Concat(transformAndScaleMatrix.m, transformAndScaleMatrix.m);
-		
+		*/
 		return 1;
 	}
 	return -1;
@@ -129,6 +128,8 @@ inline a3i32 a3spatialPoseConcat(a3_SpatialPose* finalPose, const a3_SpatialPose
 
 	a3real3Sum(finalPose->orientation.v, basePose->orientation.v, deltaPose->orientation.v); //Then rotate
 	a3real3Sum(finalPose->translation.v, basePose->translation.v, deltaPose->translation.v); //Then translate
+
+	return 1;
 }
 
 // copy operation for single node pose
@@ -136,7 +137,6 @@ inline a3i32 a3spatialPoseCopy(a3_SpatialPose* spatialPose_out, const a3_Spatial
 {
 	if (spatialPose_out && spatialPose_in)
 	{
-		spatialPose_out->transform = spatialPose_in->transform;
 		spatialPose_out->orientation = spatialPose_in->orientation;
 		spatialPose_out->scale = spatialPose_in->scale;
 		spatialPose_out->translation = spatialPose_in->translation;

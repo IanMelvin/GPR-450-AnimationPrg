@@ -527,7 +527,7 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				a3vertexDrawableActivate(demoState->draw_node);
 				for (a3ui32 i = 0; i < demoMode->hierarchyState_skel->hierarchy->numNodes; ++i)
 				{
-					a3_SpatialPose* node = &demoMode->hierarchyState_skel->samplePose.spatialPose[i];
+					a3_HierarchyPose* node = &demoMode->hierarchyState_skel->objectPose[i];
 					a3real4x4Product(tmpL.m, node->transform.m, tmpS.m);
 					a3real4x4Product(tmpLMVP.m, viewProjectionMat.m, tmpL.m);
 					a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, tmpLMVP.mm);
