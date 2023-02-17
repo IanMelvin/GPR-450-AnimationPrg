@@ -1,3 +1,4 @@
+#include "..\a3_Kinematics.h"
 /*
 	Copyright 2011-2020 Daniel S. Buckstein
 

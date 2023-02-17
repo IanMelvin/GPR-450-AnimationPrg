@@ -33,7 +33,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <cassert>
+#include <assert.h>
 
 // macros to help with names
 #define A3_CLIP_DEFAULTNAME		("unnamed clip")
@@ -43,10 +43,11 @@
 //-----------------------------------------------------------------------------
 
 // allocate keyframe pool initializing all to default values.
-a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count)
+a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count, const ec_InterpolationFuncFamily* interpolationFuncs)
 {
 	keyframePool_out->keyframe = (a3_Keyframe*)malloc(count * sizeof(a3_Keyframe));
 	keyframePool_out->count = count;
+	keyframePool_out->interpolationFuncs = interpolationFuncs;
 
 	//Define default values
 	for (a3ui32 i = 0; i < keyframePool_out->count; i++)
@@ -66,7 +67,8 @@ a3i32 a3keyframePoolRelease(a3_KeyframePool* keyframePool)
 }
 
 // initialize keyframe
-a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3_Keyframe_data_t value_x)
+// NOTE: value_x stored elsewhere
+a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3_Keyframe_data_t* value_x)
 {
 	keyframe_out->duration = duration;
 	keyframe_out->durationInv = 1 / duration;

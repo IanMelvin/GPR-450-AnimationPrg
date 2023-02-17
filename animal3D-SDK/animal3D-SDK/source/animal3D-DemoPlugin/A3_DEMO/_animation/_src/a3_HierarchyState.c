@@ -55,7 +55,8 @@ a3i32 a3hierarchyPoseGroupCreate(a3_HierarchyPoseGroup *poseGroup_out, const a3_
 
 		for (a3ui32 i = 0; i < poseCount; i++)
 		{
-			poseGroup_out->hierarchalPoses[i].spatialPose = poseGroup_out->spatialPosePool;
+			//FIXME @rsc
+			//poseGroup_out->hierarchalPoses[i].spatialPose = poseGroup_out->spatialPosePool;
 		}
 
 		// done

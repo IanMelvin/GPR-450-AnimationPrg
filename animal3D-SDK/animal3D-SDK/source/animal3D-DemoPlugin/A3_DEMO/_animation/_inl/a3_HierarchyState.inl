@@ -55,13 +55,14 @@ inline a3i32 a3hierarchyPoseGroupGetNodePoseOffsetIndex(const a3_HierarchyPoseGr
 //-----------------------------------------------------------------------------
 
 // reset full hierarchy pose
-inline a3i32 a3hierarchyPoseReset(const a3_HierarchyPose* pose_inout, const a3ui32 nodeCount)
+inline a3i32 a3hierarchyPoseReset(a3_HierarchyPose* pose_inout, const a3ui32 nodeCount)
 {
 	if (pose_inout && nodeCount)
 	{
 		for (a3ui32 i = 0; i < nodeCount; i++)
 		{
-			a3spatialPoseInit(&pose_inout->spatialPose[i], a3poseEulerOrder_xyz);
+			pose_inout[i].transform = a3mat4_identity;
+			//a3spatialPoseInit(&pose_inout->spatialPose[i], a3poseEulerOrder_xyz);
 		}
 	}
 	return 1;
@@ -78,13 +79,14 @@ inline a3i32 a3hierarchyPoseConvert(const a3_HierarchyPose* pose_inout, const a3
 }
 
 // copy full hierarchy pose
-inline a3i32 a3hierarchyPoseCopy(const a3_HierarchyPose* pose_out, const a3_HierarchyPose* pose_in, const a3ui32 nodeCount)
+inline a3i32 a3hierarchyPoseCopy(a3_HierarchyPose* pose_out, const a3_HierarchyPose* pose_in, const a3ui32 nodeCount)
 {
 	if (pose_out && pose_in && nodeCount)
 	{
 		for (a3ui32 i = 0; i < nodeCount; i++)
 		{
-			pose_out->spatialPose[i] = pose_in->spatialPose[i];
+			pose_out[i].transform = pose_in[i].transform;
+			//pose_out->spatialPose[i] = pose_in->spatialPose[i];
 		}
 	}
 	return 1;
@@ -92,12 +94,13 @@ inline a3i32 a3hierarchyPoseCopy(const a3_HierarchyPose* pose_out, const a3_Hier
 
 inline a3i32 a3hierarchyPoseInit(a3_HierarchyPose* pose_out, a3ui32 poseCount)
 {
-	pose_out->spatialPose = (a3_SpatialPose*)malloc(poseCount * sizeof(a3_SpatialPose));
+	//pose_out->spatialPose = (a3_SpatialPose*)malloc(poseCount * sizeof(a3_SpatialPose));
 
 	//Define default values
 	for (a3ui32 i = 0; i < poseCount; i++)
 	{
-		a3spatialPoseInit(&pose_out->spatialPose[i], a3poseEulerOrder_xyz);
+		pose_out[i].transform = a3mat4_identity;
+		//a3spatialPoseInit(&pose_out->spatialPose[i], a3poseEulerOrder_xyz);
 	}
 	return 1;
 }

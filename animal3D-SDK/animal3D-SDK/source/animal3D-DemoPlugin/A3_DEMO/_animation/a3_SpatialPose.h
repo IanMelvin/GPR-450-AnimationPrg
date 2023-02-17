@@ -47,14 +47,29 @@ typedef struct a3_SpatialPose			a3_SpatialPose;
 // list of Euler angle product orders
 enum a3_SpatialPoseEulerOrder
 {
-	a3poseEulerOrder_xyz,
-	a3poseEulerOrder_yzx,
-	a3poseEulerOrder_zxy,
-	a3poseEulerOrder_yxz,
-	a3poseEulerOrder_xzy,
-	a3poseEulerOrder_zyx,
+	//Raw IDs of each axis
+	a3poseEulerOrder_idx = 0x1,
+	a3poseEulerOrder_idy = 0x2,
+	a3poseEulerOrder_idz = 0x3,
+
+	//Masks: Filter order flags
+	a3poseEulerOrder_order1 = 4*0,
+	a3poseEulerOrder_order2 = 4*1,
+	a3poseEulerOrder_order3 = 4*2,
+
+	// Construct order flag like: id << offset
+	// Select by index: id>>offset & 0xf
+
+	//Main euler orders, aliases built using flags
+	a3poseEulerOrder_xyz = a3poseEulerOrder_idx<<a3poseEulerOrder_order1 | a3poseEulerOrder_idy<<a3poseEulerOrder_order2 | a3poseEulerOrder_idz<<a3poseEulerOrder_order3,
+	a3poseEulerOrder_yzx = a3poseEulerOrder_idy<<a3poseEulerOrder_order1 | a3poseEulerOrder_idz<<a3poseEulerOrder_order2 | a3poseEulerOrder_idx<<a3poseEulerOrder_order3,
+	a3poseEulerOrder_zxy = a3poseEulerOrder_idz<<a3poseEulerOrder_order1 | a3poseEulerOrder_idx<<a3poseEulerOrder_order2 | a3poseEulerOrder_idy<<a3poseEulerOrder_order3,
+	a3poseEulerOrder_yxz = a3poseEulerOrder_idy<<a3poseEulerOrder_order1 | a3poseEulerOrder_idx<<a3poseEulerOrder_order2 | a3poseEulerOrder_idz<<a3poseEulerOrder_order3,
+	a3poseEulerOrder_xzy = a3poseEulerOrder_idx<<a3poseEulerOrder_order1 | a3poseEulerOrder_idz<<a3poseEulerOrder_order2 | a3poseEulerOrder_idy<<a3poseEulerOrder_order3,
+	a3poseEulerOrder_zyx = a3poseEulerOrder_idz<<a3poseEulerOrder_order1 | a3poseEulerOrder_idy<<a3poseEulerOrder_order2 | a3poseEulerOrder_idx<<a3poseEulerOrder_order3,
 };
 
+a3mat4 ec_eulerToMat4x4(const a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order);
 
 //-----------------------------------------------------------------------------
 
@@ -99,10 +114,7 @@ enum a3_SpatialPoseChannel
 // single pose for a single node
 struct a3_SpatialPose
 {
-	// transformation matrix
-	a3mat4 transform;
-
-	// orientation vector
+	// orientation euler angles
 	a3vec3 orientation;
 
 	// translation vector
@@ -110,6 +122,8 @@ struct a3_SpatialPose
 
 	// scale vector
 	a3vec3 scale;
+
+	a3_SpatialPoseChannel constraints;
 };
 
 
@@ -134,6 +148,9 @@ a3i32 a3spatialPoseReset(a3_SpatialPose* spatialPose);
 
 // convert single node pose to matrix
 a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatialPose_in, const a3_SpatialPoseChannel channel, const a3_SpatialPoseEulerOrder order);
+
+// concat two spatial poses
+a3i32 a3spatialPoseConcat(a3_SpatialPose* finalPose, const a3_SpatialPose* basePose, const a3_SpatialPose* deltaPose);
 
 // copy operation for single node pose
 a3i32 a3spatialPoseCopy(a3_SpatialPose* spatialPose_out, const a3_SpatialPose* spatialPose_in);

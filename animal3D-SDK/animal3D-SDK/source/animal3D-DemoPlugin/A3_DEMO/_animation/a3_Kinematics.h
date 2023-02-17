@@ -41,6 +41,10 @@ extern "C"
 
 //-----------------------------------------------------------------------------
 
+a3i32 a3kinematicsInterpolateDeltas(const a3_HierarchyState* hierarchyState);
+a3i32 a3kinematicsPoseConcat       (const a3_HierarchyState* hierarchyState);
+a3i32 a3kinematicsPosesToMatrices  (const a3_HierarchyState* hierarchyState);
+
 // general forward kinematics: 
 // given local transforms for hierarchy nodes, calculate object-space: 
 //		if not root, 

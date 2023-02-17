@@ -101,7 +101,12 @@ void a3demo_render_controls(a3_DemoState const* demoState,
 	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a, buf);
 
 	//TEMP TEST
-	if (demoState->testAnimator.clipPool) sprintf_s(buf, 256, "Clip[%i] '%s': %f at time=%f", demoState->testAnimator.clipIndex, ec_clipController_getClip(&demoState->testAnimator)->name, ec_clipController_evaluateValue(&demoState->testAnimator), demoState->testAnimator.clipTime);
+	if (demoState->testAnimator.clipPool)
+	{
+		a3real evaluatedValue;
+		ec_clipController_evaluateValue(&evaluatedValue, &demoState->testAnimator);
+		sprintf_s(buf, 256, "Clip[%i] '%s': %f at time=%f", demoState->testAnimator.clipIndex, ec_clipController_getClip(&demoState->testAnimator)->name, evaluatedValue, demoState->testAnimator.clipTime);
+	}
 	else strcpy_s(buf, 256, "[Error: Test animator was not initialized]");
 	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a, buf);
 

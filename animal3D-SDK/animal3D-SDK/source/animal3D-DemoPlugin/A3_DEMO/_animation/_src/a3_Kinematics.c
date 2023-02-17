@@ -27,18 +27,59 @@
 
 //-----------------------------------------------------------------------------
 
+a3i32 a3kinematicsPoseConcat(const a3_HierarchyState* hierarchyState)
+{
+	for (a3ui32 i = 0; i < hierarchyState->hierarchy->numNodes; ++i)
+	{
+		a3spatialPoseConcat(&hierarchyState->samplePose[i], &hierarchyState->bindPose[i], &hierarchyState->sampledDeltaPose[i]);
+	}
+
+	return 1;
+}
+
+a3i32 a3kinematicsPosesToMatrices(const a3_HierarchyState* hierarchyState)
+{
+	for (a3ui32 i = 0; i < hierarchyState->hierarchy->numNodes; ++i)
+	{
+		a3spatialPoseConvert(
+			&hierarchyState->localPose[i].transform,
+			&hierarchyState->samplePose[i],
+			hierarchyState->samplePose[i].constraints,
+			hierarchyState->eulerOrder
+		);
+	}
+	
+	return 1;
+}
+
 // partial FK solver
 a3i32 a3kinematicsSolveForwardPartial(const a3_HierarchyState *hierarchyState, const a3ui32 firstIndex, const a3ui32 nodeCount)
 {
 	if (hierarchyState && hierarchyState->hierarchy && 
 		firstIndex < hierarchyState->hierarchy->numNodes && nodeCount)
 	{
-		// ****TO-DO: implement forward kinematics algorithm
 		//	- for all nodes starting at first index
 		//		- if node is not root (has parent node)
 		//			- object matrix = parent object matrix * local matrix
 		//		- else
 		//			- copy local matrix to object matrix
+
+		for (a3ui32 i = firstIndex; i < firstIndex + nodeCount; ++i)
+		{
+			a3_HierarchyNode* node = &hierarchyState->hierarchy->nodes[i];
+			
+			a3mat4 ownDelta = hierarchyState->localPose[node->index].transform;
+
+			if (node->parentIndex != -1) //If not root, concatenate
+			{
+				a3mat4 parentPosed = hierarchyState->objectPose[node->parentIndex].transform;
+				a3real4x4Concat(parentPosed.m, ownDelta.m);
+			}
+			
+			//Apply
+			hierarchyState->objectPose[node->index].transform = ownDelta;
+		}
+		return 1;
 	}
 	return -1;
 }
