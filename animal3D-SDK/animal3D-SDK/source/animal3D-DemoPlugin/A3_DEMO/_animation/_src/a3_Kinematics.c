@@ -109,7 +109,7 @@ a3i32 a3kinematicsSolveInversePartial(const a3_HierarchyState *hierarchyState, c
 			{
 				//If not root, un-concatenate
 				a3mat4 invParentTransform;
-				a3real4x4GetInverse(invParentTransform.m, hierarchyState->objectPose[node->index].transform.m); //TODO probably slow, optimize
+				a3real4x4TransformInverse(invParentTransform.m, hierarchyState->objectPose[node->parentIndex].transform.m); //TODO probably slow, optimize
 
 				a3real4x4ProductTransform(
 					hierarchyState->localPose[node->index].transform.m, //Write to own local transform

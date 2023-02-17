@@ -521,7 +521,10 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				a3real4x4SetScale(tmpS.m, 0.05f);
 				
 				//TEST ANIM
-				demoMode->hierarchyState_skel->sampledDeltaPose[0].orientation.x = (a3real)fmod(demoMode->hierarchyState_skel->sampledDeltaPose[0].orientation.x+0.5f, 360);
+				a3vec3* joint = &demoMode->hierarchyState_skel->sampledDeltaPose[0].orientation;
+				joint->x = (a3real)fmod(joint->x+1.5f, 360);
+				joint->y = (a3real)fmod(joint->y+0.5f, 360);
+				joint->z = (a3real)fmod(joint->z+0.2f, 360);
 
 				//a3kinematicsInterpolateDeltas(demoMode->hierarchyState_skel, demoMode->skeletonAnimator); //Step 1: Animate and interpolate between local deltas
 				a3kinematicsPoseConcat       (demoMode->hierarchyState_skel); //Step 2: Concat local deltas onto base poses
