@@ -82,7 +82,8 @@ struct a3_HierarchyState
 	// pointer to hierarcy
 	const a3_Hierarchy* hierarchy;
 
-	//Inputs to step 2
+	//Inputs to step 2, managed externally
+	//Arrays
 	a3_SpatialPose* bindPose;
 	a3_SpatialPose* sampledDeltaPose; //Output of step 1
 
@@ -97,6 +98,9 @@ struct a3_HierarchyState
 	//A hierarchical pose representing each node's transformation relative to the root's parent space (the actual object that the hierarchy represents).
 	//Result of step 4
 	a3_HierarchyPose* objectPose;
+
+	//Array of constraints
+	a3_SpatialPoseChannel* channels;
 
 	// Some global flag for the pool that describes the concatenation order of orientation channels
 	a3_SpatialPoseEulerOrder eulerOrder;

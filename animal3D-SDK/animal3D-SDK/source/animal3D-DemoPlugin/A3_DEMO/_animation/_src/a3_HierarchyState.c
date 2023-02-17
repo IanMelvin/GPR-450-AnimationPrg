@@ -51,7 +51,7 @@ a3i32 a3hierarchyPoseGroupCreate(a3_HierarchyPoseGroup *poseGroup_out, const a3_
 		// reset all data
 		for (a3ui32 i = 0; i < poseGroup_out->spatialPoseCount; i++)
 		{
-			a3spatialPoseInit(&poseGroup_out->spatialPosePool[i], ~0);
+			a3spatialPoseInit(&poseGroup_out->spatialPosePool[i]);
 		}
 
 		for (a3ui32 i = 0; i < poseCount; i++)
@@ -100,16 +100,26 @@ a3i32 a3hierarchyStateCreate(a3_HierarchyState *state_out, const a3_Hierarchy *h
 
 		// allocate everything (one malloc)
 		//??? = (...)malloc(sz);
-		state_out->hierarchy = (a3_Hierarchy*)malloc(sizeof(a3_Hierarchy));
+		//state_out->hierarchy = (a3_Hierarchy*)malloc(sizeof(a3_Hierarchy));
 
 		// set pointers
 		state_out->hierarchy = hierarchy;
 
+		state_out->sampledDeltaPose = NULL; //Set externally
+		state_out->bindPose         = NULL; //Set externally
+		state_out->samplePose       = malloc(sizeof(a3_SpatialPose       )*hierarchy->numNodes);
+		state_out->localPose        = malloc(sizeof(a3_HierarchyPose     )*hierarchy->numNodes);
+		state_out->objectPose       = malloc(sizeof(a3_HierarchyPose     )*hierarchy->numNodes);
+		state_out->channels         = malloc(sizeof(a3_SpatialPoseChannel)*hierarchy->numNodes);
+
 		// reset all data
-		//for (int i = 0; i < hierarchy->numNodes; i++)
-		//{
-		//	state_out->hierarchy->nodes[i] = ;
-		//}
+		for (a3ui32 i = 0; i < hierarchy->numNodes; i++)
+		{
+			a3spatialPoseInit  (&state_out->samplePose[i]);
+			//state_out->hierarchy->nodes[i] = ;
+		}
+		a3hierarchyPoseInit(state_out-> localPose, hierarchy->numNodes);
+		a3hierarchyPoseInit(state_out->objectPose, hierarchy->numNodes);
 
 		// done
 		return 1;
@@ -126,6 +136,10 @@ a3i32 a3hierarchyStateRelease(a3_HierarchyState *state)
 		// release everything (one free)
 		//free(???);
 		free(state->hierarchy->nodes);
+		free(state->samplePose);
+		free(state->localPose);
+		free(state->objectPose);
+		free(state->channels);
 
 		// reset pointers
 		state->hierarchy = 0;

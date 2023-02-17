@@ -27,6 +27,7 @@
 
 
 #include "a3_HierarchyState.h"
+#include "a3_KeyframeAnimationController.h"
 
 
 //-----------------------------------------------------------------------------
@@ -41,7 +42,7 @@ extern "C"
 
 //-----------------------------------------------------------------------------
 
-a3i32 a3kinematicsInterpolateDeltas(const a3_HierarchyState* hierarchyState);
+a3i32 a3kinematicsInterpolateDeltas(const a3_HierarchyState* hierarchyState, const a3_ClipController* animator);
 a3i32 a3kinematicsPoseConcat       (const a3_HierarchyState* hierarchyState);
 a3i32 a3kinematicsPosesToMatrices  (const a3_HierarchyState* hierarchyState);
 

@@ -93,12 +93,11 @@ inline a3mat4 ec_eulerToMat4x4(const a3vec3 eulerAngles, const a3_SpatialPoseEul
 }
 
 
-inline a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose, a3_SpatialPoseChannel channels)
+inline a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose)
 {
 	spatialPose->orientation = a3vec3_zero;
 	spatialPose->scale = a3vec3_one;
 	spatialPose->translation = a3vec3_zero;
-	spatialPose->channels = channels;
 
 	return 1;
 }

@@ -519,7 +519,7 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				a3mat4 tmpS = a3mat4_identity; //shared scale
 				a3real4x4SetScale(tmpS.m, 0.05f);
 				
-				//a3kinematicsInterpolateDeltas(demoMode->hierarchyState_skel); //Step 1: Animate and interpolate between local deltas
+				//a3kinematicsInterpolateDeltas(demoMode->hierarchyState_skel, demoMode->skeletonAnimator); //Step 1: Animate and interpolate between local deltas
 				a3kinematicsPoseConcat       (demoMode->hierarchyState_skel); //Step 2: Concat local deltas onto base poses
 				a3kinematicsPosesToMatrices  (demoMode->hierarchyState_skel); //Step 3: Convert pose channels to matrices (in node-local space)
 				a3kinematicsSolveForward     (demoMode->hierarchyState_skel); //Step 4: Forward kinematics, concat local matrices to make object matrices
