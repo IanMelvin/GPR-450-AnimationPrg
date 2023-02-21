@@ -9,9 +9,7 @@
 #ifndef EC_MATHBRIDGE_H
 #define EC_MATHBRIDGE_H
 
-#include <math.h>
 #include <animal3D/a3/a3types_real.h>
-#include <animal3D-A3DM/a3math/a3interpolation.h>
 #include <animal3D-A3DM/a3math/a3vector.h>
 
 //Helper for loglerp

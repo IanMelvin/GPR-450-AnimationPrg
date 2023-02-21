@@ -99,36 +99,8 @@ a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController
 
 	a3_Keyframe* x1 = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe+1);
 
-	switch (x0->interpolationMode)
-	{
-	//Special cases for non-blending modes
-	case EC_INTERPOLATE_CONSTANT:
-		//*out = *x0->data;
-		memcpy(out, x0->data, keyframeValSize);
-		return 1;
-
-	case EC_INTERPOLATE_NEAREST:
-		//*out = clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data;
-		memcpy(out, clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data, keyframeValSize);
-		return 1;
-
-	//Normal blending modes
-	default:
-		assert(currentClip->keyframePool->interpolationFuncs->byMode[x0->interpolationMode]);
-		currentClip->keyframePool->interpolationFuncs->byMode[x0->interpolationMode](out, x0->data, x1->data, clipCtrl->keyframeParameter);
-		return 1;
-	}
-
-	/*
-	switch (x0->interpolationMode)
-	{
-	case EC_INTERPOLATE_CONSTANT: *out = x0->data;
-	case EC_INTERPOLATE_NEAREST : *out = clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data;
-	case EC_INTERPOLATE_LINEAR  : *out = a3lerp(x0->data, x1->data, clipCtrl->keyframeParameter);
-
-	default: assert(false); return 0;
-	}
-	*/
+	//Do normal interpolation
+	ec_interpolate(out, x0->data, x1->data, clipCtrl->keyframeParameter, currentClip->keyframePool->interpolationFuncs, x0->interpolationMode);
 }
 
 // time-ticking functions

@@ -1,5 +1,8 @@
 #include "ec_MathBridge.h"
 
+#include <math.h>
+#include <animal3D-A3DM/a3math/a3interpolation.h>
+
 //Helper for loglerp
 a3real3r a3real3PowS(a3real3p out, const a3real3p base, const a3real power)
 {

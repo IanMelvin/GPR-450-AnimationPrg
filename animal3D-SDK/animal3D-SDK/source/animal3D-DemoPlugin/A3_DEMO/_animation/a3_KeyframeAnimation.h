@@ -36,6 +36,7 @@
 #include "animal3D-A3DM/a3math/a3vector.h"
 #include "animal3D-A3DM/a3math/a3interpolation.h"
 
+#include "../ec_Interpolation.h"
 #include "ec_TerminusAction.h"
 
 //-----------------------------------------------------------------------------
@@ -48,8 +49,6 @@ typedef struct a3_Keyframe					a3_Keyframe;
 typedef struct a3_KeyframePool				a3_KeyframePool;
 typedef struct a3_Clip						a3_Clip;
 typedef struct a3_ClipPool					a3_ClipPool;
-typedef enum ec_InterpolationMode			ec_InterpolationMode;
-typedef union ec_InterpolationFuncFamily	ec_InterpolationFuncFamily;
 typedef void								a3_Keyframe_data_t;
 #endif	// __cplusplus
 
@@ -81,40 +80,6 @@ struct a3_Keyframe
 
 	// how to interpolate data
 	ec_InterpolationMode interpolationMode;
-};
-
-// how to blend between a3_Keyframe.data
-// when updating here, add to ec_InterpolationFuncFamily
-enum ec_InterpolationMode
-{
-	//Special values - non-blending
-	EC_INTERPOLATE_CONSTANT = -0b01,
-	EC_INTERPOLATE_NEAREST  = -0b11,
-
-	//Normal blending
-	EC_INTERPOLATE_LINEAR = 0,
-	EC_INTERPOLATE_CATMULL_ROM,
-	EC_INTERPOLATE_CUBIC_HERMITE,
-
-	//Special values
-	EC_INTERPOLATE_MODE_COUNT, //How many *blending* interpolation modes are there? (not counting constant or nearest)
-	EC_INTERPOLATE_DEFAULT = EC_INTERPOLATE_LINEAR //What is the default interpolation mode?
-};
-
-// description of how to interpolate data
-typedef a3_Keyframe_data_t* (*interpolationFunc)(a3_Keyframe_data_t* out, const a3_Keyframe_data_t* val0, const a3_Keyframe_data_t* val1, a3real param);
-union ec_InterpolationFuncFamily
-{
-	struct {
-		//interpolationFunc constant;
-		//interpolationFunc nearest;
-		interpolationFunc linear;
-		interpolationFunc catmullRom;
-		interpolationFunc cubicHermite;
-
-		size_t valSize; //For memcpy (equivalent of = for void ptr)
-	};
-	interpolationFunc byMode[EC_INTERPOLATE_MODE_COUNT]; //Index by ec_KeyframeInterpolationMode
 };
 
 // pool of keyframe descriptors
