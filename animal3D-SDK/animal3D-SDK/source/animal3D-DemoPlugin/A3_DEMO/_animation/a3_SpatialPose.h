@@ -153,6 +153,8 @@ a3i32 a3spatialPoseConcat(a3_SpatialPose* finalPose, const a3_SpatialPose* baseP
 // copy operation for single node pose
 a3i32 a3spatialPoseCopy(a3_SpatialPose* spatialPose_out, const a3_SpatialPose* spatialPose_in);
 
+// lerp between spatial poses
+a3_SpatialPose* a3spatialPoseLerp(a3_SpatialPose* out, const a3_SpatialPose* val0, const a3_SpatialPose* val1, a3real param);
 
 //-----------------------------------------------------------------------------
 
