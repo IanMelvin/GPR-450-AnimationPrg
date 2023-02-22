@@ -96,7 +96,11 @@ inline a3mat4 ec_eulerToMat4x4(const a3vec3 eulerAngles, const a3_SpatialPoseEul
 
 inline a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose)
 {
+#ifdef USE_EULER_ANGLES
 	spatialPose->orientation = a3vec3_zero;
+#else
+	spatialPose->orientation = a3quat_identity;
+#endif
 	spatialPose->scale = a3vec3_one;
 	spatialPose->translation = a3vec3_zero;
 
@@ -153,7 +157,11 @@ inline a3i32 a3spatialPoseReset(a3_SpatialPose* spatialPose)
 {
 	if (spatialPose)
 	{
+#ifdef USE_EULER_ANGLES
 		spatialPose->orientation = a3vec3_zero;
+#else
+		spatialPose->orientation = a3quat_identity;
+#endif
 		spatialPose->scale = a3vec3_one;
 		spatialPose->translation = a3vec3_zero;
 	}
@@ -199,7 +207,13 @@ inline a3i32 a3spatialPoseConcat(a3_SpatialPose* finalPose, const a3_SpatialPose
 	finalPose->scale.y = basePose->scale.y * deltaPose->scale.y;
 	finalPose->scale.z = basePose->scale.z * deltaPose->scale.z;
 
-	a3real3Sum(finalPose->orientation.v, basePose->orientation.v, deltaPose->orientation.v); //Then rotate
+	//Then rotate
+#ifdef USE_EULER_ANGLES
+	a3real3Sum(finalPose->orientation.v, basePose->orientation.v, deltaPose->orientation.v);
+#else
+	finalPose->orientation = basePose->orientation;
+	a3quatConcatL(finalPose->orientation.q, deltaPose->orientation.q);
+#endif
 	a3real3Sum(finalPose->translation.v, basePose->translation.v, deltaPose->translation.v); //Then translate
 
 	return 1;
@@ -221,8 +235,11 @@ inline a3i32 a3spatialPoseCopy(a3_SpatialPose* spatialPose_out, const a3_Spatial
 inline a3_SpatialPose* a3spatialPoseLerp(a3_SpatialPose* out, const a3_SpatialPose* val0, const a3_SpatialPose* val1, a3real param)
 {
 	a3real3Lerp(out->translation.v, val0->translation.v, val1->translation.v, param);
+#ifdef USE_EULER_ANGLES
 	a3real3Lerp(out->orientation.v, val0->orientation.v, val1->orientation.v, param);
-	//a3quatSlerp(out->orientation.v, val0->orientation.v, val1->orientation.v, param);
+#else
+	a3quatSlerp(out->orientation.q, val0->orientation.q, val1->orientation.q, param);
+#endif
 	a3vec3LogLerp(out->scale.v, val0->scale.v, val1->scale.v, param);
 	return out;
 }

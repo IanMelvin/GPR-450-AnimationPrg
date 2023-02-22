@@ -115,7 +115,11 @@ enum a3_SpatialPoseChannel
 struct a3_SpatialPose
 {
 	// orientation euler angles
+#ifdef USE_EULER_ANGLES
 	a3vec3 orientation;
+#else
+	a3quat orientation;
+#endif
 
 	// translation vector
 	a3vec3 translation;
