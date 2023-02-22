@@ -211,20 +211,22 @@ a3i32 ec_specialCaseChecker(a3_FileStream const* inStream)
 			numSkipped++;
 		}
 		ungetc(c, inStream->stream);
+		return 0;
 	}
 
 	if (c == '[')
 	{
 		a3ui32 numSkipped = 0;
 		char header[fileLineMaxLength];
+		fscanf(&inStream, "%s", header);
 		while (!feof(inStream->stream) && (c = fgetc(inStream->stream)) && c != '\n')
 		{
 			header[numSkipped] = c;
 			numSkipped++;
 		}
 		
-
 		ungetc(c, inStream->stream);
+		return 0;
 	}
 
 	return -1;
