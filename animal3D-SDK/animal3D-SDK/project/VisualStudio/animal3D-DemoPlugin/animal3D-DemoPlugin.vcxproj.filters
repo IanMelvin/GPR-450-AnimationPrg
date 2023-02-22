@@ -174,7 +174,7 @@
     <ClCompile Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\ec_MathBridge.c">
       <Filter>Source Files\common\A3_DEMO</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\ec_Interpolation.cpp">
+    <ClCompile Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\ec_Interpolation.c">
       <Filter>Source Files\common\A3_DEMO</Filter>
     </ClCompile>
   </ItemGroup>

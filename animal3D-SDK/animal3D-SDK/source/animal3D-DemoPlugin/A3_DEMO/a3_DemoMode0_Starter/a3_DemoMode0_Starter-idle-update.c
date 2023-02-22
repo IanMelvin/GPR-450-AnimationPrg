@@ -58,16 +58,17 @@ a3boolean runWhenISaySo = a3true;
 a3_TextureAtlas testAtlas;
 
 //RSC MOD
-ec_InterpolationFuncFamily floatInterpolateFuncs = { 0 };
-ec_InterpolationFuncFamily poseInterpolateFuncs = { 0 };
+ec_InterpolationFuncFamily floatInterpolateFuncs = {
+	sizeof(a3real),
+	a3realLerpWrapper,
+	0,
+	0
+};
 
 void InitilizeCode(a3_DemoState const* demoState)
 {
 	printf("test");
 
-	floatInterpolateFuncs.linear = a3realLerpWrapper;
-	floatInterpolateFuncs.valSize = sizeof(a3real);
-	
 	a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
 	a3keyframePoolCreate(keyframes, 12, &floatInterpolateFuncs);
 

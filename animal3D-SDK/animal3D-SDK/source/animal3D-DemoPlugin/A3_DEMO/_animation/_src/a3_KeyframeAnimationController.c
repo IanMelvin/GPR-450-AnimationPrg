@@ -101,6 +101,7 @@ a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController
 
 	//Do normal interpolation
 	ec_interpolate(out, x0->data, x1->data, clipCtrl->keyframeParameter, currentClip->keyframePool->interpolationFuncs, x0->interpolationMode);
+	return 1;
 }
 
 // time-ticking functions
