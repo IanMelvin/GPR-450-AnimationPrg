@@ -42,6 +42,22 @@
 
 //-----------------------------------------------------------------------------
 
+a3i32 a3keyframeChannelInit(a3_KeyframeChannel* channel_out, const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex)
+{
+	assert(keyframePool);
+	assert(0 < firstKeyframeIndex);
+	assert(firstKeyframeIndex < finalKeyframeIndex);
+	assert(finalKeyframeIndex < keyframePool->count);
+
+	channel_out->keyframePool = (a3_KeyframePool*)keyframePool;
+	channel_out->firstKeyframe = firstKeyframeIndex;
+	channel_out->lastKeyframe = finalKeyframeIndex;
+
+	channel_out->keyframeCount = finalKeyframeIndex - firstKeyframeIndex + 1;
+
+	return 1;
+}
+
 // allocate keyframe pool initializing all to default values.
 a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count, const ec_InterpolationFuncFamily* interpolationFuncs)
 {
@@ -81,16 +97,14 @@ a3i32 a3keyframeInit(a3_Keyframe* keyframe_out, const a3real duration, const a3_
 // allocate clip pool
 a3i32 a3clipPoolCreate(a3_ClipPool* clipPool_out, const a3ui32 count)
 {
-	clipPool_out->clip = (a3_Clip*)malloc(count * sizeof(a3_Clip));
+	clipPool_out->clip = (a3_Clip*)calloc(count, sizeof(a3_Clip));
 	clipPool_out->count = count;
 
 	//Define Default values
 	for (a3ui32 i = 0; i < count; i++)
 	{
-		a3clipInit(&clipPool_out->clip[i], "", NULL, 0, 0);
-		clipPool_out->clip[i].index = i;
+		a3clipInit(&clipPool_out->clip[i], "", 0);
 	}
-
 
 	return 1;
 }
@@ -103,12 +117,13 @@ a3i32 a3clipPoolRelease(a3_ClipPool* clipPool)
 }
 
 // initialize clip with first and last indices
-a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_nameLenMax], const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex)
+a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_nameLenMax], const a3ui32 channelCount)
 {
 	strcpy_s(clip_out->name, a3keyframeAnimation_nameLenMax, clipName);
-	clip_out->keyframePool = (a3_KeyframePool*)keyframePool;
-	clip_out->firstKeyframe = firstKeyframeIndex;
-	clip_out->lastKeyframe = finalKeyframeIndex;
+
+	clip_out->channelCount = channelCount;
+	if (!clip_out->channels) clip_out->channels = calloc(channelCount, sizeof(a3_KeyframeChannel));
+	else                     clip_out->channels = realloc(clip_out->channels, channelCount * sizeof(a3_KeyframeChannel));
 
 	// Default transition: loop self
 	clip_out->forwardTransition.flags = EC_TERMINUSACTION_FORWARD;
@@ -134,10 +149,10 @@ a3i32 a3clipGetIndexInPool(const a3_ClipPool* clipPool, const a3byte clipName[a3
 }
 
 // get a keyframe by id
-a3_Keyframe* ec_clip_getKeyframe(a3_Clip const* clip, a3ui32 id)
+a3_Keyframe* ec_channel_getKeyframe(a3_KeyframeChannel const* channel, a3ui32 id)
 {
-	assert(0 <= id && id < clip->keyframeCount);
-	return &(clip->keyframePool->keyframe[clip->firstKeyframe + id]);
+	assert(0 <= id && id < channel->keyframeCount);
+	return &(channel->keyframePool->keyframe[channel->firstKeyframe + id]);
 }
 
 // retrieve the indicated terminus action

@@ -56,12 +56,6 @@ typedef void								a3_Keyframe_data_t;
 
 //-----------------------------------------------------------------------------
 
-// constant values
-enum
-{
-	a3keyframeAnimation_nameLenMax = 32,
-};
-
 // description of a channel containing keyframes
 // metaphor: timeline, but for one property only
 struct a3_KeyframeChannel
@@ -80,6 +74,22 @@ struct a3_KeyframeChannel
 
 	// data storage
 	a3_KeyframePool* keyframePool;
+};
+
+a3i32 a3keyframeChannelInit(a3_KeyframeChannel* channel_out, const a3ui32 keyframeCount, const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex);
+
+// calculate keyframes' durations by distributing clip's duration
+a3i32 a3keyframesDistributeDuration(a3_KeyframeChannel* keyframes, const a3real newDuration);
+
+// get a keyframe by id
+a3_Keyframe* ec_channel_getKeyframe(a3_KeyframeChannel const* channel, a3ui32 id);
+
+//-----------------------------------------------------------------------------
+
+// constant values
+enum
+{
+	a3keyframeAnimation_nameLenMax = 32,
 };
 
 // description of single keyframe
@@ -115,7 +125,6 @@ struct a3_KeyframePool
 	// how do we interpolate between keyframe values?
 	const ec_InterpolationFuncFamily* interpolationFuncs;
 };
-
 
 // allocate keyframe pool
 a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count, const ec_InterpolationFuncFamily* interpolationFuncs);
@@ -169,19 +178,13 @@ a3i32 a3clipPoolCreate(a3_ClipPool* clipPool_out, const a3ui32 count);
 a3i32 a3clipPoolRelease(a3_ClipPool* clipPool);
 
 // initialize clip with first and last indices
-a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_nameLenMax], const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex);
+a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_nameLenMax], const a3ui32 channelCount);
 
 // get clip index from pool
 a3i32 a3clipGetIndexInPool(const a3_ClipPool* clipPool, const a3byte clipName[a3keyframeAnimation_nameLenMax]);
 
 // calculate clip duration as sum of keyframes' durations
 a3i32 a3clipCalculateDuration(a3_Clip* clip);
-
-// calculate keyframes' durations by distributing clip's duration
-a3i32 a3keyframesDistributeDuration(a3_KeyframeChannel* keyframes, const a3real newDuration);
-
-// get a keyframe by id
-a3_Keyframe* ec_clip_getKeyframe(a3_Clip const* clip, a3ui32 id);
 
 typedef a3i8 ec_sign;
 
