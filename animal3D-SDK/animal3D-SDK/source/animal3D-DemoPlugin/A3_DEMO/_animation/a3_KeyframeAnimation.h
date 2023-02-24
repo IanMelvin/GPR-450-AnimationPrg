@@ -46,11 +46,13 @@ extern "C"
 {
 #else	// !__cplusplus
 typedef struct a3_KeyframeChannel			a3_KeyframeChannel;
+typedef struct a3_ChannelPlayhead			a3_ChannelPlayhead;
 typedef struct a3_Keyframe					a3_Keyframe;
 typedef struct a3_KeyframePool				a3_KeyframePool;
 typedef struct a3_Clip						a3_Clip;
 typedef struct a3_ClipPool					a3_ClipPool;
 typedef void								a3_Keyframe_data_t;
+typedef a3ui32								channel_id_t;
 #endif	// __cplusplus
 
 
@@ -60,8 +62,8 @@ typedef void								a3_Keyframe_data_t;
 // metaphor: timeline, but for one property only
 struct a3_KeyframeChannel
 {
-	// index in clip pool
-	a3ui32 index;
+	// identifiers
+	const char* name;
 
 	// number of keyframes referenced by clip (including first and last)
 	a3ui32 keyframeCount;
@@ -76,7 +78,19 @@ struct a3_KeyframeChannel
 	a3_KeyframePool* keyframePool;
 };
 
-a3i32 a3keyframeChannelInit(a3_KeyframeChannel* channel_out, const a3ui32 keyframeCount, const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex);
+struct a3_ChannelPlayhead
+{
+	// index of current keyframe in referenced keyframe pool
+	a3ui32 keyframe;
+
+	// current time relative to current keyframe; should always be between 0 and current keyframe's duration
+	a3f32 keyframeTime;
+
+	// normalized keyframe time; should always be between 0 and 1
+	a3f32 keyframeParameter;
+};
+
+a3i32 a3keyframeChannelInit(a3_KeyframeChannel* channel_out, const char* name, const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex);
 
 // calculate keyframes' durations by distributing clip's duration
 a3i32 a3keyframesDistributeDuration(a3_KeyframeChannel* keyframes, const a3real newDuration);

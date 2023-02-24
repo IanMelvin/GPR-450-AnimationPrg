@@ -104,7 +104,7 @@ void a3demo_render_controls(a3_DemoState const* demoState,
 	if (demoState->testAnimator.clipPool)
 	{
 		a3real evaluatedValue;
-		ec_clipController_evaluateValue(&evaluatedValue, &demoState->testAnimator);
+		ec_clipController_evaluateValue(&evaluatedValue, &demoState->testAnimator, 0);
 		sprintf_s(buf, 256, "Clip[%i] '%s': %f at time=%f", demoState->testAnimator.clipIndex, ec_clipController_getClip(&demoState->testAnimator)->name, evaluatedValue, demoState->testAnimator.clipTime);
 	}
 	else strcpy_s(buf, 256, "[Error: Test animator was not initialized]");

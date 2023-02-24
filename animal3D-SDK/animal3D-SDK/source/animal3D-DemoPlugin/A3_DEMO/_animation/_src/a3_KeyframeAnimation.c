@@ -42,12 +42,14 @@
 
 //-----------------------------------------------------------------------------
 
-a3i32 a3keyframeChannelInit(a3_KeyframeChannel* channel_out, const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex)
+a3i32 a3keyframeChannelInit(a3_KeyframeChannel* channel_out, const char* name, const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex)
 {
 	assert(keyframePool);
 	assert(0 < firstKeyframeIndex);
 	assert(firstKeyframeIndex < finalKeyframeIndex);
 	assert(finalKeyframeIndex < keyframePool->count);
+
+	channel_out->name = name;
 
 	channel_out->keyframePool = (a3_KeyframePool*)keyframePool;
 	channel_out->firstKeyframe = firstKeyframeIndex;
