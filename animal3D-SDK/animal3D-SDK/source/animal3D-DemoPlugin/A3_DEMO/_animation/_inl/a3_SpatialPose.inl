@@ -226,12 +226,13 @@ inline a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatial
 		if (channel & a3poseChannel_scale_y) matScale.m11 = spatialPose_in->scale.y;
 		if (channel & a3poseChannel_scale_z) matScale.m22 = spatialPose_in->scale.z;
 		
+		a3mat4 matRotate = { 0 };
 #ifdef USE_EULER_ANGLES
 		a3vec3 eulerAngles = { 0 };
 		if (channel & a3poseChannel_orient_x) eulerAngles.x = spatialPose_in->orientation.x;
 		if (channel & a3poseChannel_orient_y) eulerAngles.y = spatialPose_in->orientation.y;
 		if (channel & a3poseChannel_orient_z) eulerAngles.z = spatialPose_in->orientation.z;
-		a3mat4 matRotate = ec_eulerToMat4x4(eulerAngles, order);
+		ec_eulerToMat4x4(matRotate.m, eulerAngles, order);
 #else
 		/*
 		a3vec3 axis = { 0 };
@@ -248,7 +249,6 @@ inline a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatial
 		a3mat4 matRotate = { 0 };
 		a3quatConvertToMat4(matRotate.m, constrainedRotation.q);
 		// */
-		a3mat4 matRotate = { 0 };
 		a3quatConvertToMat4(matRotate.m, spatialPose_in->orientation.q);
 #endif
 
