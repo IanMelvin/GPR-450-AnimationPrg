@@ -34,9 +34,6 @@
 
 #include "../_a3_demo_utilities/a3_DemoRenderUtils.h"
 
-#include "A3_DEMO/_animation/a3_Kinematics.h"
-
-#include <math.h>
 
 // OpenGL
 #ifdef _WIN32
@@ -144,8 +141,7 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 	const a3_Framebuffer* currentReadFBO, * currentDisplayFBO;
 
 	// indices
-	//a3ui32 i;
-	a3ui32 j;
+	a3ui32 i, j;
 
 	// RGB
 	const a3vec4 rgba4[] = {
@@ -195,13 +191,13 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 	// temp drawable pointers
 	const a3_VertexDrawable* drawable[] = {
 		demoState->draw_unit_box,		// skybox
-		0,
+		demoState->draw_character_skin,	// skinned model
 	};
 
 	// temp texture pointers
 	const a3_Texture* texture_dm[] = {
 		demoState->tex_checker,
-		0,
+		demoState->tex_checker,
 	};
 
 	// forward pipeline shader programs
@@ -269,7 +265,7 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 	// final model matrix and full matrix stack
 	a3mat4 viewProjectionMat = activeCamera->viewProjectionMat;
 	a3mat4 modelViewProjectionMat = viewProjectionMat;
-	a3mat4 modelMat = a3mat4_identity;// , modelViewMat = a3mat4_identity;
+	a3mat4 modelMat = a3mat4_identity, modelViewMat = a3mat4_identity;
 	a3mat4 projectionBiasMat = activeCamera->projectionMat, projectionBiasMat_inv = activeCamera->projectionMatInv;
 
 	// init
@@ -345,8 +341,31 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 		case animation_renderTexture:
 		case animation_renderLambert:
 		case animation_renderPhong:
-			// draw skeleton
 			break;
+		}
+
+		// draw skinned object
+		currentDemoProgram = demoState->prog_drawPhong_skin;
+		a3shaderProgramActivate(currentDemoProgram->program);
+		a3shaderUniformBufferActivate(demoState->ubo_transformBlend, 1);
+		a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP, 1, activeCamera->projectionMat.mm);
+		a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, a3mat4_identity.mm);
+		currentSceneObject = demoMode->obj_skeleton;
+		j = (a3ui32)(currentSceneObject - demoMode->object_scene);
+		{
+			// send data and draw
+			i = (j * 2 + 1) % hueCount;
+			currentDrawable = demoState->draw_character_skin;
+			a3textureActivate(texture_dm[j], a3tex_unit00);
+			a3textureActivate(texture_dm[j], a3tex_unit01);
+			a3real4x4Product(modelViewMat.m, activeCameraObject->modelMatInv.m, currentSceneObject->modelMat.m);
+			a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMV, 1, modelViewMat.mm);
+			a3demo_quickInvertTranspose_internal(modelViewMat.m);
+			modelViewMat.v3 = a3vec4_zero;
+			a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMV_nrm, 1, modelViewMat.mm);
+			a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, rgba4[i].v);
+			a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uIndex, 1, &j);
+			a3vertexDrawableActivateAndRender(currentDrawable);
 		}
 
 	}	break;
@@ -498,8 +517,7 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				const a3i32 flag[1] = { demoState->displayTangentBases * 3 + demoState->displayWireframe * 4 };
 				const a3f32 size[1] = { 0.0625f };
 
-				//currentDemoProgram = demoState->prog_drawTangentBasis;
-				currentDemoProgram = demoState->prog_drawColorUnif;
+				currentDemoProgram = demoState->prog_drawTangentBasis;
 				a3shaderProgramActivate(currentDemoProgram->program);
 
 				// projection matrix
@@ -513,34 +531,29 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				// overlay flag
 				a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uFlag, 1, flag);
 
-				// draw skeleton joint bases
-#pragma region TEMP
-				a3mat4 tmpLMVP; //full stack
-				a3mat4 tmpL; //bone matrix for single joint, result of forward kinematics
-				a3mat4 tmpS = a3mat4_identity; //shared scale
-				a3real4x4SetScale(tmpS.m, 0.05f);
-				
-				//TEST ANIM
-				a3vec3* joint = &demoMode->hierarchyState_skel->sampledDeltaPose[0].orientation;
-				joint->x = (a3real)fmod(joint->x+1.5f, 360);
-				joint->y = (a3real)fmod(joint->y+0.5f, 360);
-				joint->z = (a3real)fmod(joint->z+0.2f, 360);
-
-				//a3kinematicsInterpolateDeltas(demoMode->hierarchyState_skel, demoMode->skeletonAnimator); //Step 1: Animate and interpolate between local deltas
-				a3kinematicsPoseConcat       (demoMode->hierarchyState_skel); //Step 2: Concat local deltas onto base poses
-				a3kinematicsPosesToMatrices  (demoMode->hierarchyState_skel); //Step 3: Convert pose channels to matrices (in node-local space)
-				a3kinematicsSolveForward     (demoMode->hierarchyState_skel); //Step 4: Forward kinematics, concat local matrices to make object matrices
-
-				a3vertexDrawableActivate(demoState->draw_node);
-				for (a3ui32 i = 0; i < demoMode->hierarchyState_skel->hierarchy->numNodes; ++i)
+				// skinning bases
+				currentDemoProgram = demoState->prog_drawTangentBasis_skin;
+				a3shaderProgramActivate(currentDemoProgram->program);
+				a3shaderUniformBufferActivate(demoState->ubo_transformBlend, 1);
+				a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uP, 1, activeCamera->projectionMat.mm);
+				a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor0, hueCount, rgba4->v);
+				a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, a3vec4_one.v);
+				a3shaderUniformSendFloat(a3unif_single, currentDemoProgram->uSize, 1, size);
+				a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uFlag, 1, flag);
+				currentSceneObject = demoMode->obj_skeleton;
+				j = (a3ui32)(currentSceneObject - demoMode->object_scene);
 				{
-					a3_HierarchyPose* node = &demoMode->hierarchyState_skel->objectPose[i];
-					a3real4x4Product(tmpL.m, node->transform.m, tmpS.m);
-					a3real4x4Product(tmpLMVP.m, viewProjectionMat.m, tmpL.m);
-					a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, tmpLMVP.mm);
-					a3vertexDrawableRenderActive();
+					i = (j * 2 + 13) % hueCount;
+					currentDrawable = demoState->draw_character_skin;
+					a3real4x4Product(modelViewMat.m, activeCameraObject->modelMatInv.m, currentSceneObject->modelMat.m);
+					a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMV, 1, modelViewMat.mm);
+					a3demo_quickInvertTranspose_internal(modelViewMat.m);
+					modelViewMat.v3 = a3vec4_zero;
+					a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMV_nrm, 1, modelViewMat.mm);
+					a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uAtlas, 1, a3mat4_identity.mm);
+					a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uIndex, 1, &i);
+					a3vertexDrawableActivateAndRender(currentDrawable);
 				}
-#pragma endregion
 			}
 
 			// display color target with scene overlays
@@ -570,14 +583,14 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 			currentHierarchy = currentHierarchyState->hierarchy;
 
 			// draw skeletal joints
-			//a3shaderUniformBufferActivate(demoState->ubo_transformLMVP_joint, 0);
-			a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, orange);
+			a3shaderUniformBufferActivate(demoState->ubo_transformMVP, 0);
+			a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, rose);
 			currentDrawable = demoState->draw_node;
 			a3vertexDrawableActivateAndRenderInstanced(currentDrawable, currentHierarchy->numNodes);
 
 			// draw bones
 			a3shaderProgramActivate(currentDemoProgram->program);
-			//a3shaderUniformBufferActivate(demoState->ubo_transformLMVP_bone, 0);
+			a3shaderUniformBufferActivate(demoState->ubo_transformMVPB, 0);
 			a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, sky);
 			currentDrawable = demoState->draw_link;
 			a3vertexDrawableActivateAndRenderInstanced(currentDrawable, currentHierarchy->numNodes);
@@ -587,7 +600,7 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 			{
 				currentDemoProgram = demoState->prog_drawColorAttrib_instanced;
 				a3shaderProgramActivate(currentDemoProgram->program);
-				//a3shaderUniformBufferActivate(demoState->ubo_transformLMVP_joint, 0);
+				a3shaderUniformBufferActivate(demoState->ubo_transformMVP, 0);
 				currentDrawable = demoState->draw_axes;
 				a3vertexDrawableActivateAndRenderInstanced(currentDrawable, currentHierarchy->numNodes);
 			}
