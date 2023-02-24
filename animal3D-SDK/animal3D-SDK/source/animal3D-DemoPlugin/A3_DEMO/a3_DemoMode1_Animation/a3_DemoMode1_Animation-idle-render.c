@@ -529,8 +529,8 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 #else
 				a3quat* joint = &demoMode->hierarchyState_skel->sampledDeltaPose[0].orientation;
 				a3quat frameDelta = {
-					0,
 					0.0348994967f,
+					0,
 					0,
 					0.999390827f,
 				};

@@ -33,9 +33,9 @@
 
 //-----------------------------------------------------------------------------
 
-inline a3mat4 ec_eulerToMat4x4(const a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order)
+inline a3real4x4r ec_eulerToMat4x4(a3real4x4p mat_out, const a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order)
 {
-	a3mat4 out = a3mat4_identity;
+	a3real4x4SetIdentity(mat_out);
 
 	// Setup axis matrices
 
@@ -71,28 +71,66 @@ inline a3mat4 ec_eulerToMat4x4(const a3vec3 eulerAngles, const a3_SpatialPoseEul
 
 	switch (order>>a3poseEulerOrder_order1 & 0xf)
 	{
-	case a3poseEulerOrder_idx: a3real4x4ConcatL(out.m, matRotX.m); break;
-	case a3poseEulerOrder_idy: a3real4x4ConcatL(out.m, matRotY.m); break;
-	case a3poseEulerOrder_idz: a3real4x4ConcatL(out.m, matRotZ.m); break;
+	case a3poseEulerOrder_idx: a3real4x4ConcatL(mat_out, matRotX.m); break;
+	case a3poseEulerOrder_idy: a3real4x4ConcatL(mat_out, matRotY.m); break;
+	case a3poseEulerOrder_idz: a3real4x4ConcatL(mat_out, matRotZ.m); break;
 	}
 
 	switch (order>>a3poseEulerOrder_order2 & 0xf)
 	{
-	case a3poseEulerOrder_idx: a3real4x4ConcatL(out.m, matRotX.m); break;
-	case a3poseEulerOrder_idy: a3real4x4ConcatL(out.m, matRotY.m); break;
-	case a3poseEulerOrder_idz: a3real4x4ConcatL(out.m, matRotZ.m); break;
+	case a3poseEulerOrder_idx: a3real4x4ConcatL(mat_out, matRotX.m); break;
+	case a3poseEulerOrder_idy: a3real4x4ConcatL(mat_out, matRotY.m); break;
+	case a3poseEulerOrder_idz: a3real4x4ConcatL(mat_out, matRotZ.m); break;
 	}
 
 	switch (order>>a3poseEulerOrder_order3 & 0xf)
 	{
-	case a3poseEulerOrder_idx: a3real4x4ConcatL(out.m, matRotX.m); break;
-	case a3poseEulerOrder_idy: a3real4x4ConcatL(out.m, matRotY.m); break;
-	case a3poseEulerOrder_idz: a3real4x4ConcatL(out.m, matRotZ.m); break;
+	case a3poseEulerOrder_idx: a3real4x4ConcatL(mat_out, matRotX.m); break;
+	case a3poseEulerOrder_idy: a3real4x4ConcatL(mat_out, matRotY.m); break;
+	case a3poseEulerOrder_idz: a3real4x4ConcatL(mat_out, matRotZ.m); break;
 	}
 
-	return out;
+	return mat_out;
 }
 
+inline a3real4r ec_eulerToQuat(a3real4p quat_out, const a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order)
+{
+	a3quatSetIdentity(quat_out);
+
+	// Setup axis quaternions
+	
+	a3quat rx_quat = { 0 };
+	a3quat ry_quat = { 0 };
+	a3quat rz_quat = { 0 };
+	a3quatSetEulerX(rx_quat.q, eulerAngles.x);
+	a3quatSetEulerY(ry_quat.q, eulerAngles.y);
+	a3quatSetEulerZ(rz_quat.q, eulerAngles.z);
+
+	// Apply in order
+	
+	switch (order>>a3poseEulerOrder_order1 & 0xf)
+	{
+	case a3poseEulerOrder_idx: a3quatConcatL(quat_out, rx_quat.q); break;
+	case a3poseEulerOrder_idy: a3quatConcatL(quat_out, ry_quat.q); break;
+	case a3poseEulerOrder_idz: a3quatConcatL(quat_out, rz_quat.q); break;
+	}
+
+	switch (order>>a3poseEulerOrder_order2 & 0xf)
+	{
+	case a3poseEulerOrder_idx: a3quatConcatL(quat_out, rx_quat.q); break;
+	case a3poseEulerOrder_idy: a3quatConcatL(quat_out, ry_quat.q); break;
+	case a3poseEulerOrder_idz: a3quatConcatL(quat_out, rz_quat.q); break;
+	}
+
+	switch (order>>a3poseEulerOrder_order3 & 0xf)
+	{
+	case a3poseEulerOrder_idx: a3quatConcatL(quat_out, rx_quat.q); break;
+	case a3poseEulerOrder_idy: a3quatConcatL(quat_out, ry_quat.q); break;
+	case a3poseEulerOrder_idz: a3quatConcatL(quat_out, rz_quat.q); break;
+	}
+
+	return quat_out;
+}
 
 inline a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose)
 {
@@ -108,13 +146,21 @@ inline a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose)
 }
 
 // set rotation values for a single node pose
-inline a3i32 a3spatialPoseSetRotation(a3_SpatialPose* spatialPose, const a3f32 rx_degrees, const a3f32 ry_degrees, const a3f32 rz_degrees)
+inline a3i32 a3spatialPoseSetRotation(a3_SpatialPose* spatialPose, const a3f32 rx_degrees, const a3f32 ry_degrees, const a3f32 rz_degrees, const a3_SpatialPoseEulerOrder eulerOrder)
 {
 	if (spatialPose)
 	{
+#ifdef USE_EULER_ANGLES
 		spatialPose->orientation.x = rx_degrees;
 		spatialPose->orientation.y = ry_degrees;
 		spatialPose->orientation.z = rz_degrees;
+#else
+		a3vec3 eulerAngle = { rx_degrees, ry_degrees, rz_degrees };
+		ec_eulerToQuat(spatialPose->orientation.q, eulerAngle, eulerOrder);
+		
+		//DO NOT USE
+		//a3quatSetEulerXYZ(spatialPose->orientation.q, rx_degrees, ry_degrees, rz_degrees);
+#endif
 	}
 	return -1;
 }
@@ -180,12 +226,31 @@ inline a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatial
 		if (channel & a3poseChannel_scale_y) matScale.m11 = spatialPose_in->scale.y;
 		if (channel & a3poseChannel_scale_z) matScale.m22 = spatialPose_in->scale.z;
 		
+#ifdef USE_EULER_ANGLES
 		a3vec3 eulerAngles = { 0 };
 		if (channel & a3poseChannel_orient_x) eulerAngles.x = spatialPose_in->orientation.x;
 		if (channel & a3poseChannel_orient_y) eulerAngles.y = spatialPose_in->orientation.y;
 		if (channel & a3poseChannel_orient_z) eulerAngles.z = spatialPose_in->orientation.z;
 		a3mat4 matRotate = ec_eulerToMat4x4(eulerAngles, order);
+#else
+		/*
+		a3vec3 axis = { 0 };
+		a3real angle = 0;
+		a3real scale = 0;
+		a3quatGetAxisAngleScale(spatialPose_in->orientation.q, axis.v, &angle, &scale); //TODO @rsc should this have scale?
+		if (!(channel & a3poseChannel_orient_x)) axis.x = 0;
+		if (!(channel & a3poseChannel_orient_y)) axis.y = 0;
+		if (!(channel & a3poseChannel_orient_z)) axis.z = 0;
 		
+		a3quat constrainedRotation = { 0 };
+		a3quatSetAxisAngleScale(constrainedRotation.q, axis.v, angle, scale);
+
+		a3mat4 matRotate = { 0 };
+		a3quatConvertToMat4(matRotate.m, constrainedRotation.q);
+		// */
+		a3mat4 matRotate = { 0 };
+		a3quatConvertToMat4(matRotate.m, spatialPose_in->orientation.q);
+#endif
 
 		// Concat
 
