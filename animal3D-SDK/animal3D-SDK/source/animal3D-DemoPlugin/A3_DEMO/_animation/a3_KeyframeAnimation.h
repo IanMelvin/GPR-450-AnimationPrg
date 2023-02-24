@@ -45,6 +45,7 @@
 extern "C"
 {
 #else	// !__cplusplus
+typedef struct a3_KeyframeChannel			a3_KeyframeChannel;
 typedef struct a3_Keyframe					a3_Keyframe;
 typedef struct a3_KeyframePool				a3_KeyframePool;
 typedef struct a3_Clip						a3_Clip;
@@ -59,6 +60,26 @@ typedef void								a3_Keyframe_data_t;
 enum
 {
 	a3keyframeAnimation_nameLenMax = 32,
+};
+
+// description of a channel containing keyframes
+// metaphor: timeline, but for one property only
+struct a3_KeyframeChannel
+{
+	// index in clip pool
+	a3ui32 index;
+
+	// number of keyframes referenced by clip (including first and last)
+	a3ui32 keyframeCount;
+
+	// index of first keyframe in pool referenced
+	a3ui32 firstKeyframe;
+
+	// index of final keyframe in pool referenced
+	a3ui32 lastKeyframe;
+
+	// data storage
+	a3_KeyframePool* keyframePool;
 };
 
 // description of single keyframe
@@ -116,29 +137,18 @@ struct a3_Clip
 	// clip name
 	a3byte name[a3keyframeAnimation_nameLenMax];
 
-	// index in clip pool
-	a3ui32 index;
-
 	// duration of clip; can be calculated as the sum of all of the referenced keyframes or set first and distributed uniformly across keyframes; cannot be zero
 	a3f32 duration;
 
 	// reciprocal of duration
 	a3f32 durationInv;
 
-	// number of keyframes referenced by clip (including first and last)
-	a3ui32 keyframeCount;
-
-	// index of first keyframe in pool referenced by clip
-	a3ui32 firstKeyframe;
-
-	// index of final keyframe in pool referenced by clip
-	a3ui32 lastKeyframe;
+	// channels
+	a3ui32 channelCount;
+	a3_KeyframeChannel* channels;
 
 	ec_terminusAction forwardTransition;
 	ec_terminusAction reverseTransition;
-
-	// array of keyframePools
-	a3_KeyframePool* keyframePool;
 };
 
 // group of clips
@@ -168,7 +178,7 @@ a3i32 a3clipGetIndexInPool(const a3_ClipPool* clipPool, const a3byte clipName[a3
 a3i32 a3clipCalculateDuration(a3_Clip* clip);
 
 // calculate keyframes' durations by distributing clip's duration
-a3i32 a3clipDistributeDuration(a3_Clip* clip, const a3real newClipDuration);
+a3i32 a3keyframesDistributeDuration(a3_KeyframeChannel* keyframes, const a3real newDuration);
 
 // get a keyframe by id
 a3_Keyframe* ec_clip_getKeyframe(a3_Clip const* clip, a3ui32 id);
