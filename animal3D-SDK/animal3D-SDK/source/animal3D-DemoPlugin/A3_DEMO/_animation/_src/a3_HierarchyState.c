@@ -164,20 +164,20 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 	if (poseGroup_out && !poseGroup_out->poseCount && hierarchy_out && !hierarchy_out->numNodes && resourceFilePath && *resourceFilePath)
 	{
 		//Open File
-		a3_FileStream inStream = { 0 };
+		a3_FileStream inStream = {0};
 		a3ret isValid = a3fileStreamOpenRead(&inStream, resourceFilePath);
 		assert(isValid == a3true);
-
-		char buffer[fileLineMaxLength];
-		memset(buffer, 0, fileLineMaxLength);
+		
 		a3ui16 readIndex = 0;
+		
+		while (!feof(inStream.stream))
+		{
+			isValid = ec_specialCaseChecker(&inStream);
+			if (isValid == 1)
+			{
 
-		isValid = a3fileStreamReadObject(&inStream, buffer, (a3_FileStreamReadFunc)ec_parceFile);
-		assert(isValid == a3true);
-
-
-		isValid = ec_specialCaseChecker(&inStream);
-		isValid = ec_parceFile(&inStream);
+			}
+		}
 		
 		a3fileStreamClose(&inStream);
 	}
@@ -197,9 +197,15 @@ a3i32 a3hierarchyPoseGroupLoadBVH(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 a3i32 ec_specialCaseChecker(a3_FileStream const* inStream)
 {
 	char c = fgetc(inStream->stream);
-	if (c != '#' || c != '[')
+	if (c != '#' && c != '[')
 	{
-		ungetc(c, inStream->stream);
+		//ungetc(c, inStream->stream);
+		//printf("NormalLine\n");
+		a3ui32 numSkipped = 0;
+		while (!feof(inStream->stream) && (c = fgetc(inStream->stream)) && c != '\n')
+		{
+			numSkipped++;
+		}
 		return 0;
 	}
 
@@ -210,7 +216,8 @@ a3i32 ec_specialCaseChecker(a3_FileStream const* inStream)
 		{
 			numSkipped++;
 		}
-		ungetc(c, inStream->stream);
+		//ungetc(c, inStream->stream);
+		printf("Comment\n");
 		return 0;
 	}
 
@@ -218,21 +225,24 @@ a3i32 ec_specialCaseChecker(a3_FileStream const* inStream)
 	{
 		a3ui32 numSkipped = 0;
 		char header[fileLineMaxLength];
-		fscanf(&inStream, "%s", header);
+		ungetc(c, inStream->stream);
+		fscanf(inStream->stream, "%s", header);
+		printf("Header: ");
+		printf(header);
+		printf("\n");
 		while (!feof(inStream->stream) && (c = fgetc(inStream->stream)) && c != '\n')
 		{
 			header[numSkipped] = c;
 			numSkipped++;
 		}
 		
-		ungetc(c, inStream->stream);
-		return 0;
+		return 1;
 	}
-
+	//printf("Nothing\n");
 	return -1;
 }
 
-a3i32 ec_parceFile(a3_FileStream const* inStream)
+a3i32 ec_parceFile(char* bufferOut[fileLineMaxLength], const a3_FileStream* inStream)
 {
 
 	return -1;

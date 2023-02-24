@@ -44,7 +44,7 @@ typedef struct a3_HierarchyPoseGroup	a3_HierarchyPoseGroup;
 typedef struct a3_HierarchyState		a3_HierarchyState;
 #endif	// __cplusplus
 	
-
+#define fileLineMaxLength ((size_t)256)
 //-----------------------------------------------------------------------------
 
 // single pose for a collection of nodes
@@ -165,7 +165,7 @@ a3i32 a3hierarchyPoseGroupLoadBVH(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 //
 
 // parce through line of file
-a3i32 ec_parceFile(a3_FileStream const* inStream);
+a3i32 ec_parceFile(char* bufferOut[fileLineMaxLength], const a3_FileStream* inStream);
 
 // check next line for comments or headers
 a3i32 ec_specialCaseChecker();
