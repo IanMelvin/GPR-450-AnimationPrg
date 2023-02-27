@@ -333,9 +333,12 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	hierarchyState->hierarchy = 0;
 	a3hierarchyStateCreate(hierarchyState, hierarchy);
 
-	//RSC MOD
+	// RSC MOD: TEMP TEST
 	hierarchyState->bindPose = hierarchyPoseGroup[0]->spatialPosePool;
 	hierarchyState->sampledDeltaPose = hierarchyPoseGroup[1]->spatialPosePool;
+
+	// TODO Setup animator and disable above test
+	//a3clipControllerInit(&demoMode->skeletonAnimator, "Skeleton animator", ???, ???);
 }
 
 

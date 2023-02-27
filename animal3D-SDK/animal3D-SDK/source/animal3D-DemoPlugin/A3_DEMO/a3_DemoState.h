@@ -327,9 +327,6 @@ struct a3_DemoState
 	// managed objects, no touchie
 	a3_VertexDrawable dummyDrawable[1];
 
-	//TEMP TESTING
-	a3_ClipController testAnimator;
-
 
 	//-------------------------------------------------------------------------
 	// the end

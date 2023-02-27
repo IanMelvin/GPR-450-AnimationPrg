@@ -35,6 +35,7 @@
 #include "_a3_demo_utilities/a3_DemoSceneObject.h"
 
 #include "_animation/a3_HierarchyStateBlend.h"
+#include "_animation/a3_KeyframeAnimationController.h"
 
 
 //-----------------------------------------------------------------------------
@@ -134,6 +135,7 @@ typedef enum a3_DemoMode1_Animation_TargetName				a3_DemoMode1_Animation_TargetN
 		a3_Hierarchy hierarchy_skel[1];
 		a3_HierarchyState hierarchyState_skel[1];
 		a3_HierarchyPoseGroup hierarchyPoseGroup_skel[1];
+		a3_ClipController skeletonAnimator;
 
 		// objects
 		union {
