@@ -34,6 +34,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 //See https://stackoverflow.com/a/4609795
 #define sign(val) ( (0 < val) - (val < 0) )
@@ -50,9 +51,8 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 	clipCtrl_out->clipIndex = clipIndex_pool;
 	clipCtrl_out->clipTime = 0;
 	clipCtrl_out->clipParameter = 0;
-	clipCtrl_out->keyframe = 0;
-	clipCtrl_out->keyframeTime = 0;
-	clipCtrl_out->keyframeParameter = 0;
+	clipCtrl_out->channelPlayheads = NULL;
+	clipCtrl_out->channelPlayheadsAllocated = 0;
 	clipCtrl_out->speed = 1;
 
 	clipCtrl_out->isPaused = a3false;
@@ -82,53 +82,30 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt)
 }
 
 // evaluate the current value
-a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController const* clipCtrl)
+a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController const* clipCtrl, const channel_id_t channelIndex)
 {
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
-	size_t keyframeValSize = currentClip->keyframePool->interpolationFuncs->valSize;
+	assert(0 <= channelIndex && channelIndex < currentClip->channelCount);
+	assert(currentClip->channels);
+	a3_KeyframeChannel* channel = &currentClip->channels[channelIndex];
+	a3_ChannelPlayhead* playhead = &clipCtrl->channelPlayheads[channelIndex];
+	size_t keyframeValSize = channel->keyframePool->interpolationFuncs->valSize;
 
-	a3_Keyframe* x0 = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe);
-
+	a3_Keyframe* x0 = ec_channel_getKeyframe(channel, playhead->keyframe);
+	
 	//Special case for very last keyframe
-	if (clipCtrl->keyframe == currentClip->keyframeCount - 1)
+	if (playhead->keyframe == channel->keyframeCount - 1)
 	{
 		//*out = *x0->data;
 		memcpy(out, x0->data, keyframeValSize);
 		return 1;
 	}
 
-	a3_Keyframe* x1 = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe+1);
+	a3_Keyframe* x1 = ec_channel_getKeyframe(channel, playhead->keyframe+1);
 
-	switch (x0->interpolationMode)
-	{
-	//Special cases for non-blending modes
-	case EC_INTERPOLATE_CONSTANT:
-		//*out = *x0->data;
-		memcpy(out, x0->data, keyframeValSize);
-		return 1;
-
-	case EC_INTERPOLATE_NEAREST:
-		//*out = clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data;
-		memcpy(out, clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data, keyframeValSize);
-		return 1;
-
-	//Normal blending modes
-	default:
-		assert(currentClip->keyframePool->interpolationFuncs->byMode[x0->interpolationMode]);
-		currentClip->keyframePool->interpolationFuncs->byMode[x0->interpolationMode](out, x0->data, x1->data, clipCtrl->keyframeParameter);
-		return 1;
-	}
-
-	/*
-	switch (x0->interpolationMode)
-	{
-	case EC_INTERPOLATE_CONSTANT: *out = x0->data;
-	case EC_INTERPOLATE_NEAREST : *out = clipCtrl->keyframeParameter < 0.5f ? x0->data : x1->data;
-	case EC_INTERPOLATE_LINEAR  : *out = a3lerp(x0->data, x1->data, clipCtrl->keyframeParameter);
-
-	default: assert(false); return 0;
-	}
-	*/
+	//Do normal interpolation
+	ec_interpolate(out, x0->data, x1->data, playhead->keyframeParameter, channel->keyframePool->interpolationFuncs, x0->interpolationMode);
+	return 1;
 }
 
 // time-ticking functions
@@ -144,30 +121,45 @@ a3i32 ec_clipController_incrementTimeUnscaled(a3_ClipController* clipCtrl, a3rea
 	clipCtrl->clipTime += animDt;
 
 	//Update keyframe time
-#if EC_USE_RELATIVE_KEYFRAME_DT
-	//Relative method: potential floating point error, but more performant
-	clipCtrl->keyframeTime += animDt;
-#else
-	//Absolute method: more reliable but slower
-	//Keyframe time = clip time - duration of previous keyframes
-	clipCtrl->keyframe = 0;
-	clipCtrl->keyframeTime = clipCtrl->clipTime;
-#endif
-	//Resolve keyframe overstep
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
-	while (clipCtrl->keyframeTime >= ec_clip_getKeyframe(currentClip, clipCtrl->keyframe)->duration && clipCtrl->keyframe < currentClip->keyframeCount)
+	assert(currentClip->channels);
+	for (a3ui32 i = 0; i < currentClip->channelCount; ++i)
 	{
-		clipCtrl->keyframeTime -= ec_clip_getKeyframe(currentClip, clipCtrl->keyframe)->duration;
-		clipCtrl->keyframe++;
+		//TODO @rsc this should probably be its own function
+		a3_KeyframeChannel* channel = &currentClip->channels[i];
+		a3_ChannelPlayhead* playhead = &clipCtrl->channelPlayheads[i];
+		
+	#if EC_USE_RELATIVE_KEYFRAME_DT
+		//Relative method: potential floating point error, but more performant
+		playhead->keyframeTime += animDt;
+	#else
+		//Absolute method: more reliable but slower
+		//Keyframe time = clip time - duration of previous keyframes
+		playhead->keyframe = 0;
+		playhead->keyframeTime = clipCtrl->clipTime;
+	#endif
+		//Resolve keyframe overstep
+		while (playhead->keyframeTime >= ec_channel_getKeyframe(channel, playhead->keyframe)->duration && playhead->keyframe < channel->keyframeCount)
+		{
+			playhead->keyframeTime -= ec_channel_getKeyframe(channel, playhead->keyframe)->duration;
+			playhead->keyframe++;
+		}
 	}
+
 
 	return a3true;
 }
 a3i32 ec_clipController_updateParameterTime(a3_ClipController* clipCtrl)
 {
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
-	clipCtrl->keyframeParameter = clipCtrl->keyframeTime * ec_clip_getKeyframe(currentClip, clipCtrl->keyframe)->durationInv;
-	clipCtrl->    clipParameter = clipCtrl->    clipTime * currentClip->                                         durationInv;
+	assert(currentClip->channels);
+	for (a3ui32 i = 0; i < currentClip->channelCount; ++i)
+	{
+		a3_KeyframeChannel* channel = &currentClip->channels[i];
+		a3_ChannelPlayhead* playhead = &clipCtrl->channelPlayheads[i];
+		playhead->keyframeParameter = playhead->keyframeTime * ec_channel_getKeyframe(channel, playhead->keyframe)->durationInv;
+	}
+	clipCtrl->clipParameter = clipCtrl->clipTime * currentClip->durationInv;
 	return a3true;
 }
 
@@ -223,7 +215,11 @@ a3i32 ec_clipController_processTerminusAction(a3_ClipController* clipCtrl, ec_te
 	}
 
 	//Play next clip, if it exists. Otherwise take no action, as we will just operate on the current clip.
-	if (action->targetClipID != NULL_CLIP_ID) clipCtrl->clipIndex = action->targetClipID;
+	if (action->targetClipID != NULL_CLIP_ID)
+	{
+		clipCtrl->clipIndex = action->targetClipID;
+		ec_clipController_preparePlayheads(clipCtrl, ec_clipController_getClip(clipCtrl));
+	}
 
 	//Process forward/reverse entry
 	clipCtrl->speed = entryDirection * abs(clipCtrl->speed);
@@ -231,24 +227,44 @@ a3i32 ec_clipController_processTerminusAction(a3_ClipController* clipCtrl, ec_te
 	{
 		//Forward playback case: Enter at t=0
 		clipCtrl->clipTime = overstep;
-		clipCtrl->keyframe = 0;
-		clipCtrl->keyframeTime = 0;
-		clipCtrl->keyframeParameter = 0;
+		//No need to set manually, playheads are already zeroed by preparePlayheads
 	}
 	if (action->flags & EC_TERMINUSACTION_REVERSE)
 	{
 		//Reverse playback case: Enter at t=duration
 		a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
 		clipCtrl->clipTime = currentClip->duration - overstep;
-		clipCtrl->keyframe = currentClip->keyframeCount - 1;
-		clipCtrl->keyframeTime = ec_clip_getKeyframe(currentClip, clipCtrl->keyframe)->duration;
-		clipCtrl->keyframeParameter = 1;
+		assert(currentClip->channels);
+		for (a3ui32 i = 0; i < currentClip->channelCount; ++i)
+		{
+			a3_KeyframeChannel* channel = &currentClip->channels[i];
+			a3_ChannelPlayhead* playhead = &clipCtrl->channelPlayheads[i];
+			playhead->keyframe = channel->keyframeCount - 1;
+			playhead->keyframeTime = ec_channel_getKeyframe(channel, playhead->keyframe)->duration;
+			playhead->keyframeParameter = 1;
+		}
 	}
 	
 	//Process >> and << (skip first/last)
 	//if (action->flags & EC_TERMINUSACTION_SKIP) clipCtrl->clipTime += entryDirection * timePerFrame;
 
 	return a3true;
+}
+
+a3i32 ec_clipController_preparePlayheads(a3_ClipController* clipCtrl, const a3_Clip* clip)
+{
+	if (clipCtrl->channelPlayheadsAllocated < clip->channelCount)
+	{
+		if (clipCtrl->channelPlayheads) free(clipCtrl->channelPlayheads);
+		clipCtrl->channelPlayheads = calloc(clip->channelCount, sizeof(a3_ChannelPlayhead));
+		clipCtrl->channelPlayheadsAllocated = clip->channelCount;
+	}
+	else
+	{
+		memset(clipCtrl->channelPlayheads, 0, clip->channelCount*sizeof(a3_ChannelPlayhead));
+	}
+
+	return 1;
 }
 
 //-----------------------------------------------------------------------------

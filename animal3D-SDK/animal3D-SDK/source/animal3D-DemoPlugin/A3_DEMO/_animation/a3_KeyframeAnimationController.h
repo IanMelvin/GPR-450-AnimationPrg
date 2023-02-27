@@ -70,14 +70,9 @@ struct a3_ClipController
 	// normalized clip time; should always be between 0 and 1. 
 	a3f32 clipParameter;
 
-	// index of current keyframe in referenced keyframe pool
-	a3ui32 keyframe;
-
-	// current time relative to current keyframe; should always be between 0 and current keyframe's duration
-	a3f32 keyframeTime;
-
-	// normalized keyframe time; should always be between 0 and 1
-	a3f32 keyframeParameter;
+	// playheads for each channel
+	a3_ChannelPlayhead* channelPlayheads;
+	a3ui32 channelPlayheadsAllocated;
 
 	// the active behavior of playback; try +1 for forward and -1 for reverse
 	a3f32 speed;
@@ -98,7 +93,7 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, const a3real dt);
 
 // evaluate the current value
-a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController const* clipCtrl);
+a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController const* clipCtrl, const channel_id_t channelIndex);
 
 // time-ticking functions
 a3i32 ec_clipController_incrementTimeScaled(a3_ClipController* clipCtrl, a3real wallDt); // tick using wall time
@@ -119,6 +114,8 @@ a3real ec_clipController_getClipOverstep(a3_ClipController const* clipCtrl);
 
 // process the indicated terminus action (does not check conditions!)
 a3i32 ec_clipController_processTerminusAction(a3_ClipController* clipCtrl, ec_terminusAction* action);
+
+a3i32 ec_clipController_preparePlayheads(a3_ClipController* clipCtrl, const a3_Clip* clip);
 
 //-----------------------------------------------------------------------------
 

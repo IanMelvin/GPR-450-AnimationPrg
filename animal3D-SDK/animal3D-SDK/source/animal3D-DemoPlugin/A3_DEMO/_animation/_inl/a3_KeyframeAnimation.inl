@@ -40,30 +40,33 @@ inline a3i32 a3clipCalculateDuration(a3_Clip* clip)
 {
 	clip->duration = 0;
 
-	//Sum up keyframe duration
-	for (a3ui32 i = clip->firstKeyframe; i < clip->lastKeyframe; i++)
+	for (a3ui32 channel = 0; channel < clip->channelCount; channel++)
 	{
-		clip->duration += clip->keyframePool->keyframe[i].duration;
+		//Sum up keyframe duration
+		a3f32 channelDuration = 0;
+		for (a3ui32 i = clip->channels[channel].firstKeyframe; i < clip->channels[channel].lastKeyframe; i++)
+		{
+			channelDuration += clip->channels[channel].keyframePool->keyframe[i].duration;
+		}
+		clip->duration = a3maximum(clip->duration, channelDuration);
 	}
 
 	clip->durationInv = 1 / clip->duration;
-
-	clip->keyframeCount = clip->lastKeyframe - clip->firstKeyframe + 1;
 
 	return 1;
 }
 
 // calculate keyframes' durations by distributing clip's duration
-inline a3i32 a3clipDistributeDuration(a3_Clip* clip, const a3real newClipDuration)
+inline a3i32 a3keyframesDistributeDuration(a3_KeyframeChannel* keyframes, const a3real newDuration)
 {
-	a3real keyframeDur = newClipDuration / clip->keyframeCount;
+	a3real keyframeDur = newDuration / keyframes->keyframeCount;
 	a3real keyframeDurInv = 1 / keyframeDur;
 
 	//Set duration for each keyframe
-	for (a3ui32 i = clip->firstKeyframe; i < clip->lastKeyframe; i++)
+	for (a3ui32 i = keyframes->firstKeyframe; i < keyframes->lastKeyframe; i++)
 	{
-		clip->keyframePool->keyframe[i].duration = keyframeDur;
-		clip->keyframePool->keyframe[i].durationInv = keyframeDurInv;
+		keyframes->keyframePool->keyframe[i].duration = keyframeDur;
+		keyframes->keyframePool->keyframe[i].durationInv = keyframeDurInv;
 	}
 
 	return 1;

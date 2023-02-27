@@ -27,6 +27,11 @@
 
 //-----------------------------------------------------------------------------
 
-
+ec_InterpolationFuncFamily a3_SpatialPoseInterpolationInfo = { //FIXME this is order-dependent
+	sizeof(a3_SpatialPose),
+	a3spatialPoseLerp,
+	0,
+	0
+};
 
 //-----------------------------------------------------------------------------

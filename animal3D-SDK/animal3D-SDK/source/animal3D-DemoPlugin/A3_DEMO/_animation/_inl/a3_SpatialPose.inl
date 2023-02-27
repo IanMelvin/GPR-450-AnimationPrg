@@ -1,5 +1,6 @@
 #include "a3_SpatialPose.h"
 #include "..\a3_SpatialPose.h"
+#include "A3_DEMO/ec_MathBridge.h"
 /*
 	Copyright 2011-2020 Daniel S. Buckstein
 
@@ -216,6 +217,15 @@ inline a3i32 a3spatialPoseCopy(a3_SpatialPose* spatialPose_out, const a3_Spatial
 	return -1;
 }
 
+// lerp between spatial poses
+inline a3_SpatialPose* a3spatialPoseLerp(a3_SpatialPose* out, const a3_SpatialPose* val0, const a3_SpatialPose* val1, a3real param)
+{
+	a3real3Lerp(out->translation.v, val0->translation.v, val1->translation.v, param);
+	a3real3Lerp(out->orientation.v, val0->orientation.v, val1->orientation.v, param);
+	//a3quatSlerp(out->orientation.v, val0->orientation.v, val1->orientation.v, param);
+	a3vec3LogLerp(out->scale.v, val0->scale.v, val1->scale.v, param);
+	return out;
+}
 
 //-----------------------------------------------------------------------------
 

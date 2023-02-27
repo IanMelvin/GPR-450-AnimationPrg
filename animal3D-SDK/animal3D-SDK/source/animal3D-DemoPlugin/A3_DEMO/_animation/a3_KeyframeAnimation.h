@@ -36,6 +36,7 @@
 #include "animal3D-A3DM/a3math/a3vector.h"
 #include "animal3D-A3DM/a3math/a3interpolation.h"
 
+#include "../ec_Interpolation.h"
 #include "ec_TerminusAction.h"
 
 //-----------------------------------------------------------------------------
@@ -44,15 +45,58 @@
 extern "C"
 {
 #else	// !__cplusplus
+typedef struct a3_KeyframeChannel			a3_KeyframeChannel;
+typedef struct a3_ChannelPlayhead			a3_ChannelPlayhead;
 typedef struct a3_Keyframe					a3_Keyframe;
 typedef struct a3_KeyframePool				a3_KeyframePool;
 typedef struct a3_Clip						a3_Clip;
 typedef struct a3_ClipPool					a3_ClipPool;
-typedef enum ec_InterpolationMode			ec_InterpolationMode;
-typedef union ec_InterpolationFuncFamily	ec_InterpolationFuncFamily;
 typedef void								a3_Keyframe_data_t;
+typedef a3ui32								channel_id_t;
 #endif	// __cplusplus
 
+
+//-----------------------------------------------------------------------------
+
+// description of a channel containing keyframes
+// metaphor: timeline, but for one property only
+struct a3_KeyframeChannel
+{
+	// identifiers
+	const char* name;
+
+	// number of keyframes referenced by clip (including first and last)
+	a3ui32 keyframeCount;
+
+	// index of first keyframe in pool referenced
+	a3ui32 firstKeyframe;
+
+	// index of final keyframe in pool referenced
+	a3ui32 lastKeyframe;
+
+	// data storage
+	a3_KeyframePool* keyframePool;
+};
+
+struct a3_ChannelPlayhead
+{
+	// index of current keyframe in referenced keyframe pool
+	a3ui32 keyframe;
+
+	// current time relative to current keyframe; should always be between 0 and current keyframe's duration
+	a3f32 keyframeTime;
+
+	// normalized keyframe time; should always be between 0 and 1
+	a3f32 keyframeParameter;
+};
+
+a3i32 a3keyframeChannelInit(a3_KeyframeChannel* channel_out, const char* name, const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex);
+
+// calculate keyframes' durations by distributing clip's duration
+a3i32 a3keyframesDistributeDuration(a3_KeyframeChannel* keyframes, const a3real newDuration);
+
+// get a keyframe by id
+a3_Keyframe* ec_channel_getKeyframe(a3_KeyframeChannel const* channel, a3ui32 id);
 
 //-----------------------------------------------------------------------------
 
@@ -83,40 +127,6 @@ struct a3_Keyframe
 	ec_InterpolationMode interpolationMode;
 };
 
-// how to blend between a3_Keyframe.data
-// when updating here, add to ec_InterpolationFuncFamily
-enum ec_InterpolationMode
-{
-	//Special values - non-blending
-	EC_INTERPOLATE_CONSTANT = -0b01,
-	EC_INTERPOLATE_NEAREST  = -0b11,
-
-	//Normal blending
-	EC_INTERPOLATE_LINEAR = 0,
-	EC_INTERPOLATE_CATMULL_ROM,
-	EC_INTERPOLATE_CUBIC_HERMITE,
-
-	//Special values
-	EC_INTERPOLATE_MODE_COUNT, //How many *blending* interpolation modes are there? (not counting constant or nearest)
-	EC_INTERPOLATE_DEFAULT = EC_INTERPOLATE_LINEAR //What is the default interpolation mode?
-};
-
-// description of how to interpolate data
-typedef a3_Keyframe_data_t* (*interpolationFunc)(a3_Keyframe_data_t* out, const a3_Keyframe_data_t* val0, const a3_Keyframe_data_t* val1, a3real param);
-union ec_InterpolationFuncFamily
-{
-	struct {
-		//interpolationFunc constant;
-		//interpolationFunc nearest;
-		interpolationFunc linear;
-		interpolationFunc catmullRom;
-		interpolationFunc cubicHermite;
-
-		size_t valSize; //For memcpy (equivalent of = for void ptr)
-	};
-	interpolationFunc byMode[EC_INTERPOLATE_MODE_COUNT]; //Index by ec_KeyframeInterpolationMode
-};
-
 // pool of keyframe descriptors
 struct a3_KeyframePool
 {
@@ -129,7 +139,6 @@ struct a3_KeyframePool
 	// how do we interpolate between keyframe values?
 	const ec_InterpolationFuncFamily* interpolationFuncs;
 };
-
 
 // allocate keyframe pool
 a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count, const ec_InterpolationFuncFamily* interpolationFuncs);
@@ -151,29 +160,18 @@ struct a3_Clip
 	// clip name
 	a3byte name[a3keyframeAnimation_nameLenMax];
 
-	// index in clip pool
-	a3ui32 index;
-
 	// duration of clip; can be calculated as the sum of all of the referenced keyframes or set first and distributed uniformly across keyframes; cannot be zero
 	a3f32 duration;
 
 	// reciprocal of duration
 	a3f32 durationInv;
 
-	// number of keyframes referenced by clip (including first and last)
-	a3ui32 keyframeCount;
-
-	// index of first keyframe in pool referenced by clip
-	a3ui32 firstKeyframe;
-
-	// index of final keyframe in pool referenced by clip
-	a3ui32 lastKeyframe;
+	// channels
+	a3ui32 channelCount;
+	a3_KeyframeChannel* channels;
 
 	ec_terminusAction forwardTransition;
 	ec_terminusAction reverseTransition;
-
-	// array of keyframePools
-	a3_KeyframePool* keyframePool;
 };
 
 // group of clips
@@ -194,19 +192,13 @@ a3i32 a3clipPoolCreate(a3_ClipPool* clipPool_out, const a3ui32 count);
 a3i32 a3clipPoolRelease(a3_ClipPool* clipPool);
 
 // initialize clip with first and last indices
-a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_nameLenMax], const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex);
+a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_nameLenMax], const a3ui32 channelCount);
 
 // get clip index from pool
 a3i32 a3clipGetIndexInPool(const a3_ClipPool* clipPool, const a3byte clipName[a3keyframeAnimation_nameLenMax]);
 
 // calculate clip duration as sum of keyframes' durations
 a3i32 a3clipCalculateDuration(a3_Clip* clip);
-
-// calculate keyframes' durations by distributing clip's duration
-a3i32 a3clipDistributeDuration(a3_Clip* clip, const a3real newClipDuration);
-
-// get a keyframe by id
-a3_Keyframe* ec_clip_getKeyframe(a3_Clip const* clip, a3ui32 id);
 
 typedef a3i8 ec_sign;
 
@@ -215,6 +207,10 @@ ec_terminusAction* ec_clip_getTerminusAction(a3_Clip* clip, ec_sign direction);
 
 // get the direction indicated by flags
 ec_sign ec_terminusActionFlags_getDirection(ec_terminusActionFlags flags);
+
+// get a channel by name
+a3ui32 a3clipGetChannelID(const a3_Clip* clip, const char* name);
+a3_KeyframeChannel* a3clipGetChannelByName(const a3_Clip* clip, const char* name);
 
 //-----------------------------------------------------------------------------
 
