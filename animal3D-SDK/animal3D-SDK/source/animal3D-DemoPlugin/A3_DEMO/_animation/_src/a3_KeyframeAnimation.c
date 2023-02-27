@@ -45,8 +45,8 @@
 a3i32 a3keyframeChannelInit(a3_KeyframeChannel* channel_out, const char* name, const a3_KeyframePool* keyframePool, const a3ui32 firstKeyframeIndex, const a3ui32 finalKeyframeIndex)
 {
 	assert(keyframePool);
-	assert(0 < firstKeyframeIndex);
-	assert(firstKeyframeIndex < finalKeyframeIndex);
+	assert(0 <= firstKeyframeIndex);
+	assert(firstKeyframeIndex <= finalKeyframeIndex);
 	assert(finalKeyframeIndex < keyframePool->count);
 
 	channel_out->name = name;
@@ -171,6 +171,23 @@ ec_sign ec_terminusActionFlags_getDirection(ec_terminusActionFlags flags)
 	assert(flags != 0); //Must have some form of terminus action
 	assert(!(flags&EC_TERMINUSACTION_REVERSE && flags&EC_TERMINUSACTION_FORWARD)); //Cannot be both forward and reverse
 	return (flags&EC_TERMINUSACTION_REVERSE ? -1 : 0) + (flags&EC_TERMINUSACTION_FORWARD ? 1 : 0);
+}
+
+a3ui32 a3clipGetChannelID(const a3_Clip* clip, const char* name)
+{
+	assert(clip->channels);
+	for (a3ui32 i = 0; i < clip->channelCount; ++i)
+	{
+		if (strcmp(clip->channels[i].name, name) == 0) return i;
+	}
+	return -1;
+}
+
+a3_KeyframeChannel* a3clipGetChannelByName(const a3_Clip* clip, const char* name)
+{
+	a3ui32 id = a3clipGetChannelID(clip, name);
+	assert(0 <= id && id < clip->channelCount);
+	return &clip->channels[id];
 }
 
 

@@ -208,6 +208,10 @@ ec_terminusAction* ec_clip_getTerminusAction(a3_Clip* clip, ec_sign direction);
 // get the direction indicated by flags
 ec_sign ec_terminusActionFlags_getDirection(ec_terminusActionFlags flags);
 
+// get a channel by name
+a3ui32 a3clipGetChannelID(const a3_Clip* clip, const char* name);
+a3_KeyframeChannel* a3clipGetChannelByName(const a3_Clip* clip, const char* name);
+
 //-----------------------------------------------------------------------------
 
 

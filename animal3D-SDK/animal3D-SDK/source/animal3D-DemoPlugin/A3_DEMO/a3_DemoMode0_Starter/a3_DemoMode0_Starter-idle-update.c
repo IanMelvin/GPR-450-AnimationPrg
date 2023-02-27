@@ -80,14 +80,22 @@ void InitilizeCode(a3_DemoState const* demoState)
 	}
 
 	a3_ClipPool* clips = malloc(sizeof(a3_ClipPool));
+
 	a3clipPoolCreate(clips, 2);
-	a3clipInit(&clips->clip[0], "Entry", keyframes, 0, 1); a3clipCalculateDuration(&clips->clip[0]);
+	a3clipInit(&clips->clip[0], "Entry", 1);
+	a3keyframeChannelInit(clips->clip[0].channels, "Value", keyframes, 0, 1);
+	a3clipCalculateDuration(&clips->clip[0]);
 	clips->clip[0].forwardTransition.flags = EC_TERMINUSACTION_FORWARD; clips->clip[0].forwardTransition.targetClipID = 1;
 	clips->clip[0].reverseTransition.flags = EC_TERMINUSACTION_REVERSE; clips->clip[0].reverseTransition.targetClipID = 1;
-	a3clipInit(&clips->clip[1], "Ping-pong", keyframes, 1, 11); a3clipCalculateDuration(&clips->clip[1]);
+
+	a3clipInit(&clips->clip[1], "Ping-pong", 1);
+	a3keyframeChannelInit(clips->clip[1].channels, "Value", keyframes, 1, 11);
+	a3clipCalculateDuration(&clips->clip[1]);
 	clips->clip[1].forwardTransition.flags = EC_TERMINUSACTION_REVERSE;
 	clips->clip[1].reverseTransition.flags = EC_TERMINUSACTION_FORWARD;
+	
 	a3clipControllerInit((a3_ClipController*)&demoState->testAnimator, "Test Animator", clips, 0);
+	ec_clipController_preparePlayheads((a3_ClipController*)&demoState->testAnimator, &clips->clip[0]);
 	runWhenISaySo = a3false;
 }
 
@@ -117,7 +125,7 @@ void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a
 
 		//get current index
 		a3real v;
-		ec_clipController_evaluateValue(&v, &demoState->testAnimator);
+		ec_clipController_evaluateValue(&v, &demoState->testAnimator, a3clipGetChannelID(ec_clipController_getClip(&demoState->testAnimator), "Value"));
 		demoState->index = (a3ui32)v;
 	}
 

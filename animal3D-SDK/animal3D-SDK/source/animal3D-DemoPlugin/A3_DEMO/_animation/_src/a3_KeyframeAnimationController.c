@@ -86,6 +86,7 @@ a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController
 {
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
 	assert(0 <= channelIndex && channelIndex < currentClip->channelCount);
+	assert(currentClip->channels);
 	a3_KeyframeChannel* channel = &currentClip->channels[channelIndex];
 	a3_ChannelPlayhead* playhead = &clipCtrl->channelPlayheads[channelIndex];
 	size_t keyframeValSize = channel->keyframePool->interpolationFuncs->valSize;
@@ -121,6 +122,7 @@ a3i32 ec_clipController_incrementTimeUnscaled(a3_ClipController* clipCtrl, a3rea
 
 	//Update keyframe time
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
+	assert(currentClip->channels);
 	for (a3ui32 i = 0; i < currentClip->channelCount; ++i)
 	{
 		//TODO @rsc this should probably be its own function
@@ -150,6 +152,7 @@ a3i32 ec_clipController_incrementTimeUnscaled(a3_ClipController* clipCtrl, a3rea
 a3i32 ec_clipController_updateParameterTime(a3_ClipController* clipCtrl)
 {
 	a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
+	assert(currentClip->channels);
 	for (a3ui32 i = 0; i < currentClip->channelCount; ++i)
 	{
 		a3_KeyframeChannel* channel = &currentClip->channels[i];
@@ -231,6 +234,7 @@ a3i32 ec_clipController_processTerminusAction(a3_ClipController* clipCtrl, ec_te
 		//Reverse playback case: Enter at t=duration
 		a3_Clip* currentClip = ec_clipController_getClip(clipCtrl);
 		clipCtrl->clipTime = currentClip->duration - overstep;
+		assert(currentClip->channels);
 		for (a3ui32 i = 0; i < currentClip->channelCount; ++i)
 		{
 			a3_KeyframeChannel* channel = &currentClip->channels[i];
