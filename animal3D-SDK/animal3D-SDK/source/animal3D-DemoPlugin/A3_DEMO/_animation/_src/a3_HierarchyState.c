@@ -308,6 +308,7 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream)
 				{
 					strcpy(header, objName);
 					printf("Header: %s \n", header);
+					ec_skipLine(inStream);
 					break;
 				}
 				else if (strncmp(objName, "ain", strlen("ain")) == 0)
@@ -325,6 +326,28 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream)
 				printf("Name: %s, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", objName, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneLength);
 			}
 		}
+	}
+	{
+		a3ui32 frameNumber = 0;
+		a3vec3 transform;
+		a3vec4 rotation;
+		a3real boneScaleFactor;
+		while(!feof(inStream->stream))
+		{
+			
+			output = fscanf(inStream->stream, "%", &transform.x);
+			output = fscanf(inStream->stream, "%f", &transform.x);
+			output = fscanf(inStream->stream, "%f", &transform.y);
+			output = fscanf(inStream->stream, "%f", &transform.z);
+			output = fscanf(inStream->stream, "%f", &rotation.x);
+			output = fscanf(inStream->stream, "%f", &rotation.y);
+			output = fscanf(inStream->stream, "%f", &rotation.z);
+			output = fscanf(inStream->stream, "%f", &boneScaleFactor);
+			printf("Name: %s, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", header, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneScaleFactor);
+		}
+		
+		
+		
 	}
 
 	return 0;
