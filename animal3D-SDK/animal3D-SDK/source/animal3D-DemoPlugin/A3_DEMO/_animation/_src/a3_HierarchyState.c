@@ -175,10 +175,7 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 			isValid = ec_specialCaseChecker(&inStream);
 			if (isValid == 1)
 			{
-				ec_checkHeader(&inStream);
-			}
-			else {
-				//ec_skipLine(&inStream);
+				ec_checkHeader(&inStream, poseGroup_out, hierarchy_out);
 			}
 		}
 		
@@ -219,7 +216,7 @@ a3i32 ec_specialCaseChecker(a3_FileStream const* inStream)
 	return -1;
 }
 
-a3i32 ec_checkHeader(const a3_FileStream* inStream)
+a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseGroup_out, a3_Hierarchy* hierarchy_out)
 {
 	a3ui32 numSkipped = 0;
 	a3ui32 output = 0;
@@ -245,17 +242,20 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream)
 			{
 				output = fscanf(inStream->stream, "%2d", &intValue);
 				printf("- NS = %d \n", intValue);
+				a3hierarchyCreate(hierarchy_out, intValue, test);
+				printf("%d", hierarchy_out->numNodes);
 			}
 			else if (strncmp(stringValue, "NumFrames", strlen("NumFrames")) == 0)
 			{
 				output = fscanf(inStream->stream, "%2d", &intValue);
 				printf("- NF = %d \n", intValue);
+				poseGroup_out->poseCount = intValue;
 			}
 			else if (strncmp(stringValue, "EulerRotationOrder", strlen("EulerRotationOrder")) == 0)
 			{
 				output = fscanf(inStream->stream, "%s", &stringValue);
 				printf("- ERO: %s \n", stringValue);
-				break;
+				return 0;
 			}
 		}
 	}
@@ -327,15 +327,17 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream)
 			}
 		}
 	}
+
+	if(strchr(header, '[') != NULL)
 	{
+		ec_skipLine(inStream);
 		a3ui32 frameNumber = 0;
 		a3vec3 transform;
 		a3vec4 rotation;
 		a3real boneScaleFactor;
-		while(!feof(inStream->stream))
+		while(!feof(inStream->stream) && frameNumber < poseGroup_out->poseCount - 1)
 		{
-			
-			output = fscanf(inStream->stream, "%", &transform.x);
+			output = fscanf(inStream->stream, "%2d", &frameNumber);
 			output = fscanf(inStream->stream, "%f", &transform.x);
 			output = fscanf(inStream->stream, "%f", &transform.y);
 			output = fscanf(inStream->stream, "%f", &transform.z);
@@ -343,13 +345,9 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream)
 			output = fscanf(inStream->stream, "%f", &rotation.y);
 			output = fscanf(inStream->stream, "%f", &rotation.z);
 			output = fscanf(inStream->stream, "%f", &boneScaleFactor);
-			printf("Name: %s, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", header, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneScaleFactor);
+			printf("Frame: %d, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", frameNumber, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneScaleFactor);
 		}
-		
-		
-		
 	}
-
 	return 0;
 }
 

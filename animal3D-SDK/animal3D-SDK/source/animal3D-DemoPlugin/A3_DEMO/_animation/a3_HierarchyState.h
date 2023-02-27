@@ -165,7 +165,7 @@ a3i32 a3hierarchyPoseGroupLoadBVH(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 //
 
 // Compare Header to known headers
-a3i32 ec_checkHeader(const a3_FileStream* inStream);
+a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseGroup_out, a3_Hierarchy* hierarchy_out);
 
 // check next line for comments or headers
 a3i32 ec_specialCaseChecker(a3_FileStream const* inStream);
