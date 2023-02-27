@@ -49,6 +49,7 @@
 #include <OpenGL/gl3.h>
 #endif	// _WIN32
 
+#include <stdio.h> //TEMP TEST
 
 //-----------------------------------------------------------------------------
 
@@ -126,6 +127,26 @@ void a3starter_render_controls(a3_DemoState const* demoState, a3_DemoMode0_Start
 		"    Display mode (%u / %u) ('J' | 'K'): %s", display + 1, starter_display_max, displayProgramName[display]);
 	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
 		"    Active camera (%u / %u) ('c' prev | next 'v'): %s", activeCamera + 1, starter_camera_max, cameraText[activeCamera]);
+
+	//TEMP TEST
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		"Test Lab 1: '/' (start), ']' (play/pause), '[' (slowMotion), 'r' reset");
+	char buf[256];
+
+	//TEMP TEST
+	if (demoMode->testAnimator.clipPool) sprintf_s(buf, 256, "'%s' playing at speed %f", demoMode->testAnimator.name, demoMode->testAnimator.speed);
+	else strcpy_s(buf, 256, "[Error: Test animator was not initialized]");
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a, buf);
+
+	//TEMP TEST
+	if (demoMode->testAnimator.clipPool)
+	{
+		a3real evaluatedValue;
+		ec_clipController_evaluateValue(&evaluatedValue, &demoMode->testAnimator, 0);
+		sprintf_s(buf, 256, "Clip[%i] '%s': %f at time=%f", demoMode->testAnimator.clipIndex, ec_clipController_getClip(&demoMode->testAnimator)->name, evaluatedValue, demoMode->testAnimator.clipTime);
+	}
+	else strcpy_s(buf, 256, "[Error: Test animator was not initialized]");
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a, buf);
 }
 
 

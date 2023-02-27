@@ -65,7 +65,7 @@ ec_InterpolationFuncFamily floatInterpolateFuncs = {
 	0
 };
 
-void InitilizeCode(a3_DemoState const* demoState)
+void InitilizeCode(a3_DemoState const* demoState, a3_DemoMode0_Starter* demoMode)
 {
 	printf("test");
 
@@ -94,8 +94,8 @@ void InitilizeCode(a3_DemoState const* demoState)
 	clips->clip[1].forwardTransition.flags = EC_TERMINUSACTION_REVERSE;
 	clips->clip[1].reverseTransition.flags = EC_TERMINUSACTION_FORWARD;
 	
-	a3clipControllerInit((a3_ClipController*)&demoState->testAnimator, "Test Animator", clips, 0);
-	ec_clipController_preparePlayheads((a3_ClipController*)&demoState->testAnimator, &clips->clip[0]);
+	a3clipControllerInit(&demoMode->testAnimator, "Test Animator", clips, 0);
+	ec_clipController_preparePlayheads(&demoMode->testAnimator, &clips->clip[0]);
 	runWhenISaySo = a3false;
 }
 
@@ -106,7 +106,7 @@ void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a
 
 	if (demoState->initializeCode && runWhenISaySo)
 	{
-		InitilizeCode(demoState);
+		InitilizeCode(demoState, demoMode);
 	}
 
 	if (demoState->toggleSlowMode)
@@ -121,17 +121,17 @@ void a3starter_update(a3_DemoState* demoState, a3_DemoMode0_Starter* demoMode, a
 	if (demoState->togglePlay && !runWhenISaySo)
 	{
 		//Run Update
-		a3clipControllerUpdate(&demoState->testAnimator, modifiedDT);
+		a3clipControllerUpdate(&demoMode->testAnimator, modifiedDT);
 
 		//get current index
 		a3real v;
-		ec_clipController_evaluateValue(&v, &demoState->testAnimator, a3clipGetChannelID(ec_clipController_getClip(&demoState->testAnimator), "Value"));
+		ec_clipController_evaluateValue(&v, &demoMode->testAnimator, a3clipGetChannelID(ec_clipController_getClip(&demoMode->testAnimator), "Value"));
 		demoState->index = (a3ui32)v;
 	}
 
 	if (demoState->reset)
 	{
-		a3clipPoolRelease(demoState->testAnimator.clipPool);
+		a3clipPoolRelease(demoMode->testAnimator.clipPool);
 		demoState->reset = a3false;
 		demoState->togglePlay = a3true;
 		demoState->toggleSlowMode = a3false;
