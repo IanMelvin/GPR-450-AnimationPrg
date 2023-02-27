@@ -175,7 +175,10 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 			isValid = ec_specialCaseChecker(&inStream);
 			if (isValid == 1)
 			{
-
+				ec_checkHeader(&inStream);
+			}
+			else {
+				//ec_skipLine(&inStream);
 			}
 		}
 		
@@ -199,47 +202,145 @@ a3i32 ec_specialCaseChecker(a3_FileStream const* inStream)
 	char c = fgetc(inStream->stream);
 	if (c != '#' && c != '[')
 	{
-		//ungetc(c, inStream->stream);
-		//printf("NormalLine\n");
-		a3ui32 numSkipped = 0;
-		while (!feof(inStream->stream) && (c = fgetc(inStream->stream)) && c != '\n')
-		{
-			numSkipped++;
-		}
+		//ec_skipLine(inStream);
+		return 2;
+	}
+	else if (c == '#')
+	{
+		ec_skipLine(inStream);
+		//printf("Comment\n");
 		return 0;
 	}
-
-	if (c == '#')
+	else if (c == '[')
 	{
-		a3ui32 numSkipped = 0;
-		while (!feof(inStream->stream) && (c = fgetc(inStream->stream)) && c != '\n')
-		{
-			numSkipped++;
-		}
-		//ungetc(c, inStream->stream);
-		printf("Comment\n");
-		return 0;
-	}
-
-	if (c == '[')
-	{
-		a3ui32 numSkipped = 0;
-		char header[fileLineMaxLength];
 		ungetc(c, inStream->stream);
-		fscanf(inStream->stream, "%s", header);
-		printf("Header: ");
-		printf(header);
-		printf("\n");
-		while (!feof(inStream->stream) && (c = fgetc(inStream->stream)) && c != '\n')
-		{
-			header[numSkipped] = c;
-			numSkipped++;
-		}
-		
 		return 1;
 	}
-	//printf("Nothing\n");
 	return -1;
+}
+
+a3i32 ec_checkHeader(const a3_FileStream* inStream)
+{
+	a3ui32 numSkipped = 0;
+	a3ui32 output = 0;
+	
+	char header[fileLineMaxLength];
+	header[fileLineMaxLength - 1] = '\0';
+
+	output = fscanf(inStream->stream, "%s", header);
+	printf("Header: %s \n", header);
+	ec_skipLine(inStream);
+
+	if (strncmp(header, "[Header]", strlen("[Header]")) == 0)
+	{
+		//printf("Same");
+		char stringValue [fileLineMaxLength];
+		stringValue[fileLineMaxLength - 1] = '\0';
+		a3ui32 intValue = 0;
+		
+		while (!feof(inStream->stream)) 
+		{
+			output = fscanf(inStream->stream, "%s", stringValue);
+			if (strncmp(stringValue, "NumSegments", strlen("NumSegments")) == 0)
+			{
+				output = fscanf(inStream->stream, "%2d", &intValue);
+				printf("- NS = %d \n", intValue);
+			}
+			else if (strncmp(stringValue, "NumFrames", strlen("NumFrames")) == 0)
+			{
+				output = fscanf(inStream->stream, "%2d", &intValue);
+				printf("- NF = %d \n", intValue);
+			}
+			else if (strncmp(stringValue, "EulerRotationOrder", strlen("EulerRotationOrder")) == 0)
+			{
+				output = fscanf(inStream->stream, "%s", &stringValue);
+				printf("- ERO: %s \n", stringValue);
+				break;
+			}
+		}
+	}
+	else if (strncmp(header, "[SegmentNames&Hierarchy]", strlen("[SegmentNames&Hierarchy]")) == 0)
+	{
+		
+		char objName[fileLineMaxLength] = { ' ' };
+		char objNameParent[fileLineMaxLength];
+		objName[fileLineMaxLength - 1] = '\0';
+		objNameParent[fileLineMaxLength - 1] = '\0';
+
+		while (!feof(inStream->stream))
+		{
+			output = ec_specialCaseChecker(inStream);
+			if (output == 2)
+			{
+				output = fscanf(inStream->stream, "%s", &objName);
+				if (objName[0] == '[')
+				{
+					strcpy(header, objName);
+					printf("Header: %s \n", header);
+					ec_skipLine(inStream);
+					break;
+				}
+				else if (strncmp(objName, "ain", strlen("ain")) == 0)
+				{
+					strcpy(objName, "main");
+				}
+				output = fscanf(inStream->stream, "%s", &objNameParent);
+				printf("Object: %s, Parent: %s \n", objName, objNameParent);
+			}
+		}
+	}
+	
+	if (strncmp(header, "[BasePosition]", strlen("[BasePosition]")) == 0)
+	{
+		char objName[fileLineMaxLength] = { ' ' };
+		objName[fileLineMaxLength - 1] = '\0';
+		a3vec3 transform;
+		a3vec4 rotation;
+		a3real boneLength;
+
+		while (!feof(inStream->stream))
+		{
+			output = ec_specialCaseChecker(inStream);
+			if (output == 2)
+			{
+				output = fscanf(inStream->stream, "%s", &objName);
+				if (objName[0] == '[')
+				{
+					strcpy(header, objName);
+					printf("Header: %s \n", header);
+					break;
+				}
+				else if (strncmp(objName, "ain", strlen("ain")) == 0)
+				{
+					strcpy(objName, "main");
+				}
+				output = fscanf(inStream->stream, "%f", &transform.x);
+				output = fscanf(inStream->stream, "%f", &transform.y);
+				output = fscanf(inStream->stream, "%f", &transform.z);
+				output = fscanf(inStream->stream, "%f", &rotation.x);
+				output = fscanf(inStream->stream, "%f", &rotation.y);
+				output = fscanf(inStream->stream, "%f", &rotation.z);
+				output = fscanf(inStream->stream, "%f", &boneLength);
+
+				printf("Name: %s, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", objName, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneLength);
+			}
+		}
+	}
+
+	return 0;
+}
+
+a3i32 ec_skipLine(a3_FileStream const* inStream)
+{
+	a3ui32 numSkipped = 0;
+
+	while (!feof(inStream->stream) && fgetc(inStream->stream) != '\n')
+	{
+		numSkipped++;
+	}
+
+	return numSkipped;
+
 }
 
 a3i32 ec_parceFile(char* bufferOut[fileLineMaxLength], const a3_FileStream* inStream)

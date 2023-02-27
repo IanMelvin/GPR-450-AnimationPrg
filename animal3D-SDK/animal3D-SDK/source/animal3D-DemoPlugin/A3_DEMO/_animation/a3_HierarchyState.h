@@ -164,12 +164,16 @@ a3i32 a3hierarchyPoseGroupLoadBVH(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 // File Input support for HTR file reading
 //
 
-// parce through line of file
-a3i32 ec_parceFile(char* bufferOut[fileLineMaxLength], const a3_FileStream* inStream);
+// Compare Header to known headers
+a3i32 ec_checkHeader(const a3_FileStream* inStream);
 
 // check next line for comments or headers
-a3i32 ec_specialCaseChecker();
+a3i32 ec_specialCaseChecker(a3_FileStream const* inStream);
 
+a3i32 ec_skipLine(a3_FileStream const* inStream);
+
+// parce through line of file
+a3i32 ec_parceFile(char* bufferOut[fileLineMaxLength], const a3_FileStream* inStream);
 
 //-----------------------------------------------------------------------------
 
