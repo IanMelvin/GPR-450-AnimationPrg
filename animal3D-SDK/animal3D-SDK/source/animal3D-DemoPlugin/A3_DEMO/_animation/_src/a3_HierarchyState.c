@@ -216,6 +216,27 @@ a3i32 ec_specialCaseChecker(a3_FileStream const* inStream)
 	return -1;
 }
 
+a3i32 ec_peakNextInput(a3_FileStream const* inStream)
+{
+	char c = fgetc(inStream->stream);
+	if (c != '#' && c != '[')
+	{
+		ungetc(c, inStream->stream);
+		return 2;
+	}
+	else if (c == '#')
+	{
+		ec_skipLine(inStream);
+		return 0;
+	}
+	else if (c == '[')
+	{
+		ungetc(c, inStream->stream);
+		return 1;
+	}
+	return -1;
+}
+
 a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseGroup_out, a3_Hierarchy* hierarchy_out)
 {
 	//Define Variables
@@ -239,7 +260,7 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 		
 		while (!feof(inStream->stream)) //Loop while not at end of file
 		{
-			output = fscanf(inStream->stream, "%s", stringValue);
+			output = fscanf(inStream->stream, "%s", stringValue); //Get next string value from file
 			if (strncmp(stringValue, "NumSegments", strlen("NumSegments")) == 0) //Check if value is number of segments
 			{
 				//Get data from file and print to console
@@ -277,23 +298,16 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 
 		while (!feof(inStream->stream)) //Loop while not at end of file
 		{
-			output = ec_specialCaseChecker(inStream);
+			output = ec_peakNextInput(inStream);
 			if (output == 2) // Check if line is non header / non comment
 			{
 				output = fscanf(inStream->stream, "%s", &objName);
-				if (objName[0] == '[') //Check for header
+				if (objName[0] == '[') //Check for header, if so print name and skip comment on following line
 				{
 					strcpy(header, objName);
 					printf("Header: %s \n", header);
 					ec_skipLine(inStream);
 					break;
-				}
-				else if (strncmp(objName, "ain", strlen("ain")) == 0) //Check for main, parse, store, and print data
-				{
-					strcpy(objName, "main");
-					a3hierarchySetNode(hierarchy_out, index, -1, objName);
-					output = fscanf(inStream->stream, "%s", &objNameParent);
-					printf("Object: %s, Parent: %s \n", objName, objNameParent);
 				}
 				else //Parse, store, and print data for everyother line
 				{
@@ -326,9 +340,9 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 		a3real boneLength;
 		a3ui32 index = 0;
 
-		while (!feof(inStream->stream))
+		while (!feof(inStream->stream)) //Loop while not at end of file
 		{
-			output = ec_specialCaseChecker(inStream);
+			output = ec_peakNextInput(inStream);
 			if (output == 2) // Check if line is non header / non comment
 			{
 				output = fscanf(inStream->stream, "%s", &objName);
@@ -339,10 +353,6 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 					ec_skipLine(inStream);
 					break;
 				}
-				else if (strncmp(objName, "ain", strlen("ain")) == 0) //Check for main
-				{
-					strcpy(objName, "main");
-				}
 
 				//Pull values from file
 				output = fscanf(inStream->stream, "%f", &transform.x);
@@ -352,9 +362,13 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 				output = fscanf(inStream->stream, "%f", &rotation.y);
 				output = fscanf(inStream->stream, "%f", &rotation.z);
 				output = fscanf(inStream->stream, "%f", &boneLength);
+				a3mat4 matrix = { transform.x, transform.y, transform.z,0,
+								rotation.x, rotation.y, rotation.z,0,
+								boneLength, boneLength, boneLength,0,
+								0,0,0,0};
 
 				//Set hierarchalPose matrix
-				//poseGroup_out->hierarchalPoses[index].transform = 
+				poseGroup_out->hierarchalPoses[index].transform = matrix;
 
 				//Print to console
 				printf("Name: %s, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", objName, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneLength);
@@ -411,19 +425,15 @@ a3i32 ec_skipLine(a3_FileStream const* inStream)
 {
 	a3ui32 numSkipped = 0;
 
+	//Loop through and get more characters from file i untill end of line symbol is found
 	while (!feof(inStream->stream) && fgetc(inStream->stream) != '\n')
 	{
 		numSkipped++;
 	}
 
+	//return number of characters skipped
 	return numSkipped;
 
-}
-
-a3i32 ec_parceFile(char* bufferOut[fileLineMaxLength], const a3_FileStream* inStream)
-{
-
-	return -1;
 }
 
 
