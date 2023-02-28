@@ -216,6 +216,27 @@ a3i32 ec_specialCaseChecker(a3_FileStream const* inStream)
 	return -1;
 }
 
+a3i32 ec_peakNextInput(a3_FileStream const* inStream)
+{
+	char c = fgetc(inStream->stream);
+	if (c != '#' && c != '[')
+	{
+		ungetc(c, inStream->stream);
+		return 2;
+	}
+	else if (c == '#')
+	{
+		ec_skipLine(inStream);
+		return 0;
+	}
+	else if (c == '[')
+	{
+		ungetc(c, inStream->stream);
+		return 1;
+	}
+	return -1;
+}
+
 a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseGroup_out, a3_Hierarchy* hierarchy_out)
 {
 	//Define Variables
@@ -277,7 +298,7 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 
 		while (!feof(inStream->stream)) //Loop while not at end of file
 		{
-			output = ec_specialCaseChecker(inStream);
+			output = ec_peakNextInput(inStream);
 			if (output == 2) // Check if line is non header / non comment
 			{
 				output = fscanf(inStream->stream, "%s", &objName);
@@ -321,7 +342,7 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 
 		while (!feof(inStream->stream))
 		{
-			output = ec_specialCaseChecker(inStream);
+			output = ec_peakNextInput(inStream);
 			if (output == 2) // Check if line is non header / non comment
 			{
 				output = fscanf(inStream->stream, "%s", &objName);

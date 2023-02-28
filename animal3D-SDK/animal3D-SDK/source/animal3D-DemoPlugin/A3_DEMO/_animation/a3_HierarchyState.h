@@ -170,7 +170,11 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 // check next line for comments or headers
 a3i32 ec_specialCaseChecker(a3_FileStream const* inStream);
 
+//Skip to nearest \n
 a3i32 ec_skipLine(a3_FileStream const* inStream);
+
+// check next line for comments or headers, unlike ec_specialCaseChecker if a normal line is found it ungets the checked value
+a3i32 ec_peakNextInput(a3_FileStream const* inStream);
 
 // parce through line of file
 a3i32 ec_parceFile(char* bufferOut[fileLineMaxLength], const a3_FileStream* inStream);
