@@ -271,7 +271,12 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 	// init
 	a3real4x4Product(projectionBiasMat.m, bias.m, activeCamera->projectionMat.m);
 	a3real4x4Product(projectionBiasMat_inv.m, activeCamera->projectionMatInv.m, unbias.m);
-
+	
+	// update poses
+	a3kinematicsInterpolateDeltas(demoMode->hierarchyState_skel, &demoMode->skeletonAnimator); //Step 1: Animate and interpolate between local deltas
+	a3kinematicsPoseConcat       (demoMode->hierarchyState_skel); //Step 2: Concat local deltas onto base poses
+	a3kinematicsPosesToMatrices  (demoMode->hierarchyState_skel); //Step 3: Convert pose channels to matrices (in node-local space)
+	a3kinematicsSolveForward     (demoMode->hierarchyState_skel); //Step 4: Forward kinematics, concat local matrices to make object matrices
 
 	//-------------------------------------------------------------------------
 	// 0) PRE-SCENE PASS: shadow pass renders scene to depth-only
@@ -541,10 +546,10 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				a3shaderUniformSendFloat(a3unif_single, currentDemoProgram->uSize, 1, size);
 				a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uFlag, 1, flag);
 
-				a3kinematicsInterpolateDeltas(demoMode->hierarchyState_skel, &demoMode->skeletonAnimator); //Step 1: Animate and interpolate between local deltas
-				a3kinematicsPoseConcat       (demoMode->hierarchyState_skel); //Step 2: Concat local deltas onto base poses
-				a3kinematicsPosesToMatrices  (demoMode->hierarchyState_skel); //Step 3: Convert pose channels to matrices (in node-local space)
-				a3kinematicsSolveForward     (demoMode->hierarchyState_skel); //Step 4: Forward kinematics, concat local matrices to make object matrices
+				// write morph data
+				a3mat4 morphMats[128] = { 0 };
+				for (a3ui32 i = 0; i < demoMode->hierarchy_skel->numNodes; ++i) morphMats[i] = demoMode->hierarchyState_skel->objectPose[i].transform;
+				a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->ubTransformBlend, 128, morphMats->mm);
 
 				currentSceneObject = demoMode->obj_skeleton;
 				j = (a3ui32)(currentSceneObject - demoMode->object_scene);
@@ -560,6 +565,23 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 					a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uIndex, 1, &i);
 					a3vertexDrawableActivateAndRender(currentDrawable);
 				}
+
+#pragma region TEMP
+				a3mat4 tmpLMVP; //full stack
+				a3mat4 tmpL; //bone matrix for single joint, result of forward kinematics
+				a3mat4 tmpS = a3mat4_identity; //shared scale
+				a3real4x4SetScale(tmpS.m, 0.05f);
+				
+				a3vertexDrawableActivate(demoState->draw_node);
+				for (a3ui32 i = 0; i < demoMode->hierarchyState_skel->hierarchy->numNodes; ++i)
+				{
+					a3_HierarchyPose* node = &demoMode->hierarchyState_skel->objectPose[i];
+					a3real4x4Product(tmpL.m, node->transform.m, tmpS.m);
+					a3real4x4Product(tmpLMVP.m, viewProjectionMat.m, tmpL.m);
+					a3shaderUniformSendFloatMat(a3unif_mat4, 0, currentDemoProgram->uMVP, 1, tmpLMVP.mm);
+					a3vertexDrawableRenderActive();
+				}
+#pragma endregion
 			}
 
 			// display color target with scene overlays
