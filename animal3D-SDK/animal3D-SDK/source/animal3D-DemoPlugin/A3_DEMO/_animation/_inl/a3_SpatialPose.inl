@@ -38,10 +38,6 @@ inline a3real4x4r ec_eulerToMat4x4(a3real4x4p mat_out, a3vec3 eulerAngles, const
 {
 	a3real4x4SetIdentity(mat_out);
 
-	eulerAngles.x = (a3real)fmod(eulerAngles.x, 360);
-	eulerAngles.y = (a3real)fmod(eulerAngles.y, 360);
-	eulerAngles.z = (a3real)fmod(eulerAngles.z, 360);
-
 	// Setup axis matrices
 
 	a3real sinRotX = a3sind(eulerAngles.x);

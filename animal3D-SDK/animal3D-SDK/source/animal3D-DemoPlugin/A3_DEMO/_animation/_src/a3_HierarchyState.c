@@ -377,6 +377,7 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 #endif
 				poseGroup_out->spatialPosePool[index].scale = scale;
 				
+				index++;
 
 				//Print to console
 				printf("Name: %s, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", objName, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneLength);
