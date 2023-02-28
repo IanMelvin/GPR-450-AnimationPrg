@@ -34,7 +34,7 @@ Description of a spatial pose with rotation, translation and scale.
 
 // Compile-time switch
 // Define to use Euler angles, don't define to use quaternions
-#define USE_EULER_ANGLES
+//#define USE_EULER_ANGLES
 
 #ifdef __cplusplus
 extern "C"

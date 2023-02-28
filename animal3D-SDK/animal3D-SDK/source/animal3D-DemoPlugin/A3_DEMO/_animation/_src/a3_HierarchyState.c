@@ -370,7 +370,11 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 				scale.z = boneLength;
 
 				poseGroup_out->spatialPosePool[index].translation = transform;
+#if USE_EULER_ANGLES
 				poseGroup_out->spatialPosePool[index].orientation = rotation;
+#else
+				ec_eulerToQuat(poseGroup_out->spatialPosePool[index].orientation.q, rotation, a3poseEulerOrder_default); //FIXME make configurable
+#endif
 				poseGroup_out->spatialPosePool[index].scale = scale;
 				
 
@@ -412,7 +416,11 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 
 			//Set spacial pose values
 			poseGroup_out->spatialPosePool[index].translation = transform;
+#if USE_EULER_ANGLES
 			poseGroup_out->spatialPosePool[index].orientation = rotation;
+#else
+			ec_eulerToQuat(poseGroup_out->spatialPosePool[index].orientation.q, rotation, a3poseEulerOrder_default); //FIXME make configurable
+#endif
 			poseGroup_out->spatialPosePool[index].scale = scale;
 
 			//Increment
