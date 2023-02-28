@@ -97,7 +97,7 @@ a3i32 a3hierarchyStateCreate(a3_HierarchyState *state_out, const a3_Hierarchy *h
 {
 	// validate params and initialization states
 	//	(output is not yet initialized, hierarchy is initialized)
-	if (state_out && hierarchy && !state_out->hierarchy && hierarchy->nodes)
+	if (state_out && hierarchy && hierarchy->nodes)
 	{
 		// determine memory requirements
 
@@ -109,12 +109,12 @@ a3i32 a3hierarchyStateCreate(a3_HierarchyState *state_out, const a3_Hierarchy *h
 		state_out->hierarchy = hierarchy;
 		state_out->eulerOrder = a3poseEulerOrder_zxy;
 
-		state_out->sampledDeltaPose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
-		state_out->bindPose         = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
-		state_out->samplePose       = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
-		state_out->localPose        = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
-		state_out->objectPose       = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
-		state_out->channels         = calloc(hierarchy->numNodes, sizeof(a3_SpatialPoseChannel));
+		if (!state_out->sampledDeltaPose) state_out->sampledDeltaPose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
+		if (!state_out->bindPose        ) state_out->bindPose         = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
+		if (!state_out->samplePose      ) state_out->samplePose       = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
+		if (!state_out->localPose       ) state_out->localPose        = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
+		if (!state_out->objectPose      ) state_out->objectPose       = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
+		if (!state_out->channels        ) state_out->channels         = calloc(hierarchy->numNodes, sizeof(a3_SpatialPoseChannel));
 
 		// reset all data to defaults
 		for (a3ui32 i = 0; i < hierarchy->numNodes; i++)

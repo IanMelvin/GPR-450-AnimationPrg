@@ -350,6 +350,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	// load from file
 	a3hierarchyPoseGroupLoadHTR(demoMode->hierarchyPoseGroup_skel, demoMode->hierarchy_skel,
 		"../../../../resource/animdata/egnaro/egnaro_skel_anim.htr");
+	a3hierarchyStateCreate(demoMode->hierarchyState_skel, demoMode->hierarchy_skel);
 	
 
 	// finally set up hierarchy states
@@ -415,7 +416,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	clip->reverseTransition.flags = EC_TERMINUSACTION_FORWARD                          ; clip->reverseTransition.targetClipID = 1;
 	clip->forwardTransition.flags = EC_TERMINUSACTION_FORWARD | EC_TERMINUSACTION_PAUSE; clip->forwardTransition.targetClipID = 1;
 
-	// Init "calibration"
+	// Init "idle"
 	// # @ clip_name	duration_s	first_frame	last_frame	reverse_transition	forward_transition	comments (ignored)
 	// @ 	idle		4.0			28			52			<<					>
 	clip = &clips->clip[2];
@@ -423,7 +424,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	clip->reverseTransition.flags = EC_TERMINUSACTION_REVERSE | EC_TERMINUSACTION_SKIP;
 	clip->forwardTransition.flags = EC_TERMINUSACTION_FORWARD                         ;
 
-	// Init "calibration"
+	// Init "dance"
 	// # @ clip_name	duration_s	first_frame	last_frame	reverse_transition	forward_transition	comments (ignored)
 	// @ 	dance		1.5			54			78			<<					>
 	clip = &clips->clip[3];
@@ -434,7 +435,6 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 #pragma endregion
 
 	a3clipControllerInit(&demoMode->skeletonAnimator, "Skeleton animator", clips, 3);
-	a3hierarchyStateCreate(demoMode->hierarchyState_skel, demoMode->hierarchy_skel);
 
 #pragma endregion
 }
