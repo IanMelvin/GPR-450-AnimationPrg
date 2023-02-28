@@ -35,6 +35,21 @@
 
 //-----------------------------------------------------------------------------
 
+a3i32 createPoseClip(a3_Clip* clip, char* name, const a3_HierarchyState* hierarchyState, const a3_KeyframePool* keyframes, const a3ui32 firstKeyframe, const a3ui32 lastKeyframe, const a3ui32 animFrameCount)
+{
+	a3clipInit(clip, name, hierarchyState->hierarchy->numNodes);
+	for (a3ui32 i = 0; i < hierarchyState->hierarchy->numNodes; ++i)
+	{
+		a3_HierarchyNode* node = &hierarchyState->hierarchy->nodes[i];
+		a3ui32 startOffset = hierarchyState->hierarchy->numNodes + i * animFrameCount;
+		a3keyframeChannelInit(&clip->channels[i], node->name, keyframes, startOffset + firstKeyframe, startOffset + lastKeyframe);
+	}
+	a3clipCalculateDuration(clip);
+	clip->forwardTransition.flags = EC_TERMINUSACTION_PAUSE; clip->forwardTransition.targetClipID = NULL_CLIP_ID;
+	clip->reverseTransition.flags = EC_TERMINUSACTION_PAUSE; clip->reverseTransition.targetClipID = NULL_CLIP_ID;
+	return 1;
+}
+
 // utility to load animation
 void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Animation* demoMode)
 {
@@ -353,8 +368,74 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	hierarchyState->hierarchy = 0;
 	a3hierarchyStateCreate(hierarchyState, hierarchy);
 
-	// TODO Setup animator and disable above test
-	//a3clipControllerInit(&demoMode->skeletonAnimator, "Skeleton animator", ???, ???);
+
+#pragma region //////////////////////// TEMP TESTING: Set up animator ////////////////////////
+
+#pragma region //////////// Init keyframe data ////////////
+
+	const a3real frameRate = 1.0f / 24; //FIXME don't hard code
+	
+	a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
+	a3keyframePoolCreate(keyframes, demoMode->hierarchyPoseGroup_skel->spatialPoseCount, &a3_SpatialPoseInterpolationInfo);
+	for (a3ui32 i = 0; i < demoMode->hierarchyPoseGroup_skel->spatialPoseCount; ++i)
+	{
+		a3keyframeInit(&keyframes->keyframe[i], frameRate, &demoMode->hierarchyPoseGroup_skel->spatialPosePool[i]);
+	}
+
+#pragma endregion
+
+#pragma region //////////// Init clips ////////////
+
+	const a3ui32 animFrameCount = 81; //FIXME don't hard code
+
+	a3_ClipPool* clips = malloc(sizeof(a3_ClipPool));
+	a3clipPoolCreate(clips, 4);
+
+	// Init base pose - special case, cannot use utility function
+	// # @ clip_name	duration_s	first_frame	last_frame	reverse_transition	forward_transition	comments (ignored)
+	// @ 	basepose	0.0			0			0			|					|
+	a3_Clip* clip = &clips->clip[0];
+	{
+		a3clipInit(clip, "basepose", demoMode->hierarchyState_skel->hierarchy->numNodes);
+		for (a3ui32 i = 0; i < demoMode->hierarchyState_skel->hierarchy->numNodes; ++i)
+		{
+			a3_HierarchyNode* node = &demoMode->hierarchyState_skel->hierarchy->nodes[i];
+			a3keyframeChannelInit(clip->channels, node->name, keyframes, i, i);
+		}
+		a3clipCalculateDuration(clip);
+		clip->forwardTransition.flags = EC_TERMINUSACTION_PAUSE; clip->forwardTransition.targetClipID = 0;
+		clip->reverseTransition.flags = EC_TERMINUSACTION_PAUSE; clip->reverseTransition.targetClipID = 0;
+	}
+	
+	// Init "calibration"
+	// # @ clip_name	duration_s	first_frame	last_frame	reverse_transition	forward_transition	comments (ignored)
+	// @ 	calibration	1.0			1			27			> calibration		>| calibration
+	clip = &clips->clip[1];
+	createPoseClip(clip, "calibration", demoMode->hierarchyState_skel, keyframes, 1, 27, animFrameCount);
+	clip->reverseTransition.flags = EC_TERMINUSACTION_FORWARD                          ; clip->reverseTransition.targetClipID = 1;
+	clip->forwardTransition.flags = EC_TERMINUSACTION_FORWARD | EC_TERMINUSACTION_PAUSE; clip->forwardTransition.targetClipID = 1;
+
+	// Init "calibration"
+	// # @ clip_name	duration_s	first_frame	last_frame	reverse_transition	forward_transition	comments (ignored)
+	// @ 	idle		4.0			28			52			<<					>
+	clip = &clips->clip[2];
+	createPoseClip(clip, "idle", demoMode->hierarchyState_skel, keyframes, 28, 52, animFrameCount);
+	clip->reverseTransition.flags = EC_TERMINUSACTION_REVERSE | EC_TERMINUSACTION_SKIP;
+	clip->forwardTransition.flags = EC_TERMINUSACTION_FORWARD                         ;
+
+	// Init "calibration"
+	// # @ clip_name	duration_s	first_frame	last_frame	reverse_transition	forward_transition	comments (ignored)
+	// @ 	dance		1.5			54			78			<<					>
+	clip = &clips->clip[3];
+	createPoseClip(clip, "dance", demoMode->hierarchyState_skel, keyframes, 54, 78, animFrameCount);
+	clip->reverseTransition.flags = EC_TERMINUSACTION_REVERSE | EC_TERMINUSACTION_SKIP;
+	clip->forwardTransition.flags = EC_TERMINUSACTION_FORWARD                         ;
+	
+#pragma endregion
+
+	a3clipControllerInit(&demoMode->skeletonAnimator, "Skeleton animator", clips, 3);
+
+#pragma endregion
 }
 
 

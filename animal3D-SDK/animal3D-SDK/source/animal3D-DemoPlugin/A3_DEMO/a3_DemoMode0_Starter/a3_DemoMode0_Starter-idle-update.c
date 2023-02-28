@@ -80,8 +80,8 @@ void InitilizeCode(a3_DemoState const* demoState, a3_DemoMode0_Starter* demoMode
 	}
 
 	a3_ClipPool* clips = malloc(sizeof(a3_ClipPool));
-
 	a3clipPoolCreate(clips, 2);
+
 	a3clipInit(&clips->clip[0], "Entry", 1);
 	a3keyframeChannelInit(clips->clip[0].channels, "Value", keyframes, 0, 1);
 	a3clipCalculateDuration(&clips->clip[0]);
