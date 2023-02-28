@@ -218,103 +218,133 @@ a3i32 ec_specialCaseChecker(a3_FileStream const* inStream)
 
 a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseGroup_out, a3_Hierarchy* hierarchy_out)
 {
+	//Define Variables
 	a3ui32 numSkipped = 0;
 	a3ui32 output = 0;
 	
 	char header[fileLineMaxLength];
 	header[fileLineMaxLength - 1] = '\0';
 
+	//Get header and skip comment line
 	output = fscanf(inStream->stream, "%s", header);
 	printf("Header: %s \n", header);
 	ec_skipLine(inStream);
 
-	if (strncmp(header, "[Header]", strlen("[Header]")) == 0)
+	if (strncmp(header, "[Header]", strlen("[Header]")) == 0) //Check if header is header header
 	{
 		//printf("Same");
 		char stringValue [fileLineMaxLength];
 		stringValue[fileLineMaxLength - 1] = '\0';
 		a3ui32 intValue = 0;
 		
-		while (!feof(inStream->stream)) 
+		while (!feof(inStream->stream)) //Loop while not at end of file
 		{
 			output = fscanf(inStream->stream, "%s", stringValue);
-			if (strncmp(stringValue, "NumSegments", strlen("NumSegments")) == 0)
+			if (strncmp(stringValue, "NumSegments", strlen("NumSegments")) == 0) //Check if value is number of segments
 			{
+				//Get data from file and print to console
 				output = fscanf(inStream->stream, "%2d", &intValue);
 				printf("- NS = %d \n", intValue);
-				a3hierarchyCreate(hierarchy_out, intValue, test);
-				printf("%d", hierarchy_out->numNodes);
+
+				//Set up hierarchy
+				hierarchy_out->numNodes = intValue;
+				a3hierarchyCreate(hierarchy_out, hierarchy_out->numNodes, NULL);
 			}
-			else if (strncmp(stringValue, "NumFrames", strlen("NumFrames")) == 0)
+			else if (strncmp(stringValue, "NumFrames", strlen("NumFrames")) == 0) //Check if value is number of frames
 			{
+				//Get data from file and print to console
 				output = fscanf(inStream->stream, "%2d", &intValue);
 				printf("- NF = %d \n", intValue);
 				poseGroup_out->poseCount = intValue;
 			}
-			else if (strncmp(stringValue, "EulerRotationOrder", strlen("EulerRotationOrder")) == 0)
+			else if (strncmp(stringValue, "EulerRotationOrder", strlen("EulerRotationOrder")) == 0) //Check if value is euler rotation order
 			{
+				//Get data from file and print to console
 				output = fscanf(inStream->stream, "%s", &stringValue);
 				printf("- ERO: %s \n", stringValue);
 				return 0;
 			}
 		}
 	}
-	else if (strncmp(header, "[SegmentNames&Hierarchy]", strlen("[SegmentNames&Hierarchy]")) == 0)
+	else if (strncmp(header, "[SegmentNames&Hierarchy]", strlen("[SegmentNames&Hierarchy]")) == 0) //Check if header corresponds to segements and hierarchy
 	{
-		
+		//Define Variables
 		char objName[fileLineMaxLength] = { ' ' };
 		char objNameParent[fileLineMaxLength];
 		objName[fileLineMaxLength - 1] = '\0';
 		objNameParent[fileLineMaxLength - 1] = '\0';
+		a3ui32 index = 0;
 
-		while (!feof(inStream->stream))
+		while (!feof(inStream->stream)) //Loop while not at end of file
 		{
 			output = ec_specialCaseChecker(inStream);
-			if (output == 2)
+			if (output == 2) // Check if line is non header / non comment
 			{
 				output = fscanf(inStream->stream, "%s", &objName);
-				if (objName[0] == '[')
+				if (objName[0] == '[') //Check for header
 				{
 					strcpy(header, objName);
 					printf("Header: %s \n", header);
 					ec_skipLine(inStream);
 					break;
 				}
-				else if (strncmp(objName, "ain", strlen("ain")) == 0)
+				else if (strncmp(objName, "ain", strlen("ain")) == 0) //Check for main, parse, store, and print data
 				{
 					strcpy(objName, "main");
+					a3hierarchySetNode(hierarchy_out, index, -1, objName);
+					output = fscanf(inStream->stream, "%s", &objNameParent);
+					printf("Object: %s, Parent: %s \n", objName, objNameParent);
 				}
-				output = fscanf(inStream->stream, "%s", &objNameParent);
-				printf("Object: %s, Parent: %s \n", objName, objNameParent);
+				else //Parse, store, and print data for everyother line
+				{
+					output = fscanf(inStream->stream, "%s", &objNameParent);
+					printf("Object: %s, Parent: %s \n", objName, objNameParent);
+					a3hierarchySetNode(hierarchy_out, index, a3hierarchyGetNodeIndex(hierarchy_out, objNameParent), objName);
+				}
+
+				//Increment
+				index++;
 			}
 		}
+
+		//Defines Hierarchy values
+		poseGroup_out->hierarchy = hierarchy_out;
+		poseGroup_out->spatialPoseCount = poseGroup_out->poseCount * hierarchy_out->numNodes;
+		const a3ui32 dataSize = sizeof(a3_SpatialPose) * poseGroup_out->spatialPoseCount;
+		poseGroup_out->spatialPosePool = (a3_SpatialPose*)malloc(dataSize);
+		poseGroup_out->hierarchalPoses = (a3_HierarchyPose*)malloc(sizeof(a3_SpatialPose)* poseGroup_out->poseCount);
+
 	}
 	
-	if (strncmp(header, "[BasePosition]", strlen("[BasePosition]")) == 0)
+	if (strncmp(header, "[BasePosition]", strlen("[BasePosition]")) == 0) //Check if header relates to base position
 	{
+		//Define Variables
 		char objName[fileLineMaxLength] = { ' ' };
 		objName[fileLineMaxLength - 1] = '\0';
 		a3vec3 transform;
 		a3vec4 rotation;
 		a3real boneLength;
+		a3ui32 index = 0;
 
 		while (!feof(inStream->stream))
 		{
 			output = ec_specialCaseChecker(inStream);
-			if (output == 2)
+			if (output == 2) // Check if line is non header / non comment
 			{
 				output = fscanf(inStream->stream, "%s", &objName);
-				if (objName[0] == '[')
+				if (objName[0] == '[') //Check for header
 				{
 					strcpy(header, objName);
 					printf("Header: %s \n", header);
 					ec_skipLine(inStream);
 					break;
 				}
-				else if (strncmp(objName, "ain", strlen("ain")) == 0)
+				else if (strncmp(objName, "ain", strlen("ain")) == 0) //Check for main
 				{
 					strcpy(objName, "main");
 				}
+
+				//Pull values from file
 				output = fscanf(inStream->stream, "%f", &transform.x);
 				output = fscanf(inStream->stream, "%f", &transform.y);
 				output = fscanf(inStream->stream, "%f", &transform.z);
@@ -323,20 +353,31 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 				output = fscanf(inStream->stream, "%f", &rotation.z);
 				output = fscanf(inStream->stream, "%f", &boneLength);
 
+				//Set hierarchalPose matrix
+				poseGroup_out->hierarchalPoses[index].transform = 
+
+				//Print to console
 				printf("Name: %s, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", objName, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneLength);
 			}
 		}
 	}
 
-	if(strchr(header, '[') != NULL)
+	if(strchr(header, '[') != NULL) //Check if header exists
 	{
+		//Skip Line
 		ec_skipLine(inStream);
+
+		//Define Variables
 		a3ui32 frameNumber = 0;
 		a3vec3 transform;
-		a3vec4 rotation;
+		a3vec3 rotation;
+		a3vec3 scale;
 		a3real boneScaleFactor;
-		while(!feof(inStream->stream) && frameNumber < poseGroup_out->poseCount - 1)
+		a3ui32 index = 0;
+
+		while(!feof(inStream->stream) && frameNumber < poseGroup_out->poseCount - 1) //Loop while not at end of file and frame count is less then the pose count
 		{
+			//Pull Data
 			output = fscanf(inStream->stream, "%2d", &frameNumber);
 			output = fscanf(inStream->stream, "%f", &transform.x);
 			output = fscanf(inStream->stream, "%f", &transform.y);
@@ -345,6 +386,21 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 			output = fscanf(inStream->stream, "%f", &rotation.y);
 			output = fscanf(inStream->stream, "%f", &rotation.z);
 			output = fscanf(inStream->stream, "%f", &boneScaleFactor);
+
+			//Set scale vector
+			scale.x = boneScaleFactor;
+			scale.y = boneScaleFactor;
+			scale.z = boneScaleFactor;
+
+			//Set spacial pose values
+			poseGroup_out->spatialPosePool[index].translation = transform;
+			poseGroup_out->spatialPosePool[index].orientation = rotation;
+			poseGroup_out->spatialPosePool[index].scale = scale;
+
+			//Increment
+			index++;
+
+			//Print to console
 			printf("Frame: %d, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", frameNumber, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneScaleFactor);
 		}
 	}
