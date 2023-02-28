@@ -32,6 +32,10 @@ Description of a spatial pose with rotation, translation and scale.
 
 //-----------------------------------------------------------------------------
 
+// Compile-time switch
+// Define to use Euler angles, don't define to use quaternions
+#define USE_EULER_ANGLES
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -67,9 +71,12 @@ enum a3_SpatialPoseEulerOrder
 	a3poseEulerOrder_yxz = a3poseEulerOrder_idy<<a3poseEulerOrder_order1 | a3poseEulerOrder_idx<<a3poseEulerOrder_order2 | a3poseEulerOrder_idz<<a3poseEulerOrder_order3,
 	a3poseEulerOrder_xzy = a3poseEulerOrder_idx<<a3poseEulerOrder_order1 | a3poseEulerOrder_idz<<a3poseEulerOrder_order2 | a3poseEulerOrder_idy<<a3poseEulerOrder_order3,
 	a3poseEulerOrder_zyx = a3poseEulerOrder_idz<<a3poseEulerOrder_order1 | a3poseEulerOrder_idy<<a3poseEulerOrder_order2 | a3poseEulerOrder_idx<<a3poseEulerOrder_order3,
+
+	a3poseEulerOrder_default = a3poseEulerOrder_zxy
 };
 
-a3mat4 ec_eulerToMat4x4(a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order);
+a3real4x4r ec_eulerToMat4x4(a3real4x4p mat_out, a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order);
+a3real4r ec_eulerToQuat(a3real4p quat_out, const a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order);
 
 //-----------------------------------------------------------------------------
 
@@ -115,7 +122,11 @@ enum a3_SpatialPoseChannel
 struct a3_SpatialPose
 {
 	// orientation euler angles
+#ifdef USE_EULER_ANGLES
 	a3vec3 orientation;
+#else
+	a3quat orientation;
+#endif
 
 	// translation vector
 	a3vec3 translation;
@@ -130,7 +141,7 @@ struct a3_SpatialPose
 a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose);
 
 // set rotation values for a single node pose
-a3i32 a3spatialPoseSetRotation(a3_SpatialPose* spatialPose, const a3f32 rx_degrees, const a3f32 ry_degrees, const a3f32 rz_degrees);
+a3i32 a3spatialPoseSetRotation(a3_SpatialPose* spatialPose, const a3f32 rx_degrees, const a3f32 ry_degrees, const a3f32 rz_degrees, const a3_SpatialPoseEulerOrder eulerOrder);
 
 // scale
 a3i32 a3spatialPoseSetScale(a3_SpatialPose* spatialPose, const a3f32 sx, const a3f32 sy, const a3f32 sz);
