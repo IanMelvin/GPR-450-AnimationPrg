@@ -260,7 +260,7 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 		
 		while (!feof(inStream->stream)) //Loop while not at end of file
 		{
-			output = fscanf(inStream->stream, "%s", stringValue);
+			output = fscanf(inStream->stream, "%s", stringValue); //Get next string value from file
 			if (strncmp(stringValue, "NumSegments", strlen("NumSegments")) == 0) //Check if value is number of segments
 			{
 				//Get data from file and print to console
@@ -302,7 +302,7 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 			if (output == 2) // Check if line is non header / non comment
 			{
 				output = fscanf(inStream->stream, "%s", &objName);
-				if (objName[0] == '[') //Check for header
+				if (objName[0] == '[') //Check for header, if so print name and skip comment on following line
 				{
 					strcpy(header, objName);
 					printf("Header: %s \n", header);
@@ -340,7 +340,7 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 		a3real boneLength;
 		a3ui32 index = 0;
 
-		while (!feof(inStream->stream))
+		while (!feof(inStream->stream)) //Loop while not at end of file
 		{
 			output = ec_peakNextInput(inStream);
 			if (output == 2) // Check if line is non header / non comment
@@ -425,19 +425,15 @@ a3i32 ec_skipLine(a3_FileStream const* inStream)
 {
 	a3ui32 numSkipped = 0;
 
+	//Loop through and get more characters from file i untill end of line symbol is found
 	while (!feof(inStream->stream) && fgetc(inStream->stream) != '\n')
 	{
 		numSkipped++;
 	}
 
+	//return number of characters skipped
 	return numSkipped;
 
-}
-
-a3i32 ec_parceFile(char* bufferOut[fileLineMaxLength], const a3_FileStream* inStream)
-{
-
-	return -1;
 }
 
 
