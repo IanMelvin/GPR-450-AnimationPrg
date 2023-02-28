@@ -44,9 +44,6 @@
 #include <OpenGL/gl3.h>
 #endif	// _WIN32
 
-
-#include <stdio.h> //TEMP TEST
-
 //-----------------------------------------------------------------------------
 // RENDER TEXT
 
@@ -88,27 +85,7 @@ void a3demo_render_controls(a3_DemoState const* demoState,
 	}
 
 	// global controls
-	textOffset = -0.5f;
-
-	//TEMP TEST
-	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
-		"Test Lab 1: '/' (start), ']' (play/pause), '[' (slowMotion), 'r' reset");
-	char buf[256];
-
-	//TEMP TEST
-	if (demoState->testAnimator.clipPool) sprintf_s(buf, 256, "'%s' playing at speed %f", demoState->testAnimator.name, demoState->testAnimator.speed);
-	else strcpy_s(buf, 256, "[Error: Test animator was not initialized]");
-	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a, buf);
-
-	//TEMP TEST
-	if (demoState->testAnimator.clipPool)
-	{
-		a3real evaluatedValue;
-		ec_clipController_evaluateValue(&evaluatedValue, &demoState->testAnimator, 0);
-		sprintf_s(buf, 256, "Clip[%i] '%s': %f at time=%f", demoState->testAnimator.clipIndex, ec_clipController_getClip(&demoState->testAnimator)->name, evaluatedValue, demoState->testAnimator.clipTime);
-	}
-	else strcpy_s(buf, 256, "[Error: Test animator was not initialized]");
-	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a, buf);
+	textOffset = -0.8f;
 
 	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
 		"Toggle text display:        't' (toggle) | 'T' (alloc/dealloc) ");

@@ -352,6 +352,9 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	hierarchyState = demoMode->hierarchyState_skel + 1;
 	hierarchyState->hierarchy = 0;
 	a3hierarchyStateCreate(hierarchyState, hierarchy);
+
+	// TODO Setup animator and disable above test
+	//a3clipControllerInit(&demoMode->skeletonAnimator, "Skeleton animator", ???, ???);
 }
 
 

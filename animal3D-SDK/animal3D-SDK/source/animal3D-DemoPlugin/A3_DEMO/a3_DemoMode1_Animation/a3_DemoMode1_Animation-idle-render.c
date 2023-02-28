@@ -540,6 +540,14 @@ void a3animation_render(a3_DemoState const* demoState, a3_DemoMode1_Animation co
 				a3shaderUniformSendFloat(a3unif_vec4, currentDemoProgram->uColor, 1, a3vec4_one.v);
 				a3shaderUniformSendFloat(a3unif_single, currentDemoProgram->uSize, 1, size);
 				a3shaderUniformSendInt(a3unif_single, currentDemoProgram->uFlag, 1, flag);
+
+				/*
+				//a3kinematicsInterpolateDeltas(demoMode->hierarchyState_skel, &demoMode->skeletonAnimator); //Step 1: Animate and interpolate between local deltas
+				a3kinematicsPoseConcat       (demoMode->hierarchyState_skel); //Step 2: Concat local deltas onto base poses
+				a3kinematicsPosesToMatrices  (demoMode->hierarchyState_skel); //Step 3: Convert pose channels to matrices (in node-local space)
+				a3kinematicsSolveForward     (demoMode->hierarchyState_skel); //Step 4: Forward kinematics, concat local matrices to make object matrices
+				*/
+
 				currentSceneObject = demoMode->obj_skeleton;
 				j = (a3ui32)(currentSceneObject - demoMode->object_scene);
 				{
