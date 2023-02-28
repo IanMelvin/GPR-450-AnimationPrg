@@ -30,15 +30,10 @@
 a3i32 a3kinematicsInterpolateDeltas(const a3_HierarchyState* hierarchyState, const a3_ClipController* animator)
 {
 	a3_Clip* currentClip = ec_clipController_getClip(animator);
-    channel_id_t id_translation = a3clipGetChannelID(currentClip, "T");
-    channel_id_t id_orientation = a3clipGetChannelID(currentClip, "R");
-    channel_id_t id_scale       = a3clipGetChannelID(currentClip, "S");
-
     for (a3ui32 i = 0; i < hierarchyState->hierarchy->numNodes; ++i)
     {
-		ec_clipController_evaluateValue(&hierarchyState->sampledDeltaPose[i].translation, animator, id_translation);
-		ec_clipController_evaluateValue(&hierarchyState->sampledDeltaPose[i].orientation, animator, id_orientation);
-		ec_clipController_evaluateValue(&hierarchyState->sampledDeltaPose[i].scale      , animator, id_scale      );
+		//channel_id_t id_translation = a3clipGetChannelID(currentClip, hierarchyState->hierarchy->nodes[i].name);
+		ec_clipController_evaluateValue(&hierarchyState->sampledDeltaPose[i], animator, i);
     }
 
     return 1;

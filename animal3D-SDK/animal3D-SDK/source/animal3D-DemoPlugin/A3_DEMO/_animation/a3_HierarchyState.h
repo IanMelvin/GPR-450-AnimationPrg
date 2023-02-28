@@ -82,7 +82,7 @@ struct a3_HierarchyState
 	// pointer to hierarcy
 	const a3_Hierarchy* hierarchy;
 
-	//Inputs to step 2, managed externally
+	//Inputs to step 2
 	//Arrays
 	a3_SpatialPose* bindPose;
 	a3_SpatialPose* sampledDeltaPose; //Output of step 1

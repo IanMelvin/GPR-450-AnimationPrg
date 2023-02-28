@@ -109,8 +109,8 @@ a3i32 a3hierarchyStateCreate(a3_HierarchyState *state_out, const a3_Hierarchy *h
 		state_out->hierarchy = hierarchy;
 		state_out->eulerOrder = a3poseEulerOrder_zxy;
 
-		state_out->sampledDeltaPose = NULL; //Set externally
-		state_out->bindPose         = NULL; //Set externally
+		state_out->sampledDeltaPose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
+		state_out->bindPose         = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
 		state_out->samplePose       = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
 		state_out->localPose        = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
 		state_out->objectPose       = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));

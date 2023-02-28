@@ -98,6 +98,10 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			demoMode->object_scene[i].modelMat.m, a3mat4_identity.m);
 	}
 
+	if (demoState->updateAnimation)
+	{
+		a3clipControllerUpdate(&demoMode->skeletonAnimator, (a3real)dt);
+	}
 /*
 	// skeletal
 	if (demoState->updateAnimation)

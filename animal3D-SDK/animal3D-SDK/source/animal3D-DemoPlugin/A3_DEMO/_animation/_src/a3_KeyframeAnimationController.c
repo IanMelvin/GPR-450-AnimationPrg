@@ -57,6 +57,8 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 
 	clipCtrl_out->isPaused = a3false;
 
+	if (clipPool) ec_clipController_preparePlayheads(clipCtrl_out, ec_clipController_getClip(clipCtrl_out));
+
 	return -1;
 }
 
