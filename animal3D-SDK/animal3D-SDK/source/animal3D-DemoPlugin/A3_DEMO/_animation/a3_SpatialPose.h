@@ -69,7 +69,7 @@ enum a3_SpatialPoseEulerOrder
 	a3poseEulerOrder_zyx = a3poseEulerOrder_idz<<a3poseEulerOrder_order1 | a3poseEulerOrder_idy<<a3poseEulerOrder_order2 | a3poseEulerOrder_idx<<a3poseEulerOrder_order3,
 };
 
-a3mat4 ec_eulerToMat4x4(const a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order);
+a3mat4 ec_eulerToMat4x4(a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order);
 
 //-----------------------------------------------------------------------------
 

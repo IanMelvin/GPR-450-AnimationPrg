@@ -30,12 +30,17 @@
 #ifndef __ANIMAL3D_SPATIALPOSE_INL
 #define __ANIMAL3D_SPATIALPOSE_INL
 
+#include <math.h>
 
 //-----------------------------------------------------------------------------
 
-inline a3mat4 ec_eulerToMat4x4(const a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order)
+inline a3mat4 ec_eulerToMat4x4(a3vec3 eulerAngles, const a3_SpatialPoseEulerOrder order)
 {
 	a3mat4 out = a3mat4_identity;
+
+	eulerAngles.x = (a3real)fmod(eulerAngles.x, 360);
+	eulerAngles.y = (a3real)fmod(eulerAngles.y, 360);
+	eulerAngles.z = (a3real)fmod(eulerAngles.z, 360);
 
 	// Setup axis matrices
 

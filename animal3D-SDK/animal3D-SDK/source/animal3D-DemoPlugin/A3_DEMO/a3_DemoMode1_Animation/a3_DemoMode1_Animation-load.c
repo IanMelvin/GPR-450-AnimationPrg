@@ -435,6 +435,9 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 #pragma endregion
 
 	a3clipControllerInit(&demoMode->skeletonAnimator, "Skeleton animator", clips, 3);
+	
+	// Write base pose
+	demoMode->hierarchyState_skel->bindPose = demoMode->hierarchyPoseGroup_skel->spatialPosePool;
 
 #pragma endregion
 }
