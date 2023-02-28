@@ -288,13 +288,6 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 					ec_skipLine(inStream);
 					break;
 				}
-				else if (strncmp(objName, "ain", strlen("ain")) == 0) //Check for main, parse, store, and print data
-				{
-					strcpy(objName, "main");
-					a3hierarchySetNode(hierarchy_out, index, -1, objName);
-					output = fscanf(inStream->stream, "%s", &objNameParent);
-					printf("Object: %s, Parent: %s \n", objName, objNameParent);
-				}
 				else //Parse, store, and print data for everyother line
 				{
 					output = fscanf(inStream->stream, "%s", &objNameParent);
@@ -339,10 +332,6 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 					ec_skipLine(inStream);
 					break;
 				}
-				else if (strncmp(objName, "ain", strlen("ain")) == 0) //Check for main
-				{
-					strcpy(objName, "main");
-				}
 
 				//Pull values from file
 				output = fscanf(inStream->stream, "%f", &transform.x);
@@ -352,9 +341,13 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 				output = fscanf(inStream->stream, "%f", &rotation.y);
 				output = fscanf(inStream->stream, "%f", &rotation.z);
 				output = fscanf(inStream->stream, "%f", &boneLength);
+				a3mat4 matrix = { transform.x, transform.y, transform.z,0,
+								rotation.x, rotation.y, rotation.z,0,
+								boneLength, boneLength, boneLength,0,
+								0,0,0,0};
 
 				//Set hierarchalPose matrix
-				poseGroup_out->hierarchalPoses[index].transform = 
+				poseGroup_out->hierarchalPoses[index].transform = matrix;
 
 				//Print to console
 				printf("Name: %s, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", objName, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneLength);
