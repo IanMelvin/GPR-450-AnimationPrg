@@ -323,7 +323,7 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 
 		//Defines Hierarchy values
 		poseGroup_out->hierarchy = hierarchy_out;
-		poseGroup_out->spatialPoseCount = poseGroup_out->poseCount * hierarchy_out->numNodes;
+		poseGroup_out->spatialPoseCount = (poseGroup_out->poseCount * hierarchy_out->numNodes) + hierarchy_out->numNodes;
 		const a3ui32 dataSize = sizeof(a3_SpatialPose) * poseGroup_out->spatialPoseCount;
 		poseGroup_out->spatialPosePool = (a3_SpatialPose*)malloc(dataSize);
 		poseGroup_out->hierarchalPoses = (a3_HierarchyPose*)malloc(sizeof(a3_SpatialPose)* poseGroup_out->poseCount);
@@ -336,7 +336,8 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 		char objName[fileLineMaxLength] = { ' ' };
 		objName[fileLineMaxLength - 1] = '\0';
 		a3vec3 transform;
-		a3vec4 rotation;
+		a3vec3 rotation;
+		a3vec3 scale;
 		a3real boneLength;
 		a3ui32 index = 0;
 
@@ -362,13 +363,16 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 				output = fscanf(inStream->stream, "%f", &rotation.y);
 				output = fscanf(inStream->stream, "%f", &rotation.z);
 				output = fscanf(inStream->stream, "%f", &boneLength);
-				a3mat4 matrix = { transform.x, transform.y, transform.z,0,
-								rotation.x, rotation.y, rotation.z,0,
-								boneLength, boneLength, boneLength,0,
-								0,0,0,0};
 
-				//Set hierarchalPose matrix
-				poseGroup_out->hierarchalPoses[index].transform = matrix;
+				//Set scale vector
+				scale.x = boneLength;
+				scale.y = boneLength;
+				scale.z = boneLength;
+
+				poseGroup_out->spatialPosePool[index].translation = transform;
+				poseGroup_out->spatialPosePool[index].orientation = rotation;
+				poseGroup_out->spatialPosePool[index].scale = scale;
+				
 
 				//Print to console
 				printf("Name: %s, Transform: %f %f %f, Rotation: %f %f %f, Bone: %f \n", objName, transform.x, transform.y, transform.z, rotation.x, rotation.y, rotation.z, boneLength);
@@ -387,7 +391,7 @@ a3i32 ec_checkHeader(const a3_FileStream* inStream, a3_HierarchyPoseGroup* poseG
 		a3vec3 rotation;
 		a3vec3 scale;
 		a3real boneScaleFactor;
-		a3ui32 index = 0;
+		a3ui32 index = hierarchy_out->numNodes;
 
 		while(!feof(inStream->stream) && frameNumber < poseGroup_out->poseCount - 1) //Loop while not at end of file and frame count is less then the pose count
 		{
