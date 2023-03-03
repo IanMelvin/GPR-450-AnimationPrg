@@ -35,33 +35,38 @@ void* defaultLerp(void* val_out, const void* v0, const void* v1, const a3real pa
 	return val_out;
 }
 
-void* defaultTriangular(void* val_out, const void* v0, const void* v1, const void* v2, const a3real param1, const a3real param2, const ec_DataVtable* funcs)
-{
-	if (val_out && v0 && v1 && v2)
-	{
-		a3real param3 = 1 - param1 - param2;
-
-		funcs->copy(val_out, v0);
-		funcs->scale(val_out, param3);
-
-		void* val1 = malloc(sizeof(v0));
-		funcs->copy(val1, v1);
-		funcs->scale(val1, param1);
-
-		void* val2 = malloc(sizeof(v0));
-		funcs->copy(val2, v2);
-		funcs->scale(val2, param2);
-
-		funcs->concat(val_out, val_out, val1);
-		funcs->concat(val_out, val_out, val2);
-	}
-	
-	return val_out;
-}
-
 void* defaultNearest(void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs)
 {
 	return funcs->copy(val_out, param>0.5f ? v1 : v0, funcs);
+}
+
+void* defaultCubic(void* val_out, const void* v1, const void* v2, const void* v3, const void* v4, const a3real param, const ec_DataVtable* funcs)
+{
+	if (val_out && v1 && v2 && v3 && v4)
+	{
+		funcs->copy(val_out, v1, funcs);
+
+		void* val2 = malloc(sizeof(funcs->size));
+		funcs->copy(val2, v2, funcs);
+
+		void* val3 = malloc(sizeof(funcs->size));
+		funcs->copy(val3, v3, funcs);
+
+		void* val4 = malloc(sizeof(funcs->size));
+		funcs->copy(val4, v4, funcs);
+
+		funcs->scale(val_out, (-param + 2 * pow(param, 2) - pow(param, 3)));
+		funcs->scale(val2, (2 - 5 * pow(param, 2) + 3 * pow(param, 3)));
+		funcs->scale(val3, (param + 4 * pow(param, 2) - 3 * pow(param, 3)));
+		funcs->scale(val4, (-1 * pow(param, 2) + pow(param, 3)));
+
+		funcs->concat(val_out, val_out, val2);
+		funcs->concat(val_out, val_out, val3);
+		funcs->concat(val_out, val_out, val4);
+
+		funcs->scale(val_out, 0.5f);
+	}
+	return val_out;
 }
 
 void* defaultDeconcat(void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs)
@@ -69,6 +74,30 @@ void* defaultDeconcat(void* val_out, const void* lhs, const void* rhs, const ec_
 	funcs->copy(val_out, rhs, funcs);     //val_out = rhs
 	funcs->invert(val_out);               //val_out = rhs^-1
 	funcs->concat(val_out, lhs, val_out); //val_out = lhs * rhs^-1
+	return val_out;
+}
+
+void* defaultTriangular(void* val_out, const void* v0, const void* v1, const void* v2, const a3real param1, const a3real param2, const ec_DataVtable* funcs)
+{
+	if (val_out && v0 && v1 && v2)
+	{
+		a3real param3 = 1 - param1 - param2;
+
+		funcs->copy(val_out, v0, funcs);
+		funcs->scale(val_out, param3);
+
+		void* val1 = malloc(sizeof(v0));
+		funcs->copy(val1, v1, funcs);
+		funcs->scale(val1, param1);
+
+		void* val2 = malloc(sizeof(v0));
+		funcs->copy(val2, v2, funcs);
+		funcs->scale(val2, param2);
+
+		funcs->concat(val_out, val_out, val1);
+		funcs->concat(val_out, val_out, val2);
+	}
+
 	return val_out;
 }
 
@@ -90,51 +119,22 @@ void* defaultBiNearest(void* val_out, const void* v00, const void* v01, const vo
 	return funcs->nearest(val_out, vx0, vx1, paramY, funcs);
 }
 
-void* defaultCubic(void* val_out, const void** vals, const a3real param, const ec_DataVtable* funcs)
+void* defaultBiCubic(void* val_out, const void* v1, const void* v2, const void* v3, const void* v4, const void* v5, const void* v6, const void* v7, const void* v8, const void* v9, const void* v10, const void* v11, const void* v12, const void* v13, const void* v14, const void* v15, const void* v16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const ec_DataVtable* funcs)
 {
-	if (val_out && vals)
+	if (val_out && v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8 && v9 && v10 && v11 && v12 && v13 && v14 && v15 && v16)
 	{
-		funcs->copy(val_out, vals[0]);
+		void* val1 = malloc(sizeof(funcs->size));
+		void* val2 = malloc(sizeof(funcs->size));
+		void* val3 = malloc(sizeof(funcs->size));
+		void* val4 = malloc(sizeof(funcs->size));
 
-		void* val2 = malloc(sizeof(vals[0]));
-		funcs->copy(val2, vals[1]);
-
-		void* val3 = malloc(sizeof(vals[0]));
-		funcs->copy(val3, vals[2]);
-
-		void* val4 = malloc(sizeof(vals[0]));
-		funcs->copy(val4, vals[3]);
-
-		funcs->scale(val_out, (-param + 2 * pow(param, 2) - pow(param, 3)));
-		funcs->scale(val2, (2 - 5 * pow(param, 2) + 3 * pow(param, 3)));
-		funcs->scale(val3, (param + 4*pow(param, 2) - 3*pow(param, 3)));
-		funcs->scale(val4, (-1 * pow(param, 2) + pow(param, 3)));
-
-		funcs->concat(val_out, val_out, val2);
-		funcs->concat(val_out, val_out, val3);
-		funcs->concat(val_out, val_out, val4);
-
-		funcs->scale(val_out, 0.5f);
+		funcs->cubic(val_out,
+			funcs->cubic(val1, v1, v2, v3, v4, param0, funcs),
+			funcs->cubic(val2, v5, v6, v7, v8, param1, funcs),
+			funcs->cubic(val3, v9, v10, v11, v12, param2, funcs),
+			funcs->cubic(val4, v13, v14, v15, v16, param3, funcs),
+			param4, funcs);
 	}
-	return val_out;
-}
-
-void* defaultBiCubic(void* val_out, const void** vals[4], const a3real param0, const a3real param1, const ec_DataVtable* funcs)
-{
-	void* val1 = malloc(sizeof(vals[0]));
-	funcs->copy(val1, vals[0]);
-
-	void* val2 = malloc(sizeof(vals[0]));
-	funcs->copy(val2, vals[1]);
-
-	void* val3 = malloc(sizeof(vals[0]));
-	funcs->copy(val3, vals[2]);
-
-	void* val4 = malloc(sizeof(vals[0]));
-	funcs->copy(val4, vals[3]);
-
-
-
 
 	return val_out;
 }
