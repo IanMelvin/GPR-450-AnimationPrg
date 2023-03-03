@@ -55,10 +55,10 @@ void* defaultCubic(void* val_out, const void* v1, const void* v2, const void* v3
 		void* val4 = malloc(sizeof(funcs->size));
 		funcs->copy(val4, v4, funcs);
 
-		funcs->scale(val_out, (-param + 2 * pow(param, 2) - pow(param, 3)));
-		funcs->scale(val2, (2 - 5 * pow(param, 2) + 3 * pow(param, 3)));
-		funcs->scale(val3, (param + 4 * pow(param, 2) - 3 * pow(param, 3)));
-		funcs->scale(val4, (-1 * pow(param, 2) + pow(param, 3)));
+		funcs->scale(val_out, (a3real)(-param + 2 * pow(param, 2) - pow(param, 3)));
+		funcs->scale(val2, (a3real)(2 - 5 * pow(param, 2) + 3 * pow(param, 3)));
+		funcs->scale(val3, (a3real)(param + 4 * pow(param, 2) - 3 * pow(param, 3)));
+		funcs->scale(val4, (a3real)(-1 * pow(param, 2) + pow(param, 3)));
 
 		funcs->concat(val_out, val_out, val2);
 		funcs->concat(val_out, val_out, val3);
