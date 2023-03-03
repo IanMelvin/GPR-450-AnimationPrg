@@ -54,7 +54,7 @@ void* defaultTriangular(void* val_out, const void* v0, const void* v1, const voi
 
 void* defaultNearest(void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs)
 {
-	return funcs->lerp(val_out, v0, v1, param > 0.5f ? 1.0f : 0.0f, funcs);
+	return funcs->copy(val_out, param>0.5f ? v1 : v0);
 }
 
 void* defaultDeconcat(void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs)
