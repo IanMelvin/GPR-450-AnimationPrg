@@ -1,9 +1,9 @@
 /*
-	Team Existential Crisis
+	Team Evistential Crisis
 	Robert Christensen & Ian Melvin
 
 	ec_Interpolation.h
-	Generic functions that can be used to make polymorphic interpolation
+	Generic vtables and functions that can be used to make polymorphic interpolation
 */
 
 #ifndef EC_INTERPOLATION_H
@@ -14,40 +14,51 @@
 
 typedef struct ec_DataVtable ec_DataVtable;
 
+void vtable_setDefaults(ec_DataVtable* out); // Sets defaults for order 2+
+void setupVtables();
+extern ec_DataVtable vtable_mat4;
+extern ec_DataVtable vtable_SpatialPose;
+extern ec_DataVtable vtable_translation; // vec3, additive
+extern ec_DataVtable vtable_quatRotation; // quat, multiplicative
+extern ec_DataVtable vtable_eulerRotation; // vec3, additive
+extern ec_DataVtable vtable_scale; // vec3, multiplicative
+
 struct ec_DataVtable
 {
+	size_t size;
+
+	//1st order essential functions
 	void* (*identity)(void* val_out);
 	void* (*copy)(void* dst, const void* src);
 	void* (*invert)(void* val_inout);
 	void* (*concat)(void* val_out, const void* lhs, const void* rhs);
 	void* (*scale)(void* val_inout, const a3real scale);
-	size_t size;
+
+	//Optional to override, vtable_setDefaults sets these to the functions below
+	
+	void* (*lerp      )(void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
+	void* (*nearest   )(void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
+	void* (*cubic     )(void* val_out, const void* vals, const a3real param, const ec_DataVtable* funcs); //Assume vals is void[4]
+	void* (*deconcat  )(void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs);
+	void* (*triangular)(void* val_out, const void* v0, const void* v1, const void* v2, const a3real param1, const a3real param2, const ec_DataVtable* funcs);
+	void* (*biLerp    )(void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
+	void* (*biNearest )(void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
+	void* (*biCubic   )(void* val_out, const void* vals[4], const a3real param0, const a3real param1, const ec_DataVtable* funcs); //Assume vals is 4x4
 };
 
-void* deconcat(void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs);
-
-void* nearest   (void* val_out, const void* x0, const void* x1, const a3real param, const ec_DataVtable* funcs);
-void* lerp      (void* val_out, const void* x0, const void* x1, const a3real param, const ec_DataVtable* funcs);
-void* cubic     (void* val_out, const void* xneg1, const void* x0, const void* x1, const void* x2, const a3real param, const ec_DataVtable* funcs);
-void* triangular(void* val_out, const void* x0, const void* x1, const void* x2, const a3real param0, const a3real param1, const ec_DataVtable* funcs);
+//Defaults
+void* defaultLerp      (void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
+void* defaultNearest   (void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
+void* defaultCubic     (void* val_out, const void* vals, const a3real param, const ec_DataVtable* funcs); //Assume vals is void[4]
+void* defaultDeconcat  (void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs);
+void* defaultTriangular(void* val_out, const void* v0, const void* v1, const void* v2, const a3real param1, const a3real param2, const ec_DataVtable* funcs);
+void* defaultBiLerp    (void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
+void* defaultBiNearest (void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
+void* defaultBiCubic   (void* val_out, const void* vals[4], const a3real param0, const a3real param1, const ec_DataVtable* funcs); //Assume vals is 4x4
 
 /*
-	Still need:
-	 - Bi-nearest
-	 - Bi-linear
-	 - Bi-cubic
-
-	** For bi-interpolation, allow the first two interpolations to have separate parameters **
-
 	Not doing:
 	 - Construct
 */
-
-extern ec_DataVtable vtable_mat4;
-extern ec_DataVtable vtable_SpatialPose;
-extern ec_DataVtable vtable_translation;
-extern ec_DataVtable vtable_quatRotation;
-extern ec_DataVtable vtable_eulerRotation;
-extern ec_DataVtable vtable_scale;
 
 #endif
