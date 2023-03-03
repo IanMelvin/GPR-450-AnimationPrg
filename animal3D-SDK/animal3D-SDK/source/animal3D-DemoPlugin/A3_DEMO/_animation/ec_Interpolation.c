@@ -40,6 +40,24 @@ void* defaultDeconcat(void* val_out, const void* lhs, const void* rhs, const ec_
 	return val_out;
 }
 
+void* defaultBiLerp(void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
+{
+	void* vx0 = calloc(2, funcs->size);
+	void* vx1 = ((char*)vx0) + funcs->size;
+	funcs->lerp(vx0, v00, v01, paramX0, funcs);
+	funcs->lerp(vx1, v10, v11, paramX1, funcs);
+	funcs->lerp(val_out, vx0, vx1, paramY, funcs);
+	free(vx0);
+	return val_out;
+}
+
+void* defaultBiNearest(void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
+{
+	const void* vx0 = paramX0>0.5f ? v00 : v01;
+	const void* vx1 = paramX1>0.5f ? v10 : v11;
+	return funcs->nearest(val_out, vx0, vx1, paramY, funcs);
+}
+
 #pragma endregion
 
 void setupVtables()
