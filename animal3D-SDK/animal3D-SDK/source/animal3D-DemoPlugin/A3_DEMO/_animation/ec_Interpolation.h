@@ -18,10 +18,9 @@ void vtable_setDefaults(ec_DataVtable* out); // Sets defaults for order 2+ (any 
 void setupVtables();
 extern ec_DataVtable vtable_mat4;
 extern ec_DataVtable vtable_SpatialPose;
-extern ec_DataVtable vtable_translation; // vec3, additive
-extern ec_DataVtable vtable_quatRotation; // quat, multiplicative
-extern ec_DataVtable vtable_eulerRotation; // vec3, additive
-extern ec_DataVtable vtable_scale; // vec3, multiplicative
+extern ec_DataVtable vtable_vec3Additive;       // translation and euler angles
+extern ec_DataVtable vtable_vec3Multiplicative; // scale
+extern ec_DataVtable vtable_quat;               // quat, multiplicative
 
 typedef void* (*fp_identity)(void* val_out);
 typedef void* (*fp_invert  )(void* val_inout);
@@ -61,10 +60,5 @@ void* defaultTriangular(void* val_out, const void* v0, const void* v1, const voi
 void* defaultBiLerp    (void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
 void* defaultBiNearest (void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
 void* defaultBiCubic   (void* val_out, const void* v1, const void* v2, const void* v3, const void* v4, const void* v5, const void* v6, const void* v7, const void* v8, const void* v9, const void* v10, const void* v11, const void* v12, const void* v13, const void* v14, const void* v15, const void* v16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const ec_DataVtable* funcs);
-
-/*
-	Not doing:
-	 - Construct
-*/
 
 #endif
