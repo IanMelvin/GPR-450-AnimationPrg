@@ -138,6 +138,124 @@ void* defaultBiCubic(void* val_out, const void* v1, const void* v2, const void* 
 
 	return val_out;
 }
+#pragma endregion
+
+#pragma region HierarchyPose Variants
+a3_HierarchyPose* hierarchyPoseCopy(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, a3ui32 numNodes, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out && pos0 && numNodes > 0 )
+	{
+		for(a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->copy(&hierarchyPose_Out->pose[i], &pos0->pose[i], funcs);
+		}
+	}
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyPoseLerp(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out && pos0 && pos1 && numNodes > 0)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->lerp(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], param, funcs);
+		}
+	}
+	
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyPoseNearest(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out && pos0 && pos1 && numNodes > 0)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->nearest(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], param, funcs);
+		}
+	}
+
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyPoseCubic(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3_HierarchyPose* pos3, const a3_HierarchyPose* pos4, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out && pos1 && pos2 && pos3 && pos4 && numNodes > 0)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->cubic(&hierarchyPose_Out->pose[i], &pos1->pose[i], &pos2->pose[i], &pos3->pose[i], &pos4->pose[i], param, funcs);
+		}
+	}
+
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyPoseDeconcat(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* lhs, const a3_HierarchyPose* rhs, a3ui32 numNodes, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out && lhs && rhs && numNodes > 0)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->deconcat(&hierarchyPose_Out->pose[i], &lhs->pose[i], &rhs->pose[i], funcs);
+		}
+	}
+
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyPoseTriangular(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3real param1, const a3real param2, a3ui32 numNodes, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out && pos0 && pos1 && pos2 && numNodes > 0)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->triangular(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], &pos2->pose[i], param1, param2, funcs);
+		}
+	}
+
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyPoseBiLerp(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos00, const a3_HierarchyPose* pos01, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, a3ui32 numNodes, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out && pos00 && pos01 && pos10 && pos11 && numNodes > 0)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->biLerp(&hierarchyPose_Out->pose[i], &pos00->pose[i], &pos01->pose[i], &pos10->pose[i], &pos11->pose[i], paramX0, paramX1, paramY, funcs);
+		}
+	}
+
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyPoseBiNearest(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos00, const a3_HierarchyPose* pos01, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, a3ui32 numNodes, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out && pos00 && pos01 && pos10 && pos11 && numNodes > 0)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->biNearest(&hierarchyPose_Out->pose[i], &pos00->pose[i], &pos01->pose[i], &pos10->pose[i], &pos11->pose[i], paramX0, paramX1, paramY, funcs);
+		}
+	}
+
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyPoseBiCubic(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3_HierarchyPose* pos3, const a3_HierarchyPose* pos4, const a3_HierarchyPose* pos5, const a3_HierarchyPose* pos6, const a3_HierarchyPose* pos7, const a3_HierarchyPose* pos8, const a3_HierarchyPose* pos9, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, const a3_HierarchyPose* pos12, const a3_HierarchyPose* pos13, const a3_HierarchyPose* pos14, const a3_HierarchyPose* pos15, const a3_HierarchyPose* pos16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const a3ui32 numNodes, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out && pos1 && pos2 && pos3 && pos4 && pos5 && pos6 && pos7 && pos8 && pos9 && pos10 && pos11 && pos12 && pos13 && pos14 && pos15 && pos16 && numNodes > 0)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->biCubic(&hierarchyPose_Out->pose[i], &pos1->pose[i], &pos2->pose[i], &pos3->pose[i], &pos4->pose[i], &pos5->pose[i], &pos6->pose[i], &pos7->pose[i], &pos8->pose[i], &pos9->pose[i], &pos10->pose[i], &pos11->pose[i], &pos12->pose[i], &pos13->pose[i], &pos14->pose[i], &pos15->pose[i], &pos16->pose[i], param0, param1, param2, param3, param4, funcs);
+		}
+	}
+
+	return hierarchyPose_Out;
+}
 
 #pragma endregion
 
