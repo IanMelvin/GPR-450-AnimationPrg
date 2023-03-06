@@ -181,43 +181,49 @@ a3quat* a3quatMulS(a3quat* val_inout, const a3real scale)
 	return val_inout;
 }
 
+a3_SpatialPose* a3spatialPoseMulS(a3_SpatialPose* val_inout, const a3real scale)
+{
+	vtable_vec3Additive      .scale(&val_inout->translation, scale);
+	vtable_vec3Additive      .scale(&val_inout->angles     , scale);
+	vtable_quat              .scale(&val_inout->orientation, scale);
+	vtable_vec3Multiplicative.scale(&val_inout->scale      , scale);
+	vtable_mat4              .scale(&val_inout->transform  , scale);
+	return val_inout;
+}
+
 #pragma endregion
 
 #pragma region Vtable implementations
 
-
+//NOTE: All vec3 functions can also take a vec4, but ignore W
 ec_DataVtable vtable_mat4;
 ec_DataVtable vtable_SpatialPose;
-ec_DataVtable vtable_translation; // vec3, additive
-ec_DataVtable vtable_quatRotation; // quat, multiplicative
-ec_DataVtable vtable_eulerRotation; // vec3, additive
-ec_DataVtable vtable_scale; // vec3, multiplicative
+ec_DataVtable vtable_vec3Additive;       // translation and euler angles
+ec_DataVtable vtable_vec3Multiplicative; // scale
+ec_DataVtable vtable_quat;               // quat, multiplicative
 
 void setupVtables()
 {
 #ifdef _DEBUG
 	//Safety: Zero all to detect unset values
-	memset(&vtable_mat4         , 0, sizeof(ec_DataVtable));
-	memset(&vtable_SpatialPose  , 0, sizeof(ec_DataVtable));
-	memset(&vtable_translation  , 0, sizeof(ec_DataVtable));
-	memset(&vtable_quatRotation , 0, sizeof(ec_DataVtable));
-	memset(&vtable_eulerRotation, 0, sizeof(ec_DataVtable));
-	memset(&vtable_scale        , 0, sizeof(ec_DataVtable));
+	memset(&vtable_mat4              , 0, sizeof(ec_DataVtable));
+	memset(&vtable_SpatialPose       , 0, sizeof(ec_DataVtable));
+	memset(&vtable_vec3Additive      , 0, sizeof(ec_DataVtable));
+	memset(&vtable_vec3Multiplicative, 0, sizeof(ec_DataVtable));
+	memset(&vtable_quat              , 0, sizeof(ec_DataVtable));
 #endif
 
 	//Set all defaults, size
-	vtable_setDefaults(&vtable_mat4         );
-	vtable_setDefaults(&vtable_SpatialPose  );
-	vtable_setDefaults(&vtable_translation  );
-	vtable_setDefaults(&vtable_quatRotation );
-	vtable_setDefaults(&vtable_eulerRotation);
-	vtable_setDefaults(&vtable_scale        );
-	vtable_mat4         .size = sizeof(a3mat4);
-	vtable_SpatialPose  .size = sizeof(a3_SpatialPose);
-	vtable_translation  .size = sizeof(a3vec3);
-	vtable_quatRotation .size = sizeof(a3quat);
-	vtable_eulerRotation.size = sizeof(a3vec3);
-	vtable_scale        .size = sizeof(a3vec3);
+	vtable_setDefaults(&vtable_mat4              );
+	vtable_setDefaults(&vtable_SpatialPose       );
+	vtable_setDefaults(&vtable_vec3Additive      );
+	vtable_setDefaults(&vtable_vec3Multiplicative);
+	vtable_setDefaults(&vtable_quat              );
+	vtable_mat4              .size = sizeof(a3mat4);
+	vtable_SpatialPose       .size = sizeof(a3_SpatialPose);
+	vtable_vec3Additive      .size = sizeof(a3vec3);
+	vtable_vec3Multiplicative.size = sizeof(a3vec3);
+	vtable_quat              .size = sizeof(a3quat);
 
 	//mat4
 	vtable_mat4.identity = (fp_identity) a3real4x4SetIdentity;
@@ -227,33 +233,27 @@ void setupVtables()
 
 	//spatial pose
 	vtable_SpatialPose.identity = (fp_identity) a3spatialPoseReset;
-	//vtable_SpatialPose.invert   = (fp_invert  ) ;
+	vtable_SpatialPose.invert   = (fp_invert  ) a3spatialPoseInvert;
 	vtable_SpatialPose.concat   = (fp_concat  ) a3spatialPoseConcat;
-	//vtable_SpatialPose.scale    = (fp_scale   ) ;
+	vtable_SpatialPose.scale    = (fp_scale   ) a3spatialPoseMulS;
 	
-	//translation
-	vtable_translation.identity = (fp_identity) a3real3SetZero;
-	vtable_translation.invert	= (fp_invert  ) a3real3Negate;
-	vtable_translation.concat	= (fp_concat  ) a3real3Sum;
-	vtable_translation.scale	= (fp_scale   ) a3real3MulS;
+	//translation and euler angles
+	vtable_vec3Additive.identity = (fp_identity) a3real3SetZero;
+	vtable_vec3Additive.invert	= (fp_invert  ) a3real3Negate;
+	vtable_vec3Additive.concat	= (fp_concat  ) a3real3Sum;
+	vtable_vec3Additive.scale	= (fp_scale   ) a3real3MulS;
 
-	//quat rotation
-	vtable_quatRotation.identity = (fp_identity) a3quatSetIdentity;
-	vtable_quatRotation.invert	 = (fp_invert  ) a3quatInvert;
-	vtable_quatRotation.concat	 = (fp_concat  ) a3quatProduct;
-	vtable_quatRotation.scale	 = (fp_scale   ) a3quatMulS;
-
-	//euler rotation
-	vtable_eulerRotation.identity = (fp_identity) a3real3SetZero;
-	vtable_eulerRotation.invert	  = (fp_invert  ) a3real3Negate;
-	vtable_eulerRotation.concat	  = (fp_concat  ) a3real3Sum;
-	vtable_eulerRotation.scale	  = (fp_scale   ) a3real3MulS;
+	//rotation
+	vtable_quat.identity = (fp_identity) a3quatSetIdentity;
+	vtable_quat.invert	 = (fp_invert  ) a3quatInvert;
+	vtable_quat.concat	 = (fp_concat  ) a3quatProduct;
+	vtable_quat.scale	 = (fp_scale   ) a3quatMulS;
 
 	//scale
-	vtable_scale.identity = (fp_identity) a3real3SetOne;
-	vtable_scale.invert	  = (fp_invert  ) a3real3InvertLength;
-	vtable_scale.concat	  = (fp_concat  ) a3real3MulComp;
-	vtable_scale.scale	  = (fp_scale   ) a3real3PowS;
+	vtable_vec3Multiplicative.identity = (fp_identity) a3real3SetOne;
+	vtable_vec3Multiplicative.invert	  = (fp_invert  ) a3real3InvertLength;
+	vtable_vec3Multiplicative.concat	  = (fp_concat  ) a3real3MulComp;
+	vtable_vec3Multiplicative.scale	  = (fp_scale   ) a3real3PowS;
 }
 
 #pragma endregion
