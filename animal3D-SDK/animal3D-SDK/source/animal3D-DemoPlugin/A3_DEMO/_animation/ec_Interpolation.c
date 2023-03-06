@@ -369,9 +369,9 @@ void setupVtables()
 
 	//scale
 	vtable_vec3Multiplicative.identity = (fp_identity) a3real3SetOne;
-	vtable_vec3Multiplicative.invert	  = (fp_invert  ) a3real3InvertLength;
-	vtable_vec3Multiplicative.concat	  = (fp_concat  ) a3real3MulComp;
-	vtable_vec3Multiplicative.scale	  = (fp_scale   ) a3real3PowS;
+	vtable_vec3Multiplicative.invert   = (fp_invert  ) a3real3InvertLength;
+	vtable_vec3Multiplicative.concat   = (fp_concat  ) a3real3MulComp;
+	vtable_vec3Multiplicative.scale	   = (fp_scale   ) a3real3PowS;
 }
 
 #pragma endregion
