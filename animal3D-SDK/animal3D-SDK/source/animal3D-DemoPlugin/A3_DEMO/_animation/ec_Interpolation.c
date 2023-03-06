@@ -4,6 +4,10 @@
 #include <string.h>
 #include <Math.h>
 
+#include <animal3D-A3DM/animal3D-A3DM.h>
+
+#include "a3_SpatialPose.h"
+
 #pragma region Helpers and defaults
 
 void vtable_setDefaults(ec_DataVtable* out)
@@ -141,10 +145,46 @@ void* defaultBiCubic(void* val_out, const void* v1, const void* v2, const void* 
 
 #pragma endregion
 
+#pragma region "Missing" functions
+
+a3real3* a3real3SetZero(a3real3* val_out)
+{
+	a3real3Set(*val_out, 0, 0, 0);
+	return val_out;
+}
+
+a3real3* a3real3SetOne (a3real3* val_out)
+{
+	a3real3Set(*val_out, 1, 1, 1);
+	return val_out;
+}
+
+a3real3* a3real3InvertLength(a3real3* val_inout)
+{
+	a3real3MulS(*val_inout, a3real3LengthSquaredInverse(*val_inout));
+	return val_inout;
+}
+
+a3real3* a3real3PowS(a3real3* val_inout, const a3real power)
+{
+	a3real invLen;
+	a3real3NormalizeGetInvLength(*val_inout, &invLen);
+	a3real3MulS(*val_inout, (a3real)pow(1/invLen, power));
+	return val_inout;
+}
+
+a3quat* a3quatMulS(a3quat* val_inout, const a3real scale)
+{
+	a3quat tmp = { 0 }; //Same var used for read/write may have unintended consequences
+	a3quatSlerpIdentityQ0(tmp.q, val_inout->q, scale);
+	a3real4SetReal4(val_inout->q, tmp.q);
+	return val_inout;
+}
+
+#pragma endregion
+
 #pragma region Vtable implementations
 
-#include <animal3D-A3DM/animal3D-A3DM.h>
-#include "a3_SpatialPose.h"
 
 ec_DataVtable vtable_mat4;
 ec_DataVtable vtable_SpatialPose;
@@ -192,7 +232,7 @@ void setupVtables()
 	//vtable_SpatialPose.scale    = (fp_scale   ) ;
 	
 	//translation
-	//vtable_translation.identity = (fp_identity) ;
+	vtable_translation.identity = (fp_identity) a3real3SetZero;
 	vtable_translation.invert	= (fp_invert  ) a3real3Negate;
 	vtable_translation.concat	= (fp_concat  ) a3real3Sum;
 	vtable_translation.scale	= (fp_scale   ) a3real3MulS;
@@ -200,20 +240,20 @@ void setupVtables()
 	//quat rotation
 	vtable_quatRotation.identity = (fp_identity) a3quatSetIdentity;
 	vtable_quatRotation.invert	 = (fp_invert  ) a3quatInvert;
-	//vtable_quatRotation.concat	 = (fp_concat  ) ;
-	//vtable_quatRotation.scale	 = (fp_scale   ) ;
+	vtable_quatRotation.concat	 = (fp_concat  ) a3quatProduct;
+	vtable_quatRotation.scale	 = (fp_scale   ) a3quatMulS;
 
 	//euler rotation
-	//vtable_eulerRotation.identity = (fp_identity) ;
+	vtable_eulerRotation.identity = (fp_identity) a3real3SetZero;
 	vtable_eulerRotation.invert	  = (fp_invert  ) a3real3Negate;
 	vtable_eulerRotation.concat	  = (fp_concat  ) a3real3Sum;
 	vtable_eulerRotation.scale	  = (fp_scale   ) a3real3MulS;
 
 	//scale
-	//vtable_scale.identity = (fp_identity) ;
-	//vtable_scale.invert	  = (fp_invert  ) ;
+	vtable_scale.identity = (fp_identity) a3real3SetOne;
+	vtable_scale.invert	  = (fp_invert  ) a3real3InvertLength;
 	vtable_scale.concat	  = (fp_concat  ) a3real3MulComp;
-	//vtable_scale.scale	  = (fp_scale   ) ;
+	vtable_scale.scale	  = (fp_scale   ) a3real3PowS;
 }
 
 #pragma endregion
