@@ -28,8 +28,6 @@
 #ifndef __ANIMAL3D_SPATIALPOSE_INL
 #define __ANIMAL3D_SPATIALPOSE_INL
 
-#include "ec_Interpolation.h"
-
 
 //-----------------------------------------------------------------------------
 
@@ -85,20 +83,6 @@ inline a3i32 a3spatialPoseReset(a3_SpatialPose* spatialPose)
 		spatialPose->angles      = a3vec4_zero;
 		spatialPose->scale       = a3vec4_one;
 		spatialPose->translation = a3vec4_w;
-		return 1;
-	}
-	return -1;
-}
-
-inline a3i32 a3spatialPoseInvert(a3_SpatialPose* spatialPose_inout)
-{
-	if (spatialPose_inout)
-	{
-		vtable_vec3Additive      .invert(&spatialPose_inout->translation);
-		vtable_vec3Additive      .invert(&spatialPose_inout->angles     );
-		vtable_quat              .invert(&spatialPose_inout->orientation);
-		vtable_vec3Multiplicative.invert(&spatialPose_inout->scale      );
-		vtable_mat4              .invert(&spatialPose_inout->transform  );
 		return 1;
 	}
 	return -1;
