@@ -27,6 +27,7 @@ typedef void* (*fp_identity)(void* val_out);
 typedef void* (*fp_invert  )(void* val_inout);
 typedef void* (*fp_concat  )(void* val_out, const void* lhs, const void* rhs);
 typedef void* (*fp_scale   )(void* val_inout, const a3real scale);
+typedef void* (*fp_descale)(void* val_inout, const a3real scale);
 
 struct ec_DataVtable
 {
@@ -37,6 +38,7 @@ struct ec_DataVtable
 	fp_invert   invert;
 	fp_concat   concat;
 	fp_scale    scale;
+	fp_descale	descale;
 
 	//Optional to override, vtable_setDefaults sets these to the functions below
 	
@@ -49,6 +51,11 @@ struct ec_DataVtable
 	void* (*biLerp    )(void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
 	void* (*biNearest )(void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
 	void* (*biCubic   )(void* val_out, const void* v1, const void* v2, const void* v3, const void* v4, const void* v5, const void* v6, const void* v7, const void* v8, const void* v9, const void* v10, const void* v11, const void* v12, const void* v13, const void* v14, const void* v15, const void* v16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const ec_DataVtable* funcs);
+	void* (*smoothStep)();
+	void* (*convert)   ();
+	void* (*revert)	   ();
+	void* (*FK)		   ();
+	void* (*IK)		   ();
 };
 
 //Defaults
