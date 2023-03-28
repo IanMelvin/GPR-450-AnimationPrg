@@ -135,11 +135,8 @@ inline a3real4r ec_eulerToQuat(a3real4p quat_out, const a3vec3 eulerAngles, cons
 
 inline a3i32 a3spatialPoseInit(a3_SpatialPose* spatialPose)
 {
-#ifdef USE_EULER_ANGLES
-	spatialPose->orientation = a3vec3_zero;
-#else
-	spatialPose->orientation = a3quat_identity;
-#endif
+	spatialPose->eulerAngles = a3vec3_zero;
+	spatialPose->quatOrientation = a3quat_identity;
 	spatialPose->scale = a3vec3_one;
 	spatialPose->translation = a3vec3_zero;
 
@@ -151,17 +148,11 @@ inline a3i32 a3spatialPoseSetRotation(a3_SpatialPose* spatialPose, const a3f32 r
 {
 	if (spatialPose)
 	{
-#ifdef USE_EULER_ANGLES
-		spatialPose->orientation.x = rx_degrees;
-		spatialPose->orientation.y = ry_degrees;
-		spatialPose->orientation.z = rz_degrees;
-#else
-		a3vec3 eulerAngle = { rx_degrees, ry_degrees, rz_degrees };
-		ec_eulerToQuat(spatialPose->orientation.q, eulerAngle, eulerOrder);
-		
-		//DO NOT USE
-		//a3quatSetEulerXYZ(spatialPose->orientation.q, rx_degrees, ry_degrees, rz_degrees);
-#endif
+		spatialPose->eulerAngles.x = rx_degrees;
+		spatialPose->eulerAngles.y = ry_degrees;
+		spatialPose->eulerAngles.z = rz_degrees;
+		//a3vec3 eulerAngle = { rx_degrees, ry_degrees, rz_degrees };
+		//ec_eulerToQuat(spatialPose->orientation.q, eulerAngle, eulerOrder);
 	}
 	return -1;
 }
@@ -204,11 +195,8 @@ inline a3i32 a3spatialPoseReset(a3_SpatialPose* spatialPose)
 {
 	if (spatialPose)
 	{
-#ifdef USE_EULER_ANGLES
-		spatialPose->orientation = a3vec3_zero;
-#else
-		spatialPose->orientation = a3quat_identity;
-#endif
+		spatialPose->eulerAngles = a3vec3_zero;
+		spatialPose->quatOrientation = a3quat_identity;
 		spatialPose->scale = a3vec3_one;
 		spatialPose->translation = a3vec3_zero;
 	}
@@ -228,30 +216,13 @@ inline a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatial
 		if (channel & a3poseChannel_scale_z) matScale.m22 = spatialPose_in->scale.z;
 		
 		a3mat4 matRotate = { 0 };
-#ifdef USE_EULER_ANGLES
 		a3vec3 eulerAngles = { 0 };
-		if (channel & a3poseChannel_orient_x) eulerAngles.x = spatialPose_in->orientation.x;
-		if (channel & a3poseChannel_orient_y) eulerAngles.y = spatialPose_in->orientation.y;
-		if (channel & a3poseChannel_orient_z) eulerAngles.z = spatialPose_in->orientation.z;
+		if (channel & a3poseChannel_orient_x) eulerAngles.x = spatialPose_in->eulerAngles.x;
+		if (channel & a3poseChannel_orient_y) eulerAngles.y = spatialPose_in->eulerAngles.y;
+		if (channel & a3poseChannel_orient_z) eulerAngles.z = spatialPose_in->eulerAngles.z;
 		ec_eulerToMat4x4(matRotate.m, eulerAngles, order);
-#else
-		/*
-		a3vec3 axis = { 0 };
-		a3real angle = 0;
-		a3real scale = 0;
-		a3quatGetAxisAngleScale(spatialPose_in->orientation.q, axis.v, &angle, &scale); //TODO @rsc should this have scale?
-		if (!(channel & a3poseChannel_orient_x)) axis.x = 0;
-		if (!(channel & a3poseChannel_orient_y)) axis.y = 0;
-		if (!(channel & a3poseChannel_orient_z)) axis.z = 0;
-		
-		a3quat constrainedRotation = { 0 };
-		a3quatSetAxisAngleScale(constrainedRotation.q, axis.v, angle, scale);
-
-		a3mat4 matRotate = { 0 };
-		a3quatConvertToMat4(matRotate.m, constrainedRotation.q);
-		// */
-		a3quatConvertToMat4(matRotate.m, spatialPose_in->orientation.q);
-#endif
+		//ec_eulerToQuat(spatialPose_in->quatOrientation, eulerAngles, order);
+		//a3quatConvertToMat4(matRotate.m, spatialPose_in->orientation.q);
 
 		// Concat
 
@@ -274,13 +245,12 @@ inline a3i32 a3spatialPoseConcat(a3_SpatialPose* finalPose, const a3_SpatialPose
 	finalPose->scale.z = basePose->scale.z * deltaPose->scale.z;
 
 	//Then rotate
-#ifdef USE_EULER_ANGLES
-	a3real3Sum(finalPose->orientation.v, basePose->orientation.v, deltaPose->orientation.v);
-#else
-	finalPose->orientation = basePose->orientation;
-	a3quatConcatL(finalPose->orientation.q, deltaPose->orientation.q);
-#endif
-	a3real3Sum(finalPose->translation.v, basePose->translation.v, deltaPose->translation.v); //Then translate
+	a3real3Sum(finalPose->eulerAngles.v, basePose->eulerAngles.v, deltaPose->eulerAngles.v);
+	finalPose->quatOrientation = basePose->quatOrientation;
+	a3quatConcatL(finalPose->quatOrientation.q, deltaPose->quatOrientation.q);
+
+	//Then translate
+	a3real3Sum(finalPose->translation.v, basePose->translation.v, deltaPose->translation.v);
 
 	return 1;
 }
@@ -290,7 +260,8 @@ inline a3i32 a3spatialPoseCopy(a3_SpatialPose* spatialPose_out, const a3_Spatial
 {
 	if (spatialPose_out && spatialPose_in)
 	{
-		spatialPose_out->orientation = spatialPose_in->orientation;
+		spatialPose_out->eulerAngles = spatialPose_in->eulerAngles;
+		spatialPose_out->quatOrientation = spatialPose_in->quatOrientation;
 		spatialPose_out->scale = spatialPose_in->scale;
 		spatialPose_out->translation = spatialPose_in->translation;
 	}
@@ -301,11 +272,8 @@ inline a3i32 a3spatialPoseCopy(a3_SpatialPose* spatialPose_out, const a3_Spatial
 inline a3_SpatialPose* a3spatialPoseLerp(a3_SpatialPose* out, const a3_SpatialPose* val0, const a3_SpatialPose* val1, a3real param)
 {
 	a3real3Lerp(out->translation.v, val0->translation.v, val1->translation.v, param);
-#ifdef USE_EULER_ANGLES
-	a3real3Lerp(out->orientation.v, val0->orientation.v, val1->orientation.v, param);
-#else
-	a3quatSlerp(out->orientation.q, val0->orientation.q, val1->orientation.q, param);
-#endif
+	a3real3Lerp(out->eulerAngles.v, val0->eulerAngles.v, val1->eulerAngles.v, param);
+	a3quatSlerp(out->quatOrientation.q, val0->quatOrientation.q, val1->quatOrientation.q, param);
 	a3vec3LogLerp(out->scale.v, val0->scale.v, val1->scale.v, param);
 	return out;
 }

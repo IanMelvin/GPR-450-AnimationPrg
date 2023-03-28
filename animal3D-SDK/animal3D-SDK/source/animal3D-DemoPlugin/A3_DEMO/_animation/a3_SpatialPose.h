@@ -121,12 +121,9 @@ enum a3_SpatialPoseChannel
 // single pose for a single node
 struct a3_SpatialPose
 {
-	// orientation euler angles
-#ifdef USE_EULER_ANGLES
-	a3vec3 orientation;
-#else
-	a3quat orientation;
-#endif
+	// orientation
+	a3vec3 eulerAngles;
+	a3quat quatOrientation; //TODO rename back to 'orientation' once all references are fixed
 
 	// translation vector
 	a3vec3 translation;
