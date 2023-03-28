@@ -34,7 +34,6 @@
 
 #include "_a3_demo_utilities/a3_DemoSceneObject.h"
 
-#include "_animation/a3_Kinematics.h"
 #include "_animation/a3_HierarchyStateBlend.h"
 #include "_animation/a3_KeyframeAnimationController.h"
 
@@ -136,8 +135,6 @@ typedef enum a3_DemoMode1_Animation_TargetName				a3_DemoMode1_Animation_TargetN
 		a3_Hierarchy hierarchy_skel[1];
 		a3_HierarchyState hierarchyState_skel[2];
 		a3_HierarchyPoseGroup hierarchyPoseGroup_skel[1];
-		a3_ClipController skeletonAnimator;
-		
 		a3mat4 mvp_joint[128], mvp_bone[128], t_skin[128];
 		a3dualquat dq_skin[128];
 		a3ui32 hierarchyKeyPose_display[2];
@@ -167,6 +164,8 @@ typedef enum a3_DemoMode1_Animation_TargetName				a3_DemoMode1_Animation_TargetN
 					proj_camera_main[1];
 			};
 		};
+
+		a3_ClipController skeletonAnimator;
 	};
 
 
