@@ -21,6 +21,11 @@ void vtable_setDefaults(ec_DataVtable* out)
 	out->biLerp     = defaultBiLerp    ;
 	out->biNearest  = defaultBiNearest ;
 	out->biCubic    = defaultBiCubic   ;
+	out->smoothStep = defaultSmoothStep;
+	out->convert	= defaultConvert   ;
+	out->revert		= defaultRevert	   ;
+	out->FK			= defaultFK		   ;
+	out->IK			= defaultIK		   ;
 }
 
 void* defaultCopy(void* dst, const void* src, const ec_DataVtable* funcs)
@@ -142,6 +147,46 @@ void* defaultBiCubic(void* val_out, const void* v1, const void* v2, const void* 
 
 	return val_out;
 }
+void* defaultSmoothStep(void* val_out, const void* v1, a3real param)
+{
+	
+	return val_out;
+}
+void* defaultConvert(void* val_out)
+{
+
+	return val_out;
+}
+void* defaultRevert(void* val_out)
+{
+
+	return val_out;
+}
+void* defaultFK(void* val_out, const void* hierarchy, const void* objSpaceTransform, const void* localSpaceTransform)
+{
+	
+	return val_out;
+}
+void* defaultIK(void* val_out, const void* hierarchy, const void* objSpaceTransform, const void* localSpaceTransform)
+{
+
+	return val_out;
+}
+#pragma endregion
+
+#pragma region SpacialPose Specific Functions
+
+a3_SpatialPose* spacialPoseConvert(a3_SpatialPose* spacialPose_Out)
+{
+	a3spatialPoseConvert(spacialPose_Out, a3poseChannel_none, a3poseEulerOrder_zyx);
+	return spacialPose_Out;
+}
+a3_SpatialPose* spacialPoseRevert(a3_SpatialPose* spacialPose_Out)
+{
+	a3spatialPoseRestore(spacialPose_Out, a3poseChannel_none, a3poseEulerOrder_zyx);
+	return spacialPose_Out;
+}
+
 #pragma endregion
 
 #pragma region HierarchyPose Variants
@@ -259,6 +304,47 @@ a3_HierarchyPose* hierarchyPoseBiCubic(a3_HierarchyPose* hierarchyPose_Out, cons
 	}
 
 	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyPoseSmoothStep(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pose1, a3real param, const a3ui32 numNodes, const ec_DataVtable* funcs)
+{
+	return nullptr;
+}
+
+a3_HierarchyPose* hierarchyConvert(a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *spacialPoseConvert(&hierarchyPose_Out->pose[i]);
+		}
+	}
+
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyRevert(a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			hierarchyPose_Out->pose[i] = *spacialPoseRevert(&hierarchyPose_Out->pose[i]);
+		}
+	}
+
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyFK(a3_HierarchyPose* hierarchyPose_Out, const a3_Hierarchy* hierarchy, const a3_HierarchyPose* objSpaceTransform, const a3_HierarchyPose* localSpaceTransform, const a3ui32 numNodes, const ec_DataVtable* funcs)
+{
+	return nullptr;
+}
+
+a3_HierarchyPose* hierarchyIK(a3_HierarchyPose* hierarchyPose_Out, const a3_Hierarchy* hierarchy, const a3_HierarchyPose* objSpaceTransform, const a3_HierarchyPose* localSpaceTransform, const a3ui32 numNodes, const ec_DataVtable* funcs)
+{
+	return nullptr;
 }
 
 #pragma endregion

@@ -138,9 +138,34 @@ inline a3i32 a3spatialPoseRestore(a3_SpatialPose* spatialPose, const a3_SpatialP
 {
 	if (spatialPose)
 	{
+		spatialPose->translate = spatialPose->transformMat.v3;
+		spatialPose->transformMat.v3 = a3vec4_zero;
+		spatialPose->scale.x = a3real4Length(spatialPose->transformMat.v0.v);
+		spatialPose->scale.y = a3real4Length(spatialPose->transformMat.v1.v);
+		spatialPose->scale.z = a3real4Length(spatialPose->transformMat.v2.v);
+		
+		a3real3DivS(spatialPose->transformMat.v0.v, spatialPose->scale.x);
+		a3real3DivS(spatialPose->transformMat.v1.v, spatialPose->scale.y);
+		a3real3DivS(spatialPose->transformMat.v2.v, spatialPose->scale.z);
 
+
+		float sy = a3sqrt(spatialPose->transformMat.m00 * spatialPose->transformMat.m00 + spatialPose->transformMat.m10 * spatialPose->transformMat.m10);
+
+		a3boolean singular = sy < 1e-6;
+
+		if (!singular)
+		{
+			spatialPose->rotate.x = a3atan2d(spatialPose->transformMat.m21, spatialPose->transformMat.m22);
+			spatialPose->rotate.y = a3atan2d(-spatialPose->transformMat.m20, sy);
+			spatialPose->rotate.z = a3atan2d(spatialPose->transformMat.m10, spatialPose->transformMat.m00);
+		}
+		else {
+			spatialPose->rotate.x = a3atan2d(-spatialPose->transformMat.m12, spatialPose->transformMat.m11);
+			spatialPose->rotate.y = a3atan2d(-spatialPose->transformMat.m20, sy);
+			spatialPose->rotate.z = 0;
+		}
 	}
-	return -1;
+	return 1;
 }
 
 // copy operation for single node pose
