@@ -1,5 +1,6 @@
 #include "ec_PolymorphicData.h"
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <Math.h>
@@ -26,17 +27,29 @@ void vtable_setDefaults(ec_DataVtable* out)
 
 void* defaultDescale(void* val_inout, const a3real control, const ec_DataVtable* funcs)
 {
+	assert(val_inout);
+	assert(funcs);
+
 	return funcs->scale(val_inout, 1 / control);
 }
 
 void* defaultCopy(void* dst, const void* src, const ec_DataVtable* funcs)
 {
+	assert(dst);
+	assert(src);
+	assert(funcs);
+
 	memcpy(dst, src, funcs->size);
 	return dst;
 }
 
 void* defaultLerp(void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs)
 {
+	assert(val_out);
+	assert(v0);
+	assert(v1);
+	assert(funcs);
+
 	funcs->copy(val_out, v0, funcs);     //val_out = v0
 	funcs->invert(val_out);              //val_out = v0^-1
 	funcs->concat(val_out, v1, val_out); //val_out = v1 * v0^-1
@@ -47,40 +60,59 @@ void* defaultLerp(void* val_out, const void* v0, const void* v1, const a3real pa
 
 void* defaultNearest(void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs)
 {
+	assert(val_out);
+	assert(v0);
+	assert(v1);
+	assert(funcs);
+
 	return funcs->copy(val_out, param>0.5f ? v1 : v0, funcs);
 }
 
 void* defaultCubic(void* val_out, const void* v1, const void* v2, const void* v3, const void* v4, const a3real param, const ec_DataVtable* funcs)
 {
-	if (val_out && v1 && v2 && v3 && v4)
-	{
-		funcs->copy(val_out, v1, funcs);
+	assert(val_out);
+	assert(v1);
+	assert(v2);
+	assert(v3);
+	assert(v4);
+	assert(funcs);
 
-		void* val2 = malloc(sizeof(funcs->size));
-		funcs->copy(val2, v2, funcs);
+	funcs->copy(val_out, v1, funcs);
 
-		void* val3 = malloc(sizeof(funcs->size));
-		funcs->copy(val3, v3, funcs);
+	void* val2 = malloc(sizeof(funcs->size));
+	funcs->copy(val2, v2, funcs);
 
-		void* val4 = malloc(sizeof(funcs->size));
-		funcs->copy(val4, v4, funcs);
+	void* val3 = malloc(sizeof(funcs->size));
+	funcs->copy(val3, v3, funcs);
 
-		funcs->scale(val_out, (a3real)(-param + 2 * pow(param, 2) - pow(param, 3)));
-		funcs->scale(val2, (a3real)(2 - 5 * pow(param, 2) + 3 * pow(param, 3)));
-		funcs->scale(val3, (a3real)(param + 4 * pow(param, 2) - 3 * pow(param, 3)));
-		funcs->scale(val4, (a3real)(-1 * pow(param, 2) + pow(param, 3)));
+	void* val4 = malloc(sizeof(funcs->size));
+	funcs->copy(val4, v4, funcs);
 
-		funcs->concat(val_out, val_out, val2);
-		funcs->concat(val_out, val_out, val3);
-		funcs->concat(val_out, val_out, val4);
+	funcs->scale(val_out, (a3real)(-param + 2 * pow(param, 2) - pow(param, 3)));
+	funcs->scale(val2, (a3real)(2 - 5 * pow(param, 2) + 3 * pow(param, 3)));
+	funcs->scale(val3, (a3real)(param + 4 * pow(param, 2) - 3 * pow(param, 3)));
+	funcs->scale(val4, (a3real)(-1 * pow(param, 2) + pow(param, 3)));
 
-		funcs->scale(val_out, 0.5f);
-	}
+	funcs->concat(val_out, val_out, val2);
+	funcs->concat(val_out, val_out, val3);
+	funcs->concat(val_out, val_out, val4);
+
+	funcs->scale(val_out, 0.5f);
+
+	free(val2);
+	free(val3);
+	free(val4);
+
 	return val_out;
 }
 
 void* defaultDeconcat(void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs)
 {
+	assert(val_out);
+	assert(lhs);
+	assert(rhs);
+	assert(funcs);
+
 	funcs->copy(val_out, rhs, funcs);     //val_out = rhs
 	funcs->invert(val_out);               //val_out = rhs^-1
 	funcs->concat(val_out, lhs, val_out); //val_out = lhs * rhs^-1
@@ -89,30 +121,43 @@ void* defaultDeconcat(void* val_out, const void* lhs, const void* rhs, const ec_
 
 void* defaultTriangular(void* val_out, const void* v0, const void* v1, const void* v2, const a3real param1, const a3real param2, const ec_DataVtable* funcs)
 {
-	if (val_out && v0 && v1 && v2)
-	{
-		a3real param3 = 1 - param1 - param2;
+	assert(val_out);
+	assert(v0);
+	assert(v1);
+	assert(v2);
+	assert(funcs);
 
-		funcs->copy(val_out, v0, funcs);
-		funcs->scale(val_out, param3);
+	a3real param3 = 1 - param1 - param2;
 
-		void* val1 = malloc(sizeof(v0));
-		funcs->copy(val1, v1, funcs);
-		funcs->scale(val1, param1);
+	funcs->copy(val_out, v0, funcs);
+	funcs->scale(val_out, param3);
 
-		void* val2 = malloc(sizeof(v0));
-		funcs->copy(val2, v2, funcs);
-		funcs->scale(val2, param2);
+	void* val1 = malloc(sizeof(v0));
+	funcs->copy(val1, v1, funcs);
+	funcs->scale(val1, param1);
 
-		funcs->concat(val_out, val_out, val1);
-		funcs->concat(val_out, val_out, val2);
-	}
+	void* val2 = malloc(sizeof(v0));
+	funcs->copy(val2, v2, funcs);
+	funcs->scale(val2, param2);
+
+	funcs->concat(val_out, val_out, val1);
+	funcs->concat(val_out, val_out, val2);
+
+	free(val1);
+	free(val2);
 
 	return val_out;
 }
 
 void* defaultBiLerp(void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
 {
+	assert(val_out);
+	assert(v00);
+	assert(v01);
+	assert(v10);
+	assert(v11);
+	assert(funcs);
+
 	void* vx0 = calloc(2, funcs->size);
 	void* vx1 = ((char*)vx0) + funcs->size;
 	funcs->lerp(vx0, v00, v01, paramX0, funcs);
@@ -124,6 +169,13 @@ void* defaultBiLerp(void* val_out, const void* v00, const void* v01, const void*
 
 void* defaultBiNearest(void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
 {
+	assert(val_out);
+	assert(v00);
+	assert(v01);
+	assert(v10);
+	assert(v11);
+	assert(funcs);
+
 	const void* vx0 = paramX0>0.5f ? v00 : v01;
 	const void* vx1 = paramX1>0.5f ? v10 : v11;
 	return funcs->nearest(val_out, vx0, vx1, paramY, funcs);
@@ -131,23 +183,25 @@ void* defaultBiNearest(void* val_out, const void* v00, const void* v01, const vo
 
 void* defaultBiCubic(void* val_out, const void* v1, const void* v2, const void* v3, const void* v4, const void* v5, const void* v6, const void* v7, const void* v8, const void* v9, const void* v10, const void* v11, const void* v12, const void* v13, const void* v14, const void* v15, const void* v16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const ec_DataVtable* funcs)
 {
-	if (val_out && v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8 && v9 && v10 && v11 && v12 && v13 && v14 && v15 && v16)
-	{
-		void* val1 = malloc(sizeof(funcs->size));
-		void* val2 = malloc(sizeof(funcs->size));
-		void* val3 = malloc(sizeof(funcs->size));
-		void* val4 = malloc(sizeof(funcs->size));
+	assert(val_out);
+	assert(v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8 && v9 && v10 && v11 && v12 && v13 && v14 && v15 && v16);
+	assert(funcs);
 
-		funcs->cubic(val_out,
-			funcs->cubic(val1, v1, v2, v3, v4, param0, funcs),
-			funcs->cubic(val2, v5, v6, v7, v8, param1, funcs),
-			funcs->cubic(val3, v9, v10, v11, v12, param2, funcs),
-			funcs->cubic(val4, v13, v14, v15, v16, param3, funcs),
-			param4, funcs);
-	}
+	void* val1 = malloc(sizeof(funcs->size));
+	void* val2 = malloc(sizeof(funcs->size));
+	void* val3 = malloc(sizeof(funcs->size));
+	void* val4 = malloc(sizeof(funcs->size));
 
+	funcs->cubic(val_out,
+		funcs->cubic(val1, v1, v2, v3, v4, param0, funcs),
+		funcs->cubic(val2, v5, v6, v7, v8, param1, funcs),
+		funcs->cubic(val3, v9, v10, v11, v12, param2, funcs),
+		funcs->cubic(val4, v13, v14, v15, v16, param3, funcs),
+		param4, funcs);
+	
 	return val_out;
 }
+
 #pragma endregion
 
 #pragma region HierarchyPose/Bulk Variants

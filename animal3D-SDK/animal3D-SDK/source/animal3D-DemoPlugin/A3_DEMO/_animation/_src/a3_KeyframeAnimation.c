@@ -61,7 +61,7 @@ a3i32 a3keyframeChannelInit(a3_KeyframeChannel* channel_out, const char* name, c
 }
 
 // allocate keyframe pool initializing all to default values.
-a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count, const ec_InterpolationFuncFamily* interpolationFuncs)
+a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count, const ec_DataVtable* interpolationFuncs)
 {
 	keyframePool_out->keyframe = (a3_Keyframe*)malloc(count * sizeof(a3_Keyframe));
 	keyframePool_out->count = count;

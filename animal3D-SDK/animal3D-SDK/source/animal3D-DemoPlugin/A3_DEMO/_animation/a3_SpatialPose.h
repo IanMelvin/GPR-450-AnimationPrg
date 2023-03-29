@@ -28,7 +28,6 @@ Description of a spatial pose with rotation, translation and scale.
 
 // A3 math library
 #include "animal3D-A3DM/animal3D-A3DM.h"
-#include "../ec_Interpolation.h"
 
 //-----------------------------------------------------------------------------
 
@@ -169,8 +168,6 @@ a3i32 a3spatialPoseCopy(a3_SpatialPose* spatialPose_out, const a3_SpatialPose* s
 
 // lerp between spatial poses
 a3_SpatialPose* a3spatialPoseLerp(a3_SpatialPose* out, const a3_SpatialPose* val0, const a3_SpatialPose* val1, a3real param);
-
-extern ec_InterpolationFuncFamily a3_SpatialPoseInterpolationInfo;
 
 //-----------------------------------------------------------------------------
 

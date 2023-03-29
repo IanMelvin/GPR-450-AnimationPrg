@@ -362,8 +362,9 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 	/////// Set up SpatialPoses as keyframes ///////
 
+	setupVtables(); //Required for vtable_SpatialPose
 	a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
-	a3keyframePoolCreate(keyframes, hierarchyPoseGroup->spatialPoseCount, NULL); //TODO write interpolation funcs
+	a3keyframePoolCreate(keyframes, hierarchyPoseGroup->spatialPoseCount, &vtable_SpatialPose); //TODO write interpolation funcs
 	for (a3ui32 i = 0; i < hierarchyPoseGroup->spatialPoseCount; ++i) a3keyframeInit(&keyframes->keyframe[i], durationPerFrame, &hierarchyPoseGroup->spatialPosePool[i]);
 
 	/////// Set up keyframes as clips ///////

@@ -91,7 +91,6 @@ a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController
 	assert(currentClip->channels);
 	a3_KeyframeChannel* channel = &currentClip->channels[channelIndex];
 	a3_ChannelPlayhead* playhead = &clipCtrl->channelPlayheads[channelIndex];
-	size_t keyframeValSize = channel->keyframePool->interpolationFuncs->valSize;
 
 	a3_Keyframe* x0 = ec_channel_getKeyframe(channel, playhead->keyframe);
 	
@@ -99,14 +98,15 @@ a3i32 ec_clipController_evaluateValue(a3_Keyframe_data_t* out, a3_ClipController
 	if (playhead->keyframe == channel->keyframeCount - 1)
 	{
 		//*out = *x0->data;
-		memcpy(out, x0->data, keyframeValSize);
+		channel->keyframePool->interpolationFuncs->copy(out, x0->data, channel->keyframePool->interpolationFuncs);
 		return 1;
 	}
 
 	a3_Keyframe* x1 = ec_channel_getKeyframe(channel, playhead->keyframe+1);
 
 	//Do normal interpolation
-	ec_interpolate(out, x0->data, x1->data, playhead->keyframeParameter, channel->keyframePool->interpolationFuncs, x0->interpolationMode);
+	//TODO provide control handles
+	ec_interpolate(out, NULL, x0->data, x1->data, NULL, playhead->keyframeParameter, channel->keyframePool->interpolationFuncs, x0->interpolationMode);
 	return 1;
 }
 

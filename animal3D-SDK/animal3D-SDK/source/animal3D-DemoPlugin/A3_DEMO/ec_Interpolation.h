@@ -9,13 +9,9 @@
 #ifndef EC_INTERPOLATION_H
 #define EC_INTERPOLATION_H
 
-#include "ec_MathBridge.h"
+#include "_animation/ec_PolymorphicData.h"
 
-typedef enum ec_InterpolationMode			ec_InterpolationMode;
-typedef struct ec_InterpolationFuncFamily	ec_InterpolationFuncFamily;
-
-// standardized interpolation function
-void* ec_interpolate(void* out, const void* val0, const void* val1, a3real param, const ec_InterpolationFuncFamily* funcs, ec_InterpolationMode mode);
+typedef enum ec_InterpolationMode ec_InterpolationMode;
 
 // how to blend between data
 // when adding new values here, add to ec_InterpolationFuncFamily
@@ -35,24 +31,7 @@ enum ec_InterpolationMode
 	EC_INTERPOLATE_DEFAULT = EC_INTERPOLATE_LINEAR //What is the default interpolation mode?
 };
 
-// description of how to interpolate data
-typedef void* (*interpolationFunc)(void* out, const void* val0, const void* val1, a3real param);
-struct ec_InterpolationFuncFamily
-{
-	size_t valSize; //For memcpy (equivalent of = but for void ptr)
-	union
-	{
-		struct
-		{
-			//interpolationFunc constant;
-			//interpolationFunc nearest;
-			interpolationFunc linear;
-			interpolationFunc catmullRom;
-			interpolationFunc cubicHermite;
-
-		};
-		interpolationFunc byMode[EC_INTERPOLATE_MODE_COUNT]; //Index by ec_KeyframeInterpolationMode
-	};
-};
+// standardized interpolation function
+void* ec_interpolate(void* out, const void* handle0, const void* val0, const void* val1, const void* handle1, a3real param, const ec_DataVtable* funcs, ec_InterpolationMode mode);
 
 #endif

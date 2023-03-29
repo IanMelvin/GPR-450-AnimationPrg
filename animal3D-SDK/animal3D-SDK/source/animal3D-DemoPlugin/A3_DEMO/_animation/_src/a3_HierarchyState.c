@@ -109,12 +109,14 @@ a3i32 a3hierarchyStateCreate(a3_HierarchyState *state_out, const a3_Hierarchy *h
 		state_out->hierarchy = hierarchy;
 		state_out->eulerOrder = a3poseEulerOrder_zxy;
 
-		if (!state_out->sampledDeltaPose) state_out->sampledDeltaPose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
-		if (!state_out->bindPose        ) state_out->bindPose         = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
-		if (!state_out->samplePose      ) state_out->samplePose       = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
-		if (!state_out->localPose       ) state_out->localPose        = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
-		if (!state_out->objectPose      ) state_out->objectPose       = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
-		if (!state_out->channels        ) state_out->channels         = calloc(hierarchy->numNodes, sizeof(a3_SpatialPoseChannel));
+		if (!state_out->sampledDeltaPose       ) state_out->sampledDeltaPose        = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
+		if (!state_out->bindPose               ) state_out->bindPose                = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
+		if (!state_out->samplePose             ) state_out->samplePose              = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose       ));
+		if (!state_out->localPose              ) state_out->localPose               = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
+		if (!state_out->objectPose             ) state_out->objectPose              = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
+		if (!state_out->objectPoseInv          ) state_out->objectPoseInv           = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
+		if (!state_out->objectPoseBindToCurrent) state_out->objectPoseBindToCurrent = calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose     ));
+		if (!state_out->channels               ) state_out->channels                = calloc(hierarchy->numNodes, sizeof(a3_SpatialPoseChannel));
 
 		// reset all data to defaults
 		for (a3ui32 i = 0; i < hierarchy->numNodes; i++)
@@ -144,6 +146,8 @@ a3i32 a3hierarchyStateRelease(a3_HierarchyState *state)
 		free(state->samplePose);
 		free(state->localPose);
 		free(state->objectPose);
+		free(state->objectPoseInv);
+		free(state->objectPoseBindToCurrent);
 		free(state->channels);
 
 		// reset pointers

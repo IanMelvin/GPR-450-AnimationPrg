@@ -58,19 +58,25 @@ a3boolean runWhenISaySo = a3true;
 a3_TextureAtlas testAtlas;
 
 //RSC MOD
-ec_InterpolationFuncFamily floatInterpolateFuncs = {
-	sizeof(a3real),
-	a3realLerpWrapper,
-	0,
-	0
-};
+ec_DataVtable floatFuncsAdditive;
+a3real* _floatAdditiveSetIdentity(a3real* val_out) { *val_out = 0; return val_out; }
+a3real* _floatAdditiveInvert     (a3real* val_inout) { *val_inout = -*val_inout; return val_inout; }
+a3real* _floatAdditiveConcat     (a3real* val_out, const a3real* lhs, const a3real* rhs) { *val_out = *lhs + *rhs; return val_out; }
+a3real* _floatAdditiveScale      (a3real* val_inout, const a3real scale) { *val_inout *= scale; return val_inout; }
 
 void InitilizeCode(a3_DemoState const* demoState, a3_DemoMode0_Starter* demoMode)
 {
 	printf("test");
 
+	floatFuncsAdditive.size = sizeof(a3real);
+	vtable_setDefaults(&floatFuncsAdditive);
+	floatFuncsAdditive.identity = (fp_identity) _floatAdditiveSetIdentity;
+	floatFuncsAdditive.invert   = (fp_invert)   _floatAdditiveInvert     ;
+	floatFuncsAdditive.concat   = (fp_concat)   _floatAdditiveConcat     ;
+	floatFuncsAdditive.scale    = (fp_scale)    _floatAdditiveScale      ;
+
 	a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
-	a3keyframePoolCreate(keyframes, 12, &floatInterpolateFuncs);
+	a3keyframePoolCreate(keyframes, 12, &floatFuncsAdditive);
 
 	a3real* testKeyframeValues = malloc(sizeof(a3real) * 12);
 	for (int i = 0; i < 12; ++i)

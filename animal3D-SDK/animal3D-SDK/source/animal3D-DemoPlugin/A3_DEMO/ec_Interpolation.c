@@ -3,36 +3,19 @@
 #include <assert.h>
 #include <string.h>
 
-void* ec_interpolate(void* out, const void* val0, const void* val1, a3real param, const ec_InterpolationFuncFamily* funcs, ec_InterpolationMode mode)
+void* ec_interpolate(void* out, const void* handle0, const void* val0, const void* val1, const void* handle1, a3real param, const ec_DataVtable* funcs, ec_InterpolationMode mode)
 {
     switch (mode)
 	{
-	//Special cases for non-blending modes
-	case EC_INTERPOLATE_CONSTANT:
-		//*out = *val0;
-		memcpy(out, val0, funcs->valSize);
-		return out;
+	case EC_INTERPOLATE_CONSTANT     : funcs->copy   (out,          val0,                       funcs); break;
+	case EC_INTERPOLATE_NEAREST      : funcs->nearest(out,          val0, val1,          param, funcs); break;
+	case EC_INTERPOLATE_LINEAR       : funcs->lerp   (out,          val0, val1,          param, funcs); break;
+	//case EC_INTERPOLATE_CATMULL_ROM  : break;
+	case EC_INTERPOLATE_CUBIC_HERMITE: funcs->cubic  (out, handle0, val0, val1, handle1, param, funcs); break;
 
-	case EC_INTERPOLATE_NEAREST:
-		//*out = param < 0.5f ? val0 : val1;
-		memcpy(out, param < 0.5f ? val0 : val1, funcs->valSize);
-		return out;
-
-	//Normal blending modes
-	default:
-		assert(funcs->byMode[mode]);
-		funcs->byMode[mode](out, val0, val1, param);
-		return out;
+	//Catch unhandled options
+	default: assert(false); break;
 	}
 
-	/*
-	switch (mode)
-	{
-	case EC_INTERPOLATE_CONSTANT: *out = val0;
-	case EC_INTERPOLATE_NEAREST : *out = param < 0.5f ? val0 : val1;
-	case EC_INTERPOLATE_LINEAR  : *out = a3lerp(val0, val1, param);
-
-	default: assert(false); return 0;
-	}
-	*/
+	return out;
 }

@@ -137,11 +137,11 @@ struct a3_KeyframePool
 	a3ui32 count;
 	
 	// how do we interpolate between keyframe values?
-	const ec_InterpolationFuncFamily* interpolationFuncs;
+	const ec_DataVtable* interpolationFuncs;
 };
 
 // allocate keyframe pool
-a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count, const ec_InterpolationFuncFamily* interpolationFuncs);
+a3i32 a3keyframePoolCreate(a3_KeyframePool* keyframePool_out, const a3ui32 count, const ec_DataVtable* interpolationFuncs);
 
 // release keyframe pool
 a3i32 a3keyframePoolRelease(a3_KeyframePool* keyframePool);
