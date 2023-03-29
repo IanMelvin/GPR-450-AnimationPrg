@@ -344,10 +344,11 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	hierarchyState = demoMode->hierarchyState_skel;
 	hierarchyState->hierarchy = 0;
 	a3hierarchyStateCreate(hierarchyState, hierarchy);
-	a3hierarchyPoseCopy(hierarchyState->localPose, hierarchyPoseGroup->hierarchalPoses, hierarchy->numNodes);
-	a3hierarchyPoseConvert(hierarchyState->localPose, hierarchy->numNodes, hierarchyState->channels, hierarchyState->eulerOrder);
-	a3kinematicsSolveForward(hierarchyState);
-	a3hierarchyStateUpdateObjectInverse(hierarchyState);
+	//RSC note: No need to call these, as the equivalent functions will run in update anyway
+	//a3hierarchyPoseCopy(hierarchyState->localPose, hierarchyPoseGroup->hierarchalPoses, hierarchy->numNodes);
+	//a3hierarchyPoseConvert(hierarchyState->localPose, hierarchy->numNodes, hierarchyState->channels, hierarchyState->eulerOrder);
+	//a3kinematicsSolveForward(hierarchyState);
+	//a3hierarchyStateUpdateObjectInverse(hierarchyState);
 
 	// real-time state
 	hierarchyState = demoMode->hierarchyState_skel + 1;
