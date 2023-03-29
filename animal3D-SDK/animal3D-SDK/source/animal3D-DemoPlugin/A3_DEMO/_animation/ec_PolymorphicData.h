@@ -27,7 +27,6 @@ typedef void* (*fp_identity)(void* val_out);
 typedef void* (*fp_invert  )(void* val_inout);
 typedef void* (*fp_concat  )(void* val_out, const void* lhs, const void* rhs);
 typedef void* (*fp_scale   )(void* val_inout, const a3real scale);
-typedef void* (*fp_descale)(void* val_inout, const a3real scale);
 
 struct ec_DataVtable
 {
@@ -38,10 +37,10 @@ struct ec_DataVtable
 	fp_invert   invert;
 	fp_concat   concat;
 	fp_scale    scale;
-	fp_descale	descale;
 
 	//Optional to override, vtable_setDefaults sets these to the functions below
 	
+	void* (*descale   )(void* val_inout, const a3real scale, const ec_DataVtable* funcs);
 	void* (*copy      )(void* dst, const void* src, const ec_DataVtable* funcs);
 	void* (*lerp      )(void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
 	void* (*nearest   )(void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
@@ -59,6 +58,7 @@ struct ec_DataVtable
 };
 
 //Defaults
+void* defaultDescale   (void* val_inout, const a3real control, const ec_DataVtable* funcs);
 void* defaultCopy      (void* dst, const void* src, const ec_DataVtable* funcs);
 void* defaultLerp      (void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
 void* defaultNearest   (void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);

@@ -12,6 +12,7 @@
 
 void vtable_setDefaults(ec_DataVtable* out)
 {
+	out->descale    = defaultDescale   ;
 	out->copy       = defaultCopy      ;
 	out->lerp       = defaultLerp      ;
 	out->nearest    = defaultNearest   ;
@@ -21,6 +22,11 @@ void vtable_setDefaults(ec_DataVtable* out)
 	out->biLerp     = defaultBiLerp    ;
 	out->biNearest  = defaultBiNearest ;
 	out->biCubic    = defaultBiCubic   ;
+}
+
+void* defaultDescale(void* val_inout, const a3real control, const ec_DataVtable* funcs)
+{
+	return funcs->scale(val_inout, 1 / control);
 }
 
 void* defaultCopy(void* dst, const void* src, const ec_DataVtable* funcs)
@@ -298,27 +304,10 @@ a3real3* a3real3PowS(a3real3* val_inout, const a3real power)
 	return val_inout;
 }
 
-a3real3* a3real3DivS(a3real3* val_inout, const a3real power)
-{
-	a3real invLen;
-	a3real3NormalizeGetInvLength(*val_inout, &invLen);
-	a3real3DivS(*val_inout, (a3real)pow(1 / invLen, power));
-	return val_inout;
-}
-
 a3quat* a3quatMulS(a3quat* val_inout, const a3real scale)
 {
 	a3quat tmp = { 0 }; //Same var used for read/write may have unintended consequences
 	a3quatSlerpIdentityQ0(tmp.q, val_inout->q, scale);
-	a3real4SetReal4(val_inout->q, tmp.q);
-	return val_inout;
-}
-
-//Have Robert Look Over
-a3quat* a3quatDivS(a3quat* val_inout, const a3real scale) 
-{
-	a3quat tmp = { 0 }; //Same var used for read/write may have unintended consequences
-	a3quatSlerpIdentityQ1(tmp.q, val_inout->q, scale);
 	a3real4SetReal4(val_inout->q, tmp.q);
 	return val_inout;
 }
@@ -335,11 +324,11 @@ a3_SpatialPose* a3spatialPoseMulS(a3_SpatialPose* val_inout, const a3real scale)
 
 a3_SpatialPose* a3spatialPoseDivS(a3_SpatialPose* val_inout, const a3real scale)
 {
-	vtable_vec3Additive      .descale(&val_inout->translation    , scale);
-	vtable_vec3Additive      .descale(&val_inout->eulerAngles    , scale);
-	//vtable_quat              .descale(&val_inout->quatOrientation, scale);
-	vtable_vec3Multiplicative.descale(&val_inout->scale          , scale);
-	//vtable_mat4              .descale(&val_inout->transform      , scale);
+	vtable_vec3Additive      .descale(&val_inout->translation    , scale, &vtable_vec3Additive      );
+	vtable_vec3Additive      .descale(&val_inout->eulerAngles    , scale, &vtable_vec3Additive      );
+	//vtable_quat              .descale(&val_inout->quatOrientation, scale, &vtable_quat              );
+	vtable_vec3Multiplicative.descale(&val_inout->scale          , scale, &vtable_vec3Multiplicative);
+	//vtable_mat4              .descale(&val_inout->transform      , scale, &vtable_mat4              );
 	return val_inout;
 }
 
@@ -382,14 +371,12 @@ void setupVtables()
 	vtable_mat4.invert	 = (fp_invert  ) a3real4x4Invert;
 	vtable_mat4.concat	 = (fp_concat  ) a3real4x4Product;
 	vtable_mat4.scale	 = (fp_scale   ) a3real4x4MulS;
-	vtable_mat4.descale	 = (fp_descale ) a3real4x4DivS;
 
 	//spatial pose
 	vtable_SpatialPose.identity = (fp_identity) a3spatialPoseReset;
 	vtable_SpatialPose.invert   = (fp_invert  ) a3spatialPoseInvert;
 	vtable_SpatialPose.concat   = (fp_concat  ) a3spatialPoseConcat;
 	vtable_SpatialPose.scale    = (fp_scale   ) a3spatialPoseMulS;
-	vtable_SpatialPose.descale  = (fp_descale ) a3spatialPoseDivS;
 	
 	//translation and euler angles
 	vtable_vec3Additive.identity = (fp_identity) a3real3SetZero;
@@ -402,14 +389,12 @@ void setupVtables()
 	vtable_quat.invert	 = (fp_invert  ) a3quatInvert;
 	vtable_quat.concat	 = (fp_concat  ) a3quatProduct;
 	vtable_quat.scale	 = (fp_scale   ) a3quatMulS;
-	vtable_quat.descale  = (fp_descale ) a3quatDivS;
 
 	//scale
 	vtable_vec3Multiplicative.identity = (fp_identity) a3real3SetOne;
 	vtable_vec3Multiplicative.invert   = (fp_invert  ) a3real3InvertLength;
 	vtable_vec3Multiplicative.concat   = (fp_concat  ) a3real3MulComp;
 	vtable_vec3Multiplicative.scale	   = (fp_scale   ) a3real3PowS;
-	vtable_vec3Multiplicative.descale  = (fp_descale ) a3real3DivS;
 }
 
 #pragma endregion
