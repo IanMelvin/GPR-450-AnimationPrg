@@ -291,7 +291,7 @@ a3real3* a3real3PowS(a3real3* val_inout, const a3real power)
 	return val_inout;
 }
 
-a3real3* a3real3DivS(a3real3* val_inout, const a3real power)
+a3real3* a3real3DivideS(a3real3* val_inout, const a3real power)
 {
 	a3real invLen;
 	a3real3NormalizeGetInvLength(*val_inout, &invLen);
@@ -318,21 +318,21 @@ a3quat* a3quatDivS(a3quat* val_inout, const a3real scale)
 
 a3_SpatialPose* a3spatialPoseMulS(a3_SpatialPose* val_inout, const a3real scale)
 {
-	vtable_vec3Additive      .scale(&val_inout->translation, scale);
-	vtable_vec3Additive      .scale(&val_inout->angles     , scale);
-	vtable_quat              .scale(&val_inout->orientation, scale);
+	vtable_vec3Additive      .scale(&val_inout->translate, scale);
+	vtable_vec3Additive      .scale(&val_inout->rotate     , scale);
+	vtable_quat              .scale(&val_inout->transformDQ, scale);
 	vtable_vec3Multiplicative.scale(&val_inout->scale      , scale);
-	vtable_mat4              .scale(&val_inout->transform  , scale);
+	vtable_mat4              .scale(&val_inout->transformMat  , scale);
 	return val_inout;
 }
 
 a3_SpatialPose* a3spatialPoseDivS(a3_SpatialPose* val_inout, const a3real scale)
 {
-	vtable_vec3Additive.descale(&val_inout->translation, scale);
-	vtable_vec3Additive.descale(&val_inout->angles, scale);
-	vtable_quat.descale(&val_inout->orientation, scale);
+	vtable_vec3Additive.descale(&val_inout->translate, scale);
+	vtable_vec3Additive.descale(&val_inout->rotate, scale);
+	vtable_quat.descale(&val_inout->transformDQ, scale);
 	vtable_vec3Multiplicative.descale(&val_inout->scale, scale);
-	vtable_mat4.descale(&val_inout->transform, scale);
+	vtable_mat4.descale(&val_inout->transformMat, scale);
 	return val_inout;
 }
 
@@ -402,7 +402,7 @@ void setupVtables()
 	vtable_vec3Multiplicative.invert   = (fp_invert  ) a3real3InvertLength;
 	vtable_vec3Multiplicative.concat   = (fp_concat  ) a3real3MulComp;
 	vtable_vec3Multiplicative.scale	   = (fp_scale   ) a3real3PowS;
-	vtable_vec3Multiplicative.descale  = (fp_descale ) a3real3DivS;
+	vtable_vec3Multiplicative.descale  = (fp_descale ) a3real3DivideS;
 }
 
 #pragma endregion

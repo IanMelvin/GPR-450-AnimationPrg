@@ -32,11 +32,11 @@ a3i32 a3spatialPoseInvert(a3_SpatialPose* spatialPose_inout)
 {
 	if (spatialPose_inout)
 	{
-		vtable_vec3Additive      .invert(&spatialPose_inout->translation);
-		vtable_vec3Additive      .invert(&spatialPose_inout->angles     );
-		vtable_quat              .invert(&spatialPose_inout->orientation);
+		vtable_vec3Additive      .invert(&spatialPose_inout->translate);
+		vtable_vec3Additive      .invert(&spatialPose_inout->rotate     );
+		vtable_quat              .invert(&spatialPose_inout->transformDQ);
 		vtable_vec3Multiplicative.invert(&spatialPose_inout->scale      );
-		vtable_mat4              .invert(&spatialPose_inout->transform  );
+		vtable_mat4              .invert(&spatialPose_inout->transformMat  );
 		return 1;
 	}
 	return -1;
