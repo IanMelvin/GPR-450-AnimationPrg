@@ -144,7 +144,7 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 	if (demoState->updateAnimation)
 	{
 		a3real const dtr = (a3real)dt;
-		a3_ClipController* clipCtrl = demoMode->clipCtrlA;
+		a3_ClipController* clipCtrl = demoMode->clipCtrlB;
 
 		// update controllers
 		a3clipControllerUpdate(demoMode->clipCtrl, dt);
