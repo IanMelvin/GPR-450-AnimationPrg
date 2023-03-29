@@ -69,15 +69,15 @@ void* defaultBiLerp    (void* val_out, const void* v00, const void* v01, const v
 void* defaultBiNearest (void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
 void* defaultBiCubic   (void* val_out, const void* v1, const void* v2, const void* v3, const void* v4, const void* v5, const void* v6, const void* v7, const void* v8, const void* v9, const void* v10, const void* v11, const void* v12, const void* v13, const void* v14, const void* v15, const void* v16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const ec_DataVtable* funcs);
 
-//HierarchyPose
-a3_HierarchyPose* hierarchyPoseCopy      (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseLerp      (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseNearest   (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseCubic     (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3_HierarchyPose* pos3, const a3_HierarchyPose* pos4, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseDeconcat  (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* lhs, const a3_HierarchyPose* rhs, a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseTriangular(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3real param1, const a3real param2, a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseBiLerp    (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos00, const a3_HierarchyPose* pos01, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, a3ui32 numNodes, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseBiNearest (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos00, const a3_HierarchyPose* pos01, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, a3ui32 numNodes, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseBiCubic   (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3_HierarchyPose* pos3, const a3_HierarchyPose* pos4, const a3_HierarchyPose* pos5, const a3_HierarchyPose* pos6, const a3_HierarchyPose* pos7, const a3_HierarchyPose* pos8, const a3_HierarchyPose* pos9, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, const a3_HierarchyPose* pos12, const a3_HierarchyPose* pos13, const a3_HierarchyPose* pos14, const a3_HierarchyPose* pos15, const a3_HierarchyPose* pos16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const a3ui32 numNodes, const ec_DataVtable* funcs);
+//HierarchyPose/Bulk Variants
+void* bulkCopy      (void* val_out, const void* pos0, a3ui32 count, const ec_DataVtable* funcs);
+void* bulkLerp      (void* val_out, const void* pos0, const void* pos1, a3ui32 count, const a3real param, const ec_DataVtable* funcs);
+void* bulkNearest   (void* val_out, const void* pos0, const void* pos1, a3ui32 count, const a3real param, const ec_DataVtable* funcs);
+void* bulkCubic     (void* val_out, const void* pos1, const void* pos2, const void* pos3, const void* pos4, a3ui32 count, const a3real param, const ec_DataVtable* funcs);
+void* bulkDeconcat  (void* val_out, const void* lhs, const void* rhs, a3ui32 count, const ec_DataVtable* funcs);
+void* bulkTriangular(void* val_out, const void* pos0, const void* pos1, const void* pos2, const a3real param1, const a3real param2, a3ui32 count, const ec_DataVtable* funcs);
+void* bulkBiLerp    (void* val_out, const void* pos00, const void* pos01, const void* pos10, const void* pos11, a3ui32 count, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
+void* bulkBiNearest (void* val_out, const void* pos00, const void* pos01, const void* pos10, const void* pos11, a3ui32 count, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
+void* bulkBiCubic   (void* val_out, const void* pos1, const void* pos2, const void* pos3, const void* pos4, const void* pos5, const void* pos6, const void* pos7, const void* pos8, const void* pos9, const void* pos10, const void* pos11, const void* pos12, const void* pos13, const void* pos14, const void* pos15, const void* pos16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const a3ui32 count, const ec_DataVtable* funcs);
 
 #endif

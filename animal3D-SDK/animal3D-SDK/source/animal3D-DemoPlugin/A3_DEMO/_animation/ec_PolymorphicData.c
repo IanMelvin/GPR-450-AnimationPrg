@@ -144,121 +144,128 @@ void* defaultBiCubic(void* val_out, const void* v1, const void* v2, const void* 
 }
 #pragma endregion
 
-#pragma region HierarchyPose Variants
-a3_HierarchyPose* hierarchyPoseCopy(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, a3ui32 numNodes, const ec_DataVtable* funcs)
+#pragma region HierarchyPose/Bulk Variants
+
+void* bulkOp_addrOf(const void* arrayBase, a3ui32 index, size_t elementSize)
 {
-	if (hierarchyPose_Out && pos0 && numNodes > 0 )
-	{
-		for(a3ui32 i = 0; i < numNodes; i++)
-		{
-			funcs->copy(&hierarchyPose_Out->pose[i], &pos0->pose[i], funcs);
-		}
-	}
-	return hierarchyPose_Out;
+	char* asByteArray = (void*)arrayBase; //Violates const contract, but we don't care
+	return asByteArray + (index * elementSize);
 }
 
-a3_HierarchyPose* hierarchyPoseLerp(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs)
+void* bulkCopy(void* val_out, const void* pos0, a3ui32 count, const ec_DataVtable* funcs)
 {
-	if (hierarchyPose_Out && pos0 && pos1 && numNodes > 0)
+	if (val_out && pos0 && count > 0)
 	{
-		for (a3ui32 i = 0; i < numNodes; i++)
+		for(a3ui32 i = 0; i < count; i++)
 		{
-			funcs->lerp(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], param, funcs);
+			funcs->copy(bulkOp_addrOf(val_out, i, funcs->size), bulkOp_addrOf(pos0, i, funcs->size), funcs);
+		}
+	}
+	return val_out;
+}
+
+void* bulkLerp(void* val_out, const void* pos0, const void* pos1, a3ui32 count, const a3real param, const ec_DataVtable* funcs)
+{
+	if (val_out && pos0 && pos1 && count > 0)
+	{
+		for (a3ui32 i = 0; i < count; i++)
+		{
+			funcs->lerp(bulkOp_addrOf(val_out, i, funcs->size), bulkOp_addrOf(pos0, i, funcs->size), bulkOp_addrOf(pos1, i, funcs->size), param, funcs);
 		}
 	}
 	
-	return hierarchyPose_Out;
+	return val_out;
 }
 
-a3_HierarchyPose* hierarchyPoseNearest(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs)
+void* bulkNearest(void* val_out, const void* pos0, const void* pos1, a3ui32 count, const a3real param, const ec_DataVtable* funcs)
 {
-	if (hierarchyPose_Out && pos0 && pos1 && numNodes > 0)
+	if (val_out && pos0 && pos1 && count > 0)
 	{
-		for (a3ui32 i = 0; i < numNodes; i++)
+		for (a3ui32 i = 0; i < count; i++)
 		{
-			funcs->nearest(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], param, funcs);
+			funcs->nearest(bulkOp_addrOf(val_out, i, funcs->size), bulkOp_addrOf(pos0, i, funcs->size), bulkOp_addrOf(pos1, i, funcs->size), param, funcs);
 		}
 	}
 
-	return hierarchyPose_Out;
+	return val_out;
 }
 
-a3_HierarchyPose* hierarchyPoseCubic(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3_HierarchyPose* pos3, const a3_HierarchyPose* pos4, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs)
+void* bulkCubic(void* val_out, const void* pos1, const void* pos2, const void* pos3, const void* pos4, a3ui32 count, const a3real param, const ec_DataVtable* funcs)
 {
-	if (hierarchyPose_Out && pos1 && pos2 && pos3 && pos4 && numNodes > 0)
+	if (val_out && pos1 && pos2 && pos3 && pos4 && count > 0)
 	{
-		for (a3ui32 i = 0; i < numNodes; i++)
+		for (a3ui32 i = 0; i < count; i++)
 		{
-			funcs->cubic(&hierarchyPose_Out->pose[i], &pos1->pose[i], &pos2->pose[i], &pos3->pose[i], &pos4->pose[i], param, funcs);
+			funcs->cubic(bulkOp_addrOf(val_out, i, funcs->size), bulkOp_addrOf(pos1, i, funcs->size), bulkOp_addrOf(pos2, i, funcs->size), bulkOp_addrOf(pos3, i, funcs->size), bulkOp_addrOf(pos4, i, funcs->size), param, funcs);
 		}
 	}
 
-	return hierarchyPose_Out;
+	return val_out;
 }
 
-a3_HierarchyPose* hierarchyPoseDeconcat(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* lhs, const a3_HierarchyPose* rhs, a3ui32 numNodes, const ec_DataVtable* funcs)
+void* bulkDeconcat(void* val_out, const void* lhs, const void* rhs, a3ui32 count, const ec_DataVtable* funcs)
 {
-	if (hierarchyPose_Out && lhs && rhs && numNodes > 0)
+	if (val_out && lhs && rhs && count > 0)
 	{
-		for (a3ui32 i = 0; i < numNodes; i++)
+		for (a3ui32 i = 0; i < count; i++)
 		{
-			funcs->deconcat(&hierarchyPose_Out->pose[i], &lhs->pose[i], &rhs->pose[i], funcs);
+			funcs->deconcat(bulkOp_addrOf(val_out, i, funcs->size), bulkOp_addrOf(lhs, i, funcs->size), bulkOp_addrOf(rhs, i, funcs->size), funcs);
 		}
 	}
 
-	return hierarchyPose_Out;
+	return val_out;
 }
 
-a3_HierarchyPose* hierarchyPoseTriangular(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3real param1, const a3real param2, a3ui32 numNodes, const ec_DataVtable* funcs)
+void* bulkTriangular(void* val_out, const void* pos0, const void* pos1, const void* pos2, const a3real param1, const a3real param2, a3ui32 count, const ec_DataVtable* funcs)
 {
-	if (hierarchyPose_Out && pos0 && pos1 && pos2 && numNodes > 0)
+	if (val_out && pos0 && pos1 && pos2 && count > 0)
 	{
-		for (a3ui32 i = 0; i < numNodes; i++)
+		for (a3ui32 i = 0; i < count; i++)
 		{
-			funcs->triangular(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], &pos2->pose[i], param1, param2, funcs);
+			funcs->triangular(bulkOp_addrOf(val_out, i, funcs->size), bulkOp_addrOf(pos0, i, funcs->size), bulkOp_addrOf(pos1, i, funcs->size), bulkOp_addrOf(pos2, i, funcs->size), param1, param2, funcs);
 		}
 	}
 
-	return hierarchyPose_Out;
+	return val_out;
 }
 
-a3_HierarchyPose* hierarchyPoseBiLerp(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos00, const a3_HierarchyPose* pos01, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, a3ui32 numNodes, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
+void* bulkBiLerp(void* val_out, const void* pos00, const void* pos01, const void* pos10, const void* pos11, a3ui32 count, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
 {
-	if (hierarchyPose_Out && pos00 && pos01 && pos10 && pos11 && numNodes > 0)
+	if (val_out && pos00 && pos01 && pos10 && pos11 && count > 0)
 	{
-		for (a3ui32 i = 0; i < numNodes; i++)
+		for (a3ui32 i = 0; i < count; i++)
 		{
-			funcs->biLerp(&hierarchyPose_Out->pose[i], &pos00->pose[i], &pos01->pose[i], &pos10->pose[i], &pos11->pose[i], paramX0, paramX1, paramY, funcs);
+			funcs->biLerp(bulkOp_addrOf(val_out, i, funcs->size), bulkOp_addrOf(pos00, i, funcs->size), bulkOp_addrOf(pos01, i, funcs->size), bulkOp_addrOf(pos10, i, funcs->size), bulkOp_addrOf(pos11, i, funcs->size), paramX0, paramX1, paramY, funcs);
 		}
 	}
 
-	return hierarchyPose_Out;
+	return val_out;
 }
 
-a3_HierarchyPose* hierarchyPoseBiNearest(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos00, const a3_HierarchyPose* pos01, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, a3ui32 numNodes, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
+void* bulkBiNearest(void* val_out, const void* pos00, const void* pos01, const void* pos10, const void* pos11, a3ui32 count, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
 {
-	if (hierarchyPose_Out && pos00 && pos01 && pos10 && pos11 && numNodes > 0)
+	if (val_out && pos00 && pos01 && pos10 && pos11 && count > 0)
 	{
-		for (a3ui32 i = 0; i < numNodes; i++)
+		for (a3ui32 i = 0; i < count; i++)
 		{
-			funcs->biNearest(&hierarchyPose_Out->pose[i], &pos00->pose[i], &pos01->pose[i], &pos10->pose[i], &pos11->pose[i], paramX0, paramX1, paramY, funcs);
+			funcs->biNearest(bulkOp_addrOf(val_out, i, funcs->size), bulkOp_addrOf(pos00, i, funcs->size), bulkOp_addrOf(pos01, i, funcs->size), bulkOp_addrOf(pos10, i, funcs->size), bulkOp_addrOf(pos11, i, funcs->size), paramX0, paramX1, paramY, funcs);
 		}
 	}
 
-	return hierarchyPose_Out;
+	return val_out;
 }
 
-a3_HierarchyPose* hierarchyPoseBiCubic(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3_HierarchyPose* pos3, const a3_HierarchyPose* pos4, const a3_HierarchyPose* pos5, const a3_HierarchyPose* pos6, const a3_HierarchyPose* pos7, const a3_HierarchyPose* pos8, const a3_HierarchyPose* pos9, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, const a3_HierarchyPose* pos12, const a3_HierarchyPose* pos13, const a3_HierarchyPose* pos14, const a3_HierarchyPose* pos15, const a3_HierarchyPose* pos16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const a3ui32 numNodes, const ec_DataVtable* funcs)
+void* bulkBiCubic(void* val_out, const void* pos1, const void* pos2, const void* pos3, const void* pos4, const void* pos5, const void* pos6, const void* pos7, const void* pos8, const void* pos9, const void* pos10, const void* pos11, const void* pos12, const void* pos13, const void* pos14, const void* pos15, const void* pos16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const a3ui32 count, const ec_DataVtable* funcs)
 {
-	if (hierarchyPose_Out && pos1 && pos2 && pos3 && pos4 && pos5 && pos6 && pos7 && pos8 && pos9 && pos10 && pos11 && pos12 && pos13 && pos14 && pos15 && pos16 && numNodes > 0)
+	if (val_out && pos1 && pos2 && pos3 && pos4 && pos5 && pos6 && pos7 && pos8 && pos9 && pos10 && pos11 && pos12 && pos13 && pos14 && pos15 && pos16 && count > 0)
 	{
-		for (a3ui32 i = 0; i < numNodes; i++)
+		for (a3ui32 i = 0; i < count; i++)
 		{
-			funcs->biCubic(&hierarchyPose_Out->pose[i], &pos1->pose[i], &pos2->pose[i], &pos3->pose[i], &pos4->pose[i], &pos5->pose[i], &pos6->pose[i], &pos7->pose[i], &pos8->pose[i], &pos9->pose[i], &pos10->pose[i], &pos11->pose[i], &pos12->pose[i], &pos13->pose[i], &pos14->pose[i], &pos15->pose[i], &pos16->pose[i], param0, param1, param2, param3, param4, funcs);
+			funcs->biCubic(bulkOp_addrOf(val_out, i, funcs->size), bulkOp_addrOf(pos1, i, funcs->size), bulkOp_addrOf(pos2, i, funcs->size), bulkOp_addrOf(pos3, i, funcs->size), bulkOp_addrOf(pos4, i, funcs->size), bulkOp_addrOf(pos5, i, funcs->size), bulkOp_addrOf(pos6, i, funcs->size), bulkOp_addrOf(pos7, i, funcs->size), bulkOp_addrOf(pos8, i, funcs->size), bulkOp_addrOf(pos9, i, funcs->size), bulkOp_addrOf(pos10, i, funcs->size), bulkOp_addrOf(pos11, i, funcs->size), bulkOp_addrOf(pos12, i, funcs->size), bulkOp_addrOf(pos13, i, funcs->size), bulkOp_addrOf(pos14, i, funcs->size), bulkOp_addrOf(pos15, i, funcs->size), bulkOp_addrOf(pos16, i, funcs->size), param0, param1, param2, param3, param4, funcs);
 		}
 	}
 
-	return hierarchyPose_Out;
+	return val_out;
 }
 
 #pragma endregion
