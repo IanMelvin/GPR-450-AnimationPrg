@@ -354,6 +354,62 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	hierarchyState = demoMode->hierarchyState_skel + 1;
 	hierarchyState->hierarchy = 0;
 	a3hierarchyStateCreate(hierarchyState, hierarchy);
+	
+	//////////////////// RSC MOD: Init clips and playback ////////////////////
+
+	//TODO Egnaro data that we don't have a way of loading yet
+	const a3real durationPerFrame = 1/24.0f; //24 FPS
+
+	/////// Set up SpatialPoses as keyframes ///////
+
+	a3_KeyframePool* keyframes = malloc(sizeof(a3_KeyframePool));
+	a3keyframePoolCreate(keyframes, hierarchyPoseGroup->spatialPoseCount, NULL); //TODO write interpolation funcs
+	for (a3ui32 i = 0; i < hierarchyPoseGroup->spatialPoseCount; ++i) a3keyframeInit(&keyframes->keyframe[i], durationPerFrame, &hierarchyPoseGroup->spatialPosePool[i]);
+
+	/////// Set up keyframes as clips ///////
+
+	a3_ClipPool* clips = malloc(sizeof(a3_ClipPool));
+	a3clipPoolCreate(clips, 4);
+
+	//TODO Egnaro data that we don't have a way of loading yet
+
+	a3_Clip* clip;
+
+	//Base pose "animation"
+	clip = &clips->clip[0];
+	a3clipInit(clip, "basepose", hierarchy->numNodes);
+	for (a3ui32 i = 0; i < clip->channelCount; ++i) a3keyframeChannelInit(&clip->channels[i], hierarchy->nodes[i].name, keyframes, 0, 0);
+	clip->reverseTransition.flags = EC_TERMINUSACTION_PAUSE; clip->reverseTransition.targetClipID = NULL_CLIP_ID;
+	clip->forwardTransition.flags = EC_TERMINUSACTION_PAUSE; clip->forwardTransition.targetClipID = NULL_CLIP_ID;
+	a3clipCalculateDuration(clip);
+
+	//Calibration
+	clip = &clips->clip[1];
+	a3clipInit(clip, "calibration", hierarchy->numNodes);
+	for (a3ui32 i = 0; i < clip->channelCount; ++i) a3keyframeChannelInit(&clip->channels[i], hierarchy->nodes[i].name, keyframes, 1, 27);
+	clip->reverseTransition.flags = EC_TERMINUSACTION_FORWARD                          ; clip->reverseTransition.targetClipID = 0;
+	clip->forwardTransition.flags = EC_TERMINUSACTION_FORWARD | EC_TERMINUSACTION_PAUSE; clip->forwardTransition.targetClipID = 0;
+	a3clipCalculateDuration(clip);
+
+	//Idle
+	clip = &clips->clip[2];
+	a3clipInit(clip, "idle", hierarchy->numNodes);
+	for (a3ui32 i = 0; i < clip->channelCount; ++i) a3keyframeChannelInit(&clip->channels[i], hierarchy->nodes[i].name, keyframes, 28, 52);
+	clip->reverseTransition.flags = EC_TERMINUSACTION_REVERSE | EC_TERMINUSACTION_SKIP; clip->reverseTransition.targetClipID = NULL_CLIP_ID;
+	clip->forwardTransition.flags = EC_TERMINUSACTION_FORWARD                         ; clip->forwardTransition.targetClipID = NULL_CLIP_ID;
+	a3clipCalculateDuration(clip);
+
+	//Dance
+	clip = &clips->clip[3];
+	a3clipInit(clip, "dance", hierarchy->numNodes);
+	for (a3ui32 i = 0; i < clip->channelCount; ++i) a3keyframeChannelInit(&clip->channels[i], hierarchy->nodes[i].name, keyframes, 54, 78);
+	clip->reverseTransition.flags = EC_TERMINUSACTION_REVERSE | EC_TERMINUSACTION_SKIP; clip->reverseTransition.targetClipID = NULL_CLIP_ID;
+	clip->forwardTransition.flags = EC_TERMINUSACTION_FORWARD                         ; clip->forwardTransition.targetClipID = NULL_CLIP_ID;
+	a3clipCalculateDuration(clip);
+
+	/////// Set up animator ///////
+
+	a3clipControllerInit(&demoMode->skeletonAnimator, "Skeleton animator", clips, 1);
 }
 
 

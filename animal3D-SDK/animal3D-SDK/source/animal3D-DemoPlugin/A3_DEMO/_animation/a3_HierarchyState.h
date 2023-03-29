@@ -55,7 +55,7 @@ struct a3_HierarchyPose
 	a3_SpatialPose* pose;
 
 	// Number of SpatialPoses in array
-	a3ui32 poseCount;
+	a3ui32 poseCount; //FIXME - NOT SET UP YET
 };
 
 
