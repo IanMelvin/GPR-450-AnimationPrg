@@ -23,7 +23,7 @@
 */
 
 #include "../a3_SpatialPose.h"
-
+#include "../ec_PolymorphicData.h"
 
 //-----------------------------------------------------------------------------
 
@@ -33,5 +33,18 @@ ec_InterpolationFuncFamily a3_SpatialPoseInterpolationInfo = { //FIXME this is o
 	0,
 	0
 };
+
+a3_SpatialPose* a3spatialPoseInvert(a3_SpatialPose* spatialPose_inout)
+{
+	if (spatialPose_inout)
+	{
+		vtable_vec3Additive      .invert(&spatialPose_inout->translation    );
+		vtable_vec3Additive      .invert(&spatialPose_inout->eulerAngles    );
+		//vtable_quat              .invert(&spatialPose_inout->quatOrientation);
+		vtable_vec3Multiplicative.invert(&spatialPose_inout->scale          );
+		//vtable_mat4              .invert(&spatialPose_inout->transform      );
+	}
+	return spatialPose_inout;
+}
 
 //-----------------------------------------------------------------------------

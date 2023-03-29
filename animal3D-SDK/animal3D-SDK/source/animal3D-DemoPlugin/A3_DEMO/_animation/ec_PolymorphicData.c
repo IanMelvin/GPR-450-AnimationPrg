@@ -151,7 +151,7 @@ a3_HierarchyPose* hierarchyPoseCopy(a3_HierarchyPose* hierarchyPose_Out, const a
 	{
 		for(a3ui32 i = 0; i < numNodes; i++)
 		{
-			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->copy(&hierarchyPose_Out->pose[i], &pos0->pose[i], funcs);
+			funcs->copy(&hierarchyPose_Out->pose[i], &pos0->pose[i], funcs);
 		}
 	}
 	return hierarchyPose_Out;
@@ -163,7 +163,7 @@ a3_HierarchyPose* hierarchyPoseLerp(a3_HierarchyPose* hierarchyPose_Out, const a
 	{
 		for (a3ui32 i = 0; i < numNodes; i++)
 		{
-			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->lerp(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], param, funcs);
+			funcs->lerp(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], param, funcs);
 		}
 	}
 	
@@ -176,7 +176,7 @@ a3_HierarchyPose* hierarchyPoseNearest(a3_HierarchyPose* hierarchyPose_Out, cons
 	{
 		for (a3ui32 i = 0; i < numNodes; i++)
 		{
-			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->nearest(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], param, funcs);
+			funcs->nearest(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], param, funcs);
 		}
 	}
 
@@ -189,7 +189,7 @@ a3_HierarchyPose* hierarchyPoseCubic(a3_HierarchyPose* hierarchyPose_Out, const 
 	{
 		for (a3ui32 i = 0; i < numNodes; i++)
 		{
-			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->cubic(&hierarchyPose_Out->pose[i], &pos1->pose[i], &pos2->pose[i], &pos3->pose[i], &pos4->pose[i], param, funcs);
+			funcs->cubic(&hierarchyPose_Out->pose[i], &pos1->pose[i], &pos2->pose[i], &pos3->pose[i], &pos4->pose[i], param, funcs);
 		}
 	}
 
@@ -202,7 +202,7 @@ a3_HierarchyPose* hierarchyPoseDeconcat(a3_HierarchyPose* hierarchyPose_Out, con
 	{
 		for (a3ui32 i = 0; i < numNodes; i++)
 		{
-			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->deconcat(&hierarchyPose_Out->pose[i], &lhs->pose[i], &rhs->pose[i], funcs);
+			funcs->deconcat(&hierarchyPose_Out->pose[i], &lhs->pose[i], &rhs->pose[i], funcs);
 		}
 	}
 
@@ -215,7 +215,7 @@ a3_HierarchyPose* hierarchyPoseTriangular(a3_HierarchyPose* hierarchyPose_Out, c
 	{
 		for (a3ui32 i = 0; i < numNodes; i++)
 		{
-			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->triangular(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], &pos2->pose[i], param1, param2, funcs);
+			funcs->triangular(&hierarchyPose_Out->pose[i], &pos0->pose[i], &pos1->pose[i], &pos2->pose[i], param1, param2, funcs);
 		}
 	}
 
@@ -228,7 +228,7 @@ a3_HierarchyPose* hierarchyPoseBiLerp(a3_HierarchyPose* hierarchyPose_Out, const
 	{
 		for (a3ui32 i = 0; i < numNodes; i++)
 		{
-			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->biLerp(&hierarchyPose_Out->pose[i], &pos00->pose[i], &pos01->pose[i], &pos10->pose[i], &pos11->pose[i], paramX0, paramX1, paramY, funcs);
+			funcs->biLerp(&hierarchyPose_Out->pose[i], &pos00->pose[i], &pos01->pose[i], &pos10->pose[i], &pos11->pose[i], paramX0, paramX1, paramY, funcs);
 		}
 	}
 
@@ -241,7 +241,7 @@ a3_HierarchyPose* hierarchyPoseBiNearest(a3_HierarchyPose* hierarchyPose_Out, co
 	{
 		for (a3ui32 i = 0; i < numNodes; i++)
 		{
-			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->biNearest(&hierarchyPose_Out->pose[i], &pos00->pose[i], &pos01->pose[i], &pos10->pose[i], &pos11->pose[i], paramX0, paramX1, paramY, funcs);
+			funcs->biNearest(&hierarchyPose_Out->pose[i], &pos00->pose[i], &pos01->pose[i], &pos10->pose[i], &pos11->pose[i], paramX0, paramX1, paramY, funcs);
 		}
 	}
 
@@ -254,7 +254,7 @@ a3_HierarchyPose* hierarchyPoseBiCubic(a3_HierarchyPose* hierarchyPose_Out, cons
 	{
 		for (a3ui32 i = 0; i < numNodes; i++)
 		{
-			hierarchyPose_Out->pose[i] = *(a3_SpatialPose*)funcs->biCubic(&hierarchyPose_Out->pose[i], &pos1->pose[i], &pos2->pose[i], &pos3->pose[i], &pos4->pose[i], &pos5->pose[i], &pos6->pose[i], &pos7->pose[i], &pos8->pose[i], &pos9->pose[i], &pos10->pose[i], &pos11->pose[i], &pos12->pose[i], &pos13->pose[i], &pos14->pose[i], &pos15->pose[i], &pos16->pose[i], param0, param1, param2, param3, param4, funcs);
+			funcs->biCubic(&hierarchyPose_Out->pose[i], &pos1->pose[i], &pos2->pose[i], &pos3->pose[i], &pos4->pose[i], &pos5->pose[i], &pos6->pose[i], &pos7->pose[i], &pos8->pose[i], &pos9->pose[i], &pos10->pose[i], &pos11->pose[i], &pos12->pose[i], &pos13->pose[i], &pos14->pose[i], &pos15->pose[i], &pos16->pose[i], param0, param1, param2, param3, param4, funcs);
 		}
 	}
 
@@ -318,21 +318,21 @@ a3quat* a3quatDivS(a3quat* val_inout, const a3real scale)
 
 a3_SpatialPose* a3spatialPoseMulS(a3_SpatialPose* val_inout, const a3real scale)
 {
-	vtable_vec3Additive      .scale(&val_inout->translation, scale);
-	vtable_vec3Additive      .scale(&val_inout->angles     , scale);
-	vtable_quat              .scale(&val_inout->orientation, scale);
-	vtable_vec3Multiplicative.scale(&val_inout->scale      , scale);
-	vtable_mat4              .scale(&val_inout->transform  , scale);
+	vtable_vec3Additive      .scale(&val_inout->translation    , scale);
+	vtable_vec3Additive      .scale(&val_inout->eulerAngles    , scale);
+	//vtable_quat              .scale(&val_inout->quatOrientation, scale);
+	vtable_vec3Multiplicative.scale(&val_inout->scale          , scale);
+	//vtable_mat4              .scale(&val_inout->transform      , scale);
 	return val_inout;
 }
 
 a3_SpatialPose* a3spatialPoseDivS(a3_SpatialPose* val_inout, const a3real scale)
 {
-	vtable_vec3Additive.descale(&val_inout->translation, scale);
-	vtable_vec3Additive.descale(&val_inout->angles, scale);
-	vtable_quat.descale(&val_inout->orientation, scale);
-	vtable_vec3Multiplicative.descale(&val_inout->scale, scale);
-	vtable_mat4.descale(&val_inout->transform, scale);
+	vtable_vec3Additive      .descale(&val_inout->translation    , scale);
+	vtable_vec3Additive      .descale(&val_inout->eulerAngles    , scale);
+	//vtable_quat              .descale(&val_inout->quatOrientation, scale);
+	vtable_vec3Multiplicative.descale(&val_inout->scale          , scale);
+	//vtable_mat4              .descale(&val_inout->transform      , scale);
 	return val_inout;
 }
 
