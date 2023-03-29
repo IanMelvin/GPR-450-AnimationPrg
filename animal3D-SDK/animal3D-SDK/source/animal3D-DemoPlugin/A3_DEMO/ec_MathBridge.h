@@ -13,7 +13,7 @@
 #include <animal3D-A3DM/a3math/a3vector.h>
 
 //Helper for loglerp
-a3real3r a3real3PowS(a3real3p out, const a3real3p base, const a3real power);
+a3real3r a3real3PowS(a3real3p v_inout, const a3real power);
 
 //Just wraps the lerp function to make it the standard form
 a3real* a3realLerpWrapper(a3real* out, const a3real* val0, const a3real* val1, a3real param);

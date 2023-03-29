@@ -296,14 +296,6 @@ a3real3* a3real3InvertLength(a3real3* val_inout)
 	return val_inout;
 }
 
-a3real3* a3real3PowS(a3real3* val_inout, const a3real power)
-{
-	a3real invLen;
-	a3real3NormalizeGetInvLength(*val_inout, &invLen);
-	a3real3MulS(*val_inout, (a3real)pow(1/invLen, power));
-	return val_inout;
-}
-
 a3quat* a3quatMulS(a3quat* val_inout, const a3real scale)
 {
 	a3quat tmp = { 0 }; //Same var used for read/write may have unintended consequences
