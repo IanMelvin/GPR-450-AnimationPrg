@@ -161,7 +161,7 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 		
 			// joint transform
 			a3real4x4SetScale(scaleMat.m, a3real_quarter);
-			a3real4x4Concat(activeHS->objectPose[i].transform.m, scaleMat.m);
+			a3real4x4Concat(activeHS->objectPose[i].m, scaleMat.m);
 			a3real4x4Product(mvp_joint->m, mvp_obj.m, scaleMat.m);
 			
 			// bone transform
@@ -169,11 +169,11 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			if (p >= 0)
 			{
 				// position is parent joint's position
-				scaleMat.v3 = activeHS->objectPose[p].transform.v3;
+				scaleMat.v3 = activeHS->objectPose[p].v3;
 
 				// direction basis is from parent to current
 				a3real3Diff(scaleMat.v2.v,
-					activeHS->objectPose[i].transform.v3.v, scaleMat.v3.v);
+					activeHS->objectPose[i].v3.v, scaleMat.v3.v);
 
 				// right basis is cross of some upward vector and direction
 				// select 'z' for up if either of the other dimensions is set
@@ -194,7 +194,7 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 
 			// get base to current object-space
 			//*t_skin = activeHS->objectSpaceBindToCurrent->pose[i].transform;
-			*t_skin = activeHS->objectSpaceBindToCurrent->pose[i].transform;
+			*t_skin = activeHS->objectPoseBindToCurrent[i];
 		
 			// calculate DQ
 			{

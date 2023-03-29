@@ -158,6 +158,9 @@ a3_SpatialPose* a3spatialPoseInvert(a3_SpatialPose* spatialPose_inout);
 // convert single node pose to matrix
 a3i32 a3spatialPoseConvert(a3mat4* mat_out, const a3_SpatialPose* spatialPose_in, const a3_SpatialPoseChannel channel, const a3_SpatialPoseEulerOrder order);
 
+// convert single matrix back to node pose
+a3i32 a3spatialPoseRestore(a3_SpatialPose* spatialPose_out, const a3mat4* mat_in, const a3_SpatialPoseChannel channel, const a3_SpatialPoseEulerOrder order);
+
 // concat two spatial poses
 a3i32 a3spatialPoseConcat(a3_SpatialPose* finalPose, const a3_SpatialPose* basePose, const a3_SpatialPose* deltaPose);
 

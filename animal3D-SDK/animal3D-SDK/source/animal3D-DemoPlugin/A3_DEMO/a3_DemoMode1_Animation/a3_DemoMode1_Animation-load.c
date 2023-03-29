@@ -31,6 +31,7 @@
 #include "../a3_DemoMode1_Animation.h"
 
 #include "../a3_DemoState.h"
+#include "../_animation/a3_Kinematics.h"
 
 
 //-----------------------------------------------------------------------------
@@ -345,7 +346,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	a3hierarchyStateCreate(hierarchyState, hierarchy);
 	a3hierarchyPoseCopy(hierarchyState->localPose, hierarchyPoseGroup->hierarchalPoses, hierarchy->numNodes);
 	a3hierarchyPoseConvert(hierarchyState->localPose, hierarchy->numNodes, hierarchyState->channels, hierarchyState->eulerOrder);
-	//a3kinematicsSolveForward(hierarchyState);
+	a3kinematicsSolveForward(hierarchyState);
 	a3hierarchyStateUpdateObjectInverse(hierarchyState);
 
 	// real-time state

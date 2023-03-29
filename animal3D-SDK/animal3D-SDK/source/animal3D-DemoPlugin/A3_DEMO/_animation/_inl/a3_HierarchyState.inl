@@ -59,21 +59,36 @@ inline a3i32 a3hierarchyPoseReset(a3_HierarchyPose* pose_inout, const a3ui32 nod
 {
 	if (pose_inout && nodeCount)
 	{
-		for (a3ui32 i = 0; i < nodeCount; i++)
-		{
-			pose_inout[i].transform = a3mat4_identity;
-			//a3spatialPoseInit(&pose_inout->spatialPose[i], a3poseEulerOrder_xyz);
-		}
+		a3index i;
+		for (i = 0; i < nodeCount; ++i)
+			a3spatialPoseReset(pose_inout->pose + i);
+		return i;
 	}
-	return 1;
+	return -1;
 }
 
 // convert full hierarchy pose to hierarchy transforms
-inline a3i32 a3hierarchyPoseConvert(const a3_HierarchyPose* pose_inout, const a3ui32 nodeCount, const a3_SpatialPoseChannel* channel, const a3_SpatialPoseEulerOrder order)
+inline a3i32 a3hierarchyPoseConvert(a3mat4* transforms_out, const a3_SpatialPose* poses_in, const a3ui32 nodeCount, const a3_SpatialPoseChannel* channel, const a3_SpatialPoseEulerOrder order)
 {
-	if (pose_inout && nodeCount)
+	if (transforms_out && poses_in && nodeCount && channel)
 	{
+		a3index i;
+		for (i = 0; i < nodeCount; ++i)
+			a3spatialPoseConvert(transforms_out+i, poses_in+i, channel[i], order);
+		return i;
+	}
+	return -1;
+}
 
+// restore full hierarchy pose from hierarchy transforms
+inline a3i32 a3hierarchyPoseRestore(a3_SpatialPose* poses_out, const a3mat4* transforms_in, const a3ui32 nodeCount, const a3_SpatialPoseChannel* channel, const a3_SpatialPoseEulerOrder order)
+{
+	if (poses_out && transforms_in && nodeCount && channel)
+	{
+		a3index i;
+		for (i = 0; i < nodeCount; ++i)
+			a3spatialPoseRestore(poses_out+i, transforms_in+i, channel[i], order);
+		return i;
 	}
 	return -1;
 }
@@ -83,26 +98,38 @@ inline a3i32 a3hierarchyPoseCopy(a3_HierarchyPose* pose_out, const a3_HierarchyP
 {
 	if (pose_out && pose_in && nodeCount)
 	{
-		for (a3ui32 i = 0; i < nodeCount; i++)
-		{
-			pose_out[i].transform = pose_in[i].transform;
-			//pose_out->spatialPose[i] = pose_in->spatialPose[i];
-		}
+		a3index i;
+		for (i = 0; i < nodeCount; ++i)
+			a3spatialPoseCopy(pose_out->pose + i, pose_in->pose + i);
+		return i;
 	}
-	return 1;
+	return -1;
 }
 
-inline a3i32 a3hierarchyPoseInit(a3_HierarchyPose* pose_out, a3ui32 poseCount)
+// concat full hierarchy pose
+inline a3i32 a3hierarchyPoseConcat(const a3_HierarchyPose* pose_out, const a3_HierarchyPose* pose_lhs, const a3_HierarchyPose* pose_rhs, const a3ui32 nodeCount)
 {
-	//pose_out->spatialPose = (a3_SpatialPose*)malloc(poseCount * sizeof(a3_SpatialPose));
-
-	//Define default values
-	for (a3ui32 i = 0; i < poseCount; i++)
+	if (pose_out && pose_lhs && pose_rhs && nodeCount)
 	{
-		pose_out[i].transform = a3mat4_identity;
-		//a3spatialPoseInit(&pose_out->spatialPose[i], a3poseEulerOrder_xyz);
+		a3index i;
+		for (i = 0; i < nodeCount; ++i)
+			a3spatialPoseConcat(pose_out->pose + i, pose_lhs->pose + i, pose_rhs->pose + i);
+		return i;
 	}
-	return 1;
+	return -1;
+}
+
+// lerp full hierarchy pose
+inline a3i32 a3hierarchyPoseLerp(const a3_HierarchyPose* pose_out, const a3_HierarchyPose* pose_0, const a3_HierarchyPose* pose_1, const a3real u, const a3ui32 nodeCount)
+{
+	if (pose_out && pose_0 && pose_1 && nodeCount)
+	{
+		a3index i;
+		for (i = 0; i < nodeCount; ++i)
+			a3spatialPoseLerp(pose_out->pose + i, pose_0->pose + i, pose_1->pose + i, u);
+		return i;
+	}
+	return -1;
 }
 
 
@@ -111,6 +138,29 @@ inline a3i32 a3hierarchyPoseInit(a3_HierarchyPose* pose_out, a3ui32 poseCount)
 // update inverse object-space matrices
 inline a3i32 a3hierarchyStateUpdateObjectInverse(const a3_HierarchyState *state)
 {
+	if (state && state->hierarchy)
+	{
+		a3index i;
+		for (i = 0; i < state->hierarchy->numNodes; ++i)
+			a3real4x4TransformInverse(state->objectPoseInv[i].m,
+				state->objectPose[i].m);
+		return i;
+	}
+	return -1;
+}
+
+// update inverse object-space bind-to-current matrices
+inline a3i32 a3hierarchyStateUpdateObjectBindToCurrent(const a3_HierarchyState* state, const a3_HierarchyState* state_bind)
+{
+	if (state && state->hierarchy && state_bind && state_bind->hierarchy)
+	{
+		a3index i;
+		for (i = 0; i < state->hierarchy->numNodes; ++i)
+			a3real4x4Product(state->objectPoseBindToCurrent[i].m,
+				state->objectPose[i].m,
+				state_bind->objectPoseInv[i].m);
+		return i;
+	}
 	return -1;
 }
 

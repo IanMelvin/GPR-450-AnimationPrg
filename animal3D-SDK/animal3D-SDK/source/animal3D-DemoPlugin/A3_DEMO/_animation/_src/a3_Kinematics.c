@@ -54,7 +54,7 @@ a3i32 a3kinematicsPosesToMatrices(const a3_HierarchyState* hierarchyState)
 	for (a3ui32 i = 0; i < hierarchyState->hierarchy->numNodes; ++i)
 	{
 		a3spatialPoseConvert(
-			&hierarchyState->localPose[i].transform,
+			&hierarchyState->localPose[i],
 			&hierarchyState->samplePose[i],
 			hierarchyState->channels[i],
 			hierarchyState->eulerOrder
@@ -83,15 +83,17 @@ a3i32 a3kinematicsSolveForwardPartial(const a3_HierarchyState *hierarchyState, c
 			{
 				//If not root, concatenate
 				a3real4x4ProductTransform(
-					hierarchyState->objectPose[node->index].transform.m, //Write to own object transform
-					hierarchyState->objectPose[node->parentIndex].transform.m, //Parent's object transform
-					hierarchyState->localPose[node->index].transform.m //Own local transform
+					hierarchyState->objectPose[node->index].m, //Write to own object transform
+					hierarchyState->objectPose[node->parentIndex].m, //Parent's object transform
+					hierarchyState->localPose[node->index].m //Own local transform
 				);
+
+				a3real4x4GetInverse(hierarchyState->objectPoseInv[node->index].m, hierarchyState->objectPose[node->index].m);
 			}
 			else
 			{
 				//If root, local transform is the same as global transform
-				hierarchyState->objectPose[node->index].transform = hierarchyState->localPose[node->index].transform;
+				hierarchyState->objectPose[node->index] = hierarchyState->localPose[node->index];
 			}
 		}
 		return 1;
@@ -121,18 +123,18 @@ a3i32 a3kinematicsSolveInversePartial(const a3_HierarchyState *hierarchyState, c
 			{
 				//If not root, un-concatenate
 				a3mat4 invParentTransform;
-				a3real4x4TransformInverse(invParentTransform.m, hierarchyState->objectPose[node->parentIndex].transform.m); //TODO probably slow, optimize
+				a3real4x4TransformInverse(invParentTransform.m, hierarchyState->objectPose[node->parentIndex].m); //TODO probably slow, optimize
 
 				a3real4x4ProductTransform(
-					hierarchyState->localPose[node->index].transform.m, //Write to own local transform
+					hierarchyState->localPose[node->index].m, //Write to own local transform
 					invParentTransform.m, //Inverse of parent's object transform
-					hierarchyState->objectPose[node->index].transform.m //Own object transform
+					hierarchyState->objectPose[node->index].m //Own object transform
 				);
 			}
 			else
 			{
 				//If root, local transform is the same as global transform
-				hierarchyState->localPose[node->index].transform = hierarchyState->objectPose[node->index].transform;
+				hierarchyState->localPose[node->index] = hierarchyState->objectPose[node->index];
 			}
 		}
 		return 1;

@@ -123,8 +123,8 @@ a3i32 a3hierarchyStateCreate(a3_HierarchyState *state_out, const a3_Hierarchy *h
 			state_out->channels[i] = ~0;
 			//state_out->hierarchy->nodes[i] = ;
 		}
-		a3hierarchyPoseInit(state_out-> localPose, hierarchy->numNodes);
-		a3hierarchyPoseInit(state_out->objectPose, hierarchy->numNodes);
+		//a3hierarchyPoseInit(state_out-> localPose, hierarchy->numNodes);
+		//a3hierarchyPoseInit(state_out->objectPose, hierarchy->numNodes);
 
 		// done
 		return 1;

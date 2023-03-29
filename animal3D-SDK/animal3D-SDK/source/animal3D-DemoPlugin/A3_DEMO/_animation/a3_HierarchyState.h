@@ -51,8 +51,11 @@ typedef struct a3_HierarchyState		a3_HierarchyState;
 // makes algorithms easier to keep this as a separate data type
 struct a3_HierarchyPose
 {
-	// transform of this node (whether local or global depends on usage)
-	a3mat4 transform;
+	// Array of SpatialPoses
+	a3_SpatialPose* pose;
+
+	// Number of SpatialPoses in array
+	a3ui32 poseCount;
 };
 
 
@@ -93,11 +96,13 @@ struct a3_HierarchyState
 
 	//An array of hierarchical poses representing each node's transformation relative to its parent's space.
 	//Result of step 3
-	a3_HierarchyPose* localPose;
+	a3mat4* localPose;
 
 	//A hierarchical pose representing each node's transformation relative to the root's parent space (the actual object that the hierarchy represents).
 	//Result of step 4
-	a3_HierarchyPose* objectPose;
+	a3mat4* objectPose;
+	a3mat4* objectPoseInv;
+	a3mat4* objectPoseBindToCurrent;
 
 	//Array of constraints
 	a3_SpatialPoseChannel* channels;
@@ -128,7 +133,7 @@ a3i32 a3hierarchyPoseGroupGetNodePoseOffsetIndex(const a3_HierarchyPoseGroup *po
 a3i32 a3hierarchyPoseReset(a3_HierarchyPose* pose_inout, const a3ui32 nodeCount);
 
 // convert full hierarchy pose to hierarchy transforms
-a3i32 a3hierarchyPoseConvert(const a3_HierarchyPose* pose_inout, const a3ui32 nodeCount, const a3_SpatialPoseChannel* channels, const a3_SpatialPoseEulerOrder order);
+a3i32 a3hierarchyPoseConvert(a3mat4* transforms_out, const a3_SpatialPose* poses_in, const a3ui32 nodeCount, const a3_SpatialPoseChannel* channel, const a3_SpatialPoseEulerOrder order);
 
 // copy full hierarchy pose
 a3i32 a3hierarchyPoseCopy(a3_HierarchyPose* pose_out, const a3_HierarchyPose* pose_in, const a3ui32 nodeCount);
