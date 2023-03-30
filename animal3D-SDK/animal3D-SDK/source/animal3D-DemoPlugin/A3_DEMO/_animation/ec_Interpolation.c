@@ -22,8 +22,6 @@ void vtable_setDefaults(ec_DataVtable* out)
 	out->biNearest  = defaultBiNearest ;
 	out->biCubic    = defaultBiCubic   ;
 	out->smoothStep = defaultSmoothStep;
-	out->convert	= defaultConvert   ;
-	out->revert		= defaultRevert	   ;
 	out->FK			= defaultFK		   ;
 	out->IK			= defaultIK		   ;
 }
