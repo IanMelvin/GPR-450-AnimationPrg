@@ -75,21 +75,21 @@ a3_SpatialPose* spacialPoseConvert		 (a3_SpatialPose* spacialPose_Out);
 a3_SpatialPose* spacialPoseRevert		 (a3_SpatialPose* spacialPose_Out);
 
 //HierarchyPose
-a3_HierarchyPose* hierarchyPoseScale     (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* in, const a3real scale, a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseCopy      (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseLerp      (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseNearest   (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseCubic     (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3_HierarchyPose* pos3, const a3_HierarchyPose* pos4, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseDeconcat  (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* lhs, const a3_HierarchyPose* rhs, a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseTriangular(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3real param1, const a3real param2, a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseBiLerp    (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos00, const a3_HierarchyPose* pos01, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, a3ui32 numNodes, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseBiNearest (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos00, const a3_HierarchyPose* pos01, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, a3ui32 numNodes, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseBiCubic   (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3_HierarchyPose* pos3, const a3_HierarchyPose* pos4, const a3_HierarchyPose* pos5, const a3_HierarchyPose* pos6, const a3_HierarchyPose* pos7, const a3_HierarchyPose* pos8, const a3_HierarchyPose* pos9, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, const a3_HierarchyPose* pos12, const a3_HierarchyPose* pos13, const a3_HierarchyPose* pos14, const a3_HierarchyPose* pos15, const a3_HierarchyPose* pos16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyPoseSmoothStep(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pose1, a3real param, const a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyConvert		 (a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyRevert		 (a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyFK(a3_HierarchyPose* hierarchyPose_Out, const a3_Hierarchy* hierarchy, const a3_HierarchyPose* objSpaceTransform, const a3_HierarchyPose* localSpaceTransform, const a3ui32 numNodes, const ec_DataVtable* funcs);
-a3_HierarchyPose* hierarchyIK(a3_HierarchyPose* hierarchyPose_Out, const a3_Hierarchy* hierarchy, const a3_HierarchyPose* objSpaceTransform, const a3_HierarchyPose* localSpaceTransform, const a3ui32 numNodes, const ec_DataVtable* funcs);
+a3_HierarchyPose* hierarchyPoseScale     (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* in, const a3real scale, a3ui32 numNodes);
+a3_HierarchyPose* hierarchyPoseCopy      (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, a3ui32 numNodes);
+a3_HierarchyPose* hierarchyPoseLerp      (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param);
+a3_HierarchyPose* hierarchyPoseNearest   (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param);
+a3_HierarchyPose* hierarchyPoseCubic     (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3_HierarchyPose* pos3, const a3_HierarchyPose* pos4, a3ui32 numNodes, const a3real param);
+a3_HierarchyPose* hierarchyPoseDeconcat  (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* lhs, const a3_HierarchyPose* rhs, a3ui32 numNodes);
+a3_HierarchyPose* hierarchyPoseTriangular(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3real param1, const a3real param2, a3ui32 numNodes);
+a3_HierarchyPose* hierarchyPoseBiLerp    (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos00, const a3_HierarchyPose* pos01, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, a3ui32 numNodes, const a3real paramX0, const a3real paramX1, const a3real paramY);
+a3_HierarchyPose* hierarchyPoseBiNearest (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos00, const a3_HierarchyPose* pos01, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, a3ui32 numNodes, const a3real paramX0, const a3real paramX1, const a3real paramY);
+a3_HierarchyPose* hierarchyPoseBiCubic   (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos1, const a3_HierarchyPose* pos2, const a3_HierarchyPose* pos3, const a3_HierarchyPose* pos4, const a3_HierarchyPose* pos5, const a3_HierarchyPose* pos6, const a3_HierarchyPose* pos7, const a3_HierarchyPose* pos8, const a3_HierarchyPose* pos9, const a3_HierarchyPose* pos10, const a3_HierarchyPose* pos11, const a3_HierarchyPose* pos12, const a3_HierarchyPose* pos13, const a3_HierarchyPose* pos14, const a3_HierarchyPose* pos15, const a3_HierarchyPose* pos16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const a3ui32 numNodes);
+a3_HierarchyPose* hierarchyPoseSmoothStep(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pose1, a3real param, const a3ui32 numNodes);
+a3_HierarchyPose* hierarchyConvert		 (a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes);
+a3_HierarchyPose* hierarchyRevert		 (a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes);
+a3_HierarchyPose* hierarchyFK(a3_HierarchyPose* hierarchyPose_Out, const a3_Hierarchy* hierarchy, const a3_HierarchyPose* objSpaceTransform, const a3_HierarchyPose* localSpaceTransform, const a3ui32 numNodes);
+a3_HierarchyPose* hierarchyIK(a3_HierarchyPose* hierarchyPose_Out, const a3_Hierarchy* hierarchy, const a3_HierarchyPose* objSpaceTransform, const a3_HierarchyPose* localSpaceTransform, const a3ui32 numNodes);
 
 
 #endif

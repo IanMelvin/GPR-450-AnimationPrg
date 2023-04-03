@@ -27,7 +27,7 @@ a3ret ec_blendTreeNodeEvaluate_Lerp(ec_BlendTreeNode* node)
 {
 	assert(node->data.lerp.x0);
 	assert(node->data.lerp.x1);
-	hierarchyPoseLerp(node->out, node->data.lerp.x0, node->data.lerp.x1, node->numNodes, node->data.lerp.param, &vtable_SpatialPose);
+	hierarchyPoseLerp(node->out, node->data.lerp.x0, node->data.lerp.x1, node->numNodes, node->data.lerp.param);
 	return 1;
 }
 
