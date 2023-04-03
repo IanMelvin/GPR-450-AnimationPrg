@@ -3,7 +3,7 @@
 	Robert Christensen & Ian Melvin
 
 	ec_BlendTreeNode.h
-	Generic vtables and functions that can be used to make polymorphic interpolation
+	Polymorphic node on a blend tree
 */
 
 #ifndef EC_BLEND_TREE_NODE_H
