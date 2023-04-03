@@ -189,14 +189,27 @@ a3_SpatialPose* spacialPoseRevert(a3_SpatialPose* spacialPose_Out)
 
 #pragma region HierarchyPose Variants
 
-a3_HierarchyPose* hierarchyPoseScale(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* in, const a3real scale, a3ui32 numNodes)
+a3_HierarchyPose* hierarchyPoseScaleUniform(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* in, const a3real scale, a3ui32 numNodes)
+{
+	if (hierarchyPose_Out && in && numNodes > 0)
+	{
+		for (a3ui32 i = 0; i < numNodes; i++)
+		{
+			vtable_SpatialPose.copy(&hierarchyPose_Out->pose[i], &in->pose[i], &vtable_SpatialPose);
+			vtable_SpatialPose.scale(&hierarchyPose_Out->pose[i], scale);
+		}
+	}
+	return hierarchyPose_Out;
+}
+
+a3_HierarchyPose* hierarchyPoseScalePerNode(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* in, const a3real* scalesPerNode, a3ui32 numNodes)
 {
 	if (hierarchyPose_Out && in && numNodes > 0 )
 	{
 		for(a3ui32 i = 0; i < numNodes; i++)
 		{
 			vtable_SpatialPose.copy(&hierarchyPose_Out->pose[i], &in->pose[i], &vtable_SpatialPose);
-			vtable_SpatialPose.scale(&hierarchyPose_Out->pose[i], scale);
+			vtable_SpatialPose.scale(&hierarchyPose_Out->pose[i], scalesPerNode[i]);
 		}
 	}
 	return hierarchyPose_Out;
