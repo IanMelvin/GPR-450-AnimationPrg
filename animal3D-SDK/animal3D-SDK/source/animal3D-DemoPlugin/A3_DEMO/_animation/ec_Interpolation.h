@@ -75,6 +75,7 @@ a3_SpatialPose* spacialPoseConvert		 (a3_SpatialPose* spacialPose_Out);
 a3_SpatialPose* spacialPoseRevert		 (a3_SpatialPose* spacialPose_Out);
 
 //HierarchyPose
+a3_HierarchyPose* hierarchyPoseScale     (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* in, const a3real scale, a3ui32 numNodes);
 a3_HierarchyPose* hierarchyPoseCopy      (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, a3ui32 numNodes, const ec_DataVtable* funcs);
 a3_HierarchyPose* hierarchyPoseLerp      (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs);
 a3_HierarchyPose* hierarchyPoseNearest   (a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, const a3_HierarchyPose* pos1, a3ui32 numNodes, const a3real param, const ec_DataVtable* funcs);

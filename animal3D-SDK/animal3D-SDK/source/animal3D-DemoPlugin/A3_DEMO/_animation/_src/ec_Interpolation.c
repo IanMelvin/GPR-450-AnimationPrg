@@ -1,4 +1,4 @@
-#include "ec_Interpolation.h"
+#include "A3_DEMO/_animation/ec_Interpolation.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -6,7 +6,7 @@
 
 #include <animal3D-A3DM/animal3D-A3DM.h>
 
-#include "a3_SpatialPose.h"
+#include "A3_DEMO/_animation/a3_SpatialPose.h"
 
 #pragma region Helpers and defaults
 

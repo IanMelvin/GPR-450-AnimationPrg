@@ -171,8 +171,11 @@
     <ClCompile Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\a3_DemoMode1_Animation\a3_DemoMode1_Animation-unload.c">
       <Filter>Source Files\common\A3_DEMO\a3_DemoMode1_Animation</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\ec_Interpolation.c">
-      <Filter>Source Files\common\A3_DEMO\_animation</Filter>
+    <ClCompile Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\_src\ec_Interpolation.c">
+      <Filter>Source Files\common\A3_DEMO\_animation\_src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\_src\ec_BlendTreeNode.c">
+      <Filter>Source Files\common\A3_DEMO\_animation\_src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -222,6 +225,9 @@
       <Filter>Header Files\A3_DEMO</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\ec_Interpolation.h">
+      <Filter>Header Files\A3_DEMO\_animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\ec_BlendTreeNode.h">
       <Filter>Header Files\A3_DEMO\_animation</Filter>
     </ClInclude>
   </ItemGroup>
