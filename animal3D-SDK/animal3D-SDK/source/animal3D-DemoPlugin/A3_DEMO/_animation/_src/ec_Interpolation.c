@@ -188,6 +188,20 @@ a3_SpatialPose* spacialPoseRevert(a3_SpatialPose* spacialPose_Out)
 #pragma endregion
 
 #pragma region HierarchyPose Variants
+
+a3_HierarchyPose* hierarchyPoseScale(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* in, const a3real scale, a3ui32 numNodes, const ec_DataVtable* funcs)
+{
+	if (hierarchyPose_Out && in && numNodes > 0 )
+	{
+		for(a3ui32 i = 0; i < numNodes; i++)
+		{
+			funcs->copy(&hierarchyPose_Out->pose[i], &in->pose[i], funcs);
+			funcs->scale(&hierarchyPose_Out->pose[i], scale);
+		}
+	}
+	return hierarchyPose_Out;
+}
+
 a3_HierarchyPose* hierarchyPoseCopy(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pos0, a3ui32 numNodes, const ec_DataVtable* funcs)
 {
 	if (hierarchyPose_Out && pos0 && numNodes > 0 )
