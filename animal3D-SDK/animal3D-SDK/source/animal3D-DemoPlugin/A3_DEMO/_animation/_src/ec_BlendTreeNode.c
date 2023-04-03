@@ -1,6 +1,7 @@
 #include "A3_DEMO/_animation/ec_BlendTreeNode.h"
 
 #include <assert.h>
+#include <stdlib.h>
 
 #include "A3_DEMO/_animation/ec_Interpolation.h"
 
@@ -43,5 +44,48 @@ a3ret ec_blendTreeNodeEvaluate_Scale(ec_BlendTreeNode* node)
 {
 	assert(node->data.scale.scaleFactor);
 	hierarchyPoseScale(node->out, node->data.scale.in, node->data.scale.scaleFactor, node->numNodes);
+	return 1;
+}
+
+
+a3ret ec_blendTreeNodeCleanup(ec_BlendTreeNode* node_out)
+{
+	assert(node_out->out);
+	free(node_out->out);
+	node_out->out = NULL;
+	return 1;
+}
+
+a3ret ec_blendTreeNodeInternalCreate(ec_BlendTreeNode* node_out, a3ui32 numNodes, ec_BlendTreeNodeType type)
+{
+	assert(node_out);
+	node_out->type = type;
+	node_out->numNodes = numNodes;
+	node_out->out = calloc(numNodes, sizeof(a3_HierarchyPose));
+	return 1;
+}
+
+a3ret ec_blendTreeNodeCreateLerp(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real param)
+{
+	ec_blendTreeNodeInternalCreate(node_out, numNodes, BT_LERP);
+	node_out->data.lerp.x0 = x0;
+	node_out->data.lerp.x1 = x1;
+	node_out->data.lerp.param = param;
+	return 1;
+}
+
+a3ret ec_blendTreeNodeCreateAdd(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* a, a3_HierarchyPose* b)
+{
+	ec_blendTreeNodeInternalCreate(node_out, numNodes, BT_ADD);
+	node_out->data.add.a = a;
+	node_out->data.add.b = b;
+	return 1;
+}
+
+a3ret ec_blendTreeNodeCreateScale(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real scaleFactor)
+{
+	ec_blendTreeNodeInternalCreate(node_out, numNodes, BT_SCALE);
+	node_out->data.scale.in = in;
+	node_out->data.scale.scaleFactor = scaleFactor;
 	return 1;
 }
