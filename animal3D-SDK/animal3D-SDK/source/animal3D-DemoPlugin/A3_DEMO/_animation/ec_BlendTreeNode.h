@@ -31,32 +31,32 @@ enum ec_BlendTreeNodeType
 
 struct ec_BlendTreeNode
 {
-	ec_BlendTreeNodeType type;
-
 	a3ui32 numNodes;
-	a3_HierarchyPose* out;
+	a3_HierarchyPose* out; //Managed by self
+
+	ec_BlendTreeNodeType type;
 
 	//Data
 	union {
 
 		struct {
-			a3_HierarchyPose* x0;
-			a3_HierarchyPose* x1;
+			a3_HierarchyPose* x0; //External
+			a3_HierarchyPose* x1; //External
 			a3real param;
 		} lerp;
 
 		struct {
-			a3_HierarchyPose* a;
-			a3_HierarchyPose* b;
+			a3_HierarchyPose* a; //External
+			a3_HierarchyPose* b; //External
 		} add;
 
 		struct {
-			a3_HierarchyPose* in;
-			a3real* scaleFactors;
+			a3_HierarchyPose* in; //External
+			a3real* scaleFactors; //Managed by self
 		} scalePerNode;
 
 		struct {
-			a3_HierarchyPose* in;
+			a3_HierarchyPose* in; //External
 			a3real scaleFactor;
 		} scaleUniform;
 

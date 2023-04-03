@@ -5,6 +5,8 @@
 
 #include "A3_DEMO/_animation/ec_Interpolation.h"
 
+#pragma region Evaluate family
+
 //Internal helper functions
 a3ret ec_blendTreeNodeEvaluate_Lerp        (ec_BlendTreeNode* node);
 a3ret ec_blendTreeNodeEvaluate_Add         (ec_BlendTreeNode* node);
@@ -55,6 +57,9 @@ a3ret ec_blendTreeNodeEvaluate_ScalePerNode(ec_BlendTreeNode* node)
 	return 1;
 }
 
+#pragma endregion Evaluate family
+
+#pragma region Lifecycle family
 
 a3ret ec_blendTreeNodeCleanup(ec_BlendTreeNode* node_out)
 {
@@ -116,3 +121,5 @@ a3ret ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out, a3ui32 numN
 	for (a3index i = 0; i < numNodes; ++i) node_out->data.scalePerNode.scaleFactors[i] = defaultScaleFactor;
 	return 1;
 }
+
+#pragma endregion Lifecycle family
