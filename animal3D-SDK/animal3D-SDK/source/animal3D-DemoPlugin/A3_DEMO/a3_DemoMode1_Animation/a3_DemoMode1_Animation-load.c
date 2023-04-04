@@ -31,6 +31,7 @@
 #include "../a3_DemoMode1_Animation.h"
 
 #include <stdlib.h>
+#include <assert.h>
 
 #include "../a3_DemoState.h"
 #include "A3_DEMO/_animation/ec_BlendTree.h"
@@ -477,14 +478,14 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		a3clipControllerInit(demoMode->clipCtrlB, "xbot_ctrlB", demoMode->clipPool, j, rate, fps);
 
 		//CUSTOM STUFF for blend tree
-		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_strafe_l_f");
-		a3clipControllerInit(demoMode->clipCtrlStrafeL, "xbot_strafe_l_f", demoMode->clipPool, j, rate, fps);
-		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_strafe_r_f");
-		a3clipControllerInit(demoMode->clipCtrlStrafeR, "xbot_strafe_r_f", demoMode->clipPool, j, rate, fps);
-		j = a3clipGetIndexInPool(demoMode->clipPool, "xbot_walk_f");
-		a3clipControllerInit(demoMode->clipCtrlWalk, "xbot_walk_f", demoMode->clipPool, j, rate, fps);
-		j = a3clipGetIndexInPool(demoMode->clipPool, "xbot_idle_pistol");
-		a3clipControllerInit(demoMode->clipCtrlPistol, "xbot_idle_pistol", demoMode->clipPool, j, rate, fps);
+		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_strafe_l_m");
+		a3clipControllerInit(demoMode->clipCtrlStrafeL, "xbot_strafe_l_m", demoMode->clipPool, j, rate, fps);
+		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_strafe_r_m");
+		a3clipControllerInit(demoMode->clipCtrlStrafeR, "xbot_strafe_r_m", demoMode->clipPool, j, rate, fps);
+		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_walk_m");
+		a3clipControllerInit(demoMode->clipCtrlWalk,    "xbot_walk_m", demoMode->clipPool, j, rate, fps);
+		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_idle_pistol");
+		a3clipControllerInit(demoMode->clipCtrlPistol,  "xbot_idle_pistol", demoMode->clipPool, j, rate, fps);
 	}
 
 	//Blend tree
@@ -533,6 +534,14 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 		//Option to just ignore masking and use locomotion part for upper body as well
 		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, finalMasked->out, 1);
+
+		assert(j == demoMode->blendTree.numBtNodes);
+
+		demoMode->blendTree_output = finalOutput->out;
+		demoMode->blendTree_ctlStrafe = &basicLocomotion->data.lerp.param;
+
+		//TEST
+		//demoMode->blendTree_output = lowerBodyMasked->out;
 	}
 }
 

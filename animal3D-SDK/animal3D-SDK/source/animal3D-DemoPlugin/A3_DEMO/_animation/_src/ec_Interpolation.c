@@ -428,6 +428,12 @@ a3_SpatialPose* a3spatialPoseDivS(a3_SpatialPose* val_inout, const a3real scale)
 	return val_inout;
 }
 
+a3_SpatialPose* a3spatialPoseLerp_adapter(a3_SpatialPose* spatialPose_out, const a3_SpatialPose* spatialPose_0, const a3_SpatialPose* spatialPose_1, const a3real u, const ec_DataVtable* funcs_ignored)
+{
+	a3spatialPoseLerp(spatialPose_out, spatialPose_0, spatialPose_1, u);
+	return spatialPose_out;
+}
+
 #pragma endregion
 
 #pragma region Vtable implementations
@@ -475,6 +481,7 @@ void setupVtables()
 	vtable_SpatialPose.concat   = (fp_concat  ) a3spatialPoseConcat;
 	vtable_SpatialPose.scale    = (fp_scale   ) a3spatialPoseMulS;
 	vtable_SpatialPose.descale  = (fp_descale ) a3spatialPoseDivS;
+	vtable_SpatialPose.lerp     = (fp_lerp    ) a3spatialPoseLerp_adapter;
 	
 	//translation and euler angles
 	vtable_vec3Additive.identity = (fp_identity) a3real3SetZero;

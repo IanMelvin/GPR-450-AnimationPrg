@@ -27,7 +27,9 @@ typedef void* (*fp_identity)(void* val_out);
 typedef void* (*fp_invert  )(void* val_inout);
 typedef void* (*fp_concat  )(void* val_out, const void* lhs, const void* rhs);
 typedef void* (*fp_scale   )(void* val_inout, const a3real scale);
-typedef void* (*fp_descale)(void* val_inout, const a3real scale);
+typedef void* (*fp_descale )(void* val_inout, const a3real scale);
+typedef void* (*fp_lerp    )(void* val_out, const void* val_0, const void* val_1, const a3real u, const ec_DataVtable* funcs);
+
 
 struct ec_DataVtable
 {
