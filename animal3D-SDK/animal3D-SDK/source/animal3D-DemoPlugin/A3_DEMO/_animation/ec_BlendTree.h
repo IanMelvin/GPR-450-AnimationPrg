@@ -20,8 +20,8 @@ struct ec_BlendTree
 	a3ui32 numBtNodes;
 };
 
-a3ret ec_blendTreeCreate(ec_BlendTree* node_out, a3ui32 numBtNodes);
-a3ret ec_blendTreeCleanup(ec_BlendTree* node);
-a3ret ec_blendTreeEvaluate(ec_BlendTree* node);
+a3ret ec_blendTreeCreate(ec_BlendTree* tree_out, a3ui32 numBtNodes);
+a3ret ec_blendTreeCleanup(ec_BlendTree* tree);
+a3ret ec_blendTreeEvaluate(ec_BlendTree* tree);
 
 #endif

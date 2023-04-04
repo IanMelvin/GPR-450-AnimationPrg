@@ -175,6 +175,26 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 		a3hierarchyStateUpdateObjectInverse(activeHS);
 		a3hierarchyStateUpdateObjectBindToCurrent(activeHS, baseHS);
 
+		//Custom blend tree stuff
+		a3clipControllerUpdate(demoMode->clipCtrlStrafeL, dt);
+		a3clipControllerUpdate(demoMode->clipCtrlStrafeR, dt);
+		a3clipControllerUpdate(demoMode->clipCtrlWalk, dt);
+		a3clipControllerUpdate(demoMode->clipCtrlPistol, dt);
+		a3_ClipController* strafeClipSrc = demoMode->strafe>0 ? demoMode->clipCtrlStrafeR : demoMode->clipCtrlStrafeL;
+		a3hierarchyPoseLerp(demoMode->animOutputTargetStrafeDir,
+			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[strafeClipSrc->keyframeIndex].sampleIndex0,
+			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[strafeClipSrc->keyframeIndex].sampleIndex1,
+			(a3f32)strafeClipSrc->keyframeParam, demoMode->hierarchy_skel->numNodes);
+		a3hierarchyPoseLerp(demoMode->animOutputWalk,
+			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlWalk->keyframeIndex].sampleIndex0,
+			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlWalk->keyframeIndex].sampleIndex1,
+			(a3f32)demoMode->clipCtrlWalk->keyframeParam, demoMode->hierarchy_skel->numNodes);
+		a3hierarchyPoseLerp(demoMode->animOutputArmsAction,
+			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlPistol->keyframeIndex].sampleIndex0,
+			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlPistol->keyframeIndex].sampleIndex1,
+			(a3f32)demoMode->clipCtrlPistol->keyframeParam, demoMode->hierarchy_skel->numNodes);
+		ec_blendTreeEvaluate(&demoMode->blendTree);
+
 		// ****TO-DO: 
 		// process input
 

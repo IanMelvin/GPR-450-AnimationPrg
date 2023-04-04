@@ -34,6 +34,7 @@
 
 #include "../a3_DemoState.h"
 #include "A3_DEMO/_animation/ec_BlendTree.h"
+#include "A3_DEMO/_animation/ec_Interpolation.h"
 
 //-----------------------------------------------------------------------------
 
@@ -489,13 +490,13 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	//Blend tree
 	{
 		//Intermediate resources
-		demoMode->animOutputWalk			= calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose));
-		demoMode->animOutputTargetStrafeDir	= calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose));
-		demoMode->animOutputArmsAction		= calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose));
-
+		setupVtables();
+		demoMode->animOutputWalk           ->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
+		demoMode->animOutputTargetStrafeDir->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
+		demoMode->animOutputArmsAction     ->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
 
 		//Blend tree proper
-		ec_blendTreeCreate(&demoMode->blendTree, 0);
+		ec_blendTreeCreate(&demoMode->blendTree, 5);
 		a3index j = 0;
 
 		ec_BlendTreeNode* basicLocomotion = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputWalk, demoMode->animOutputTargetStrafeDir, 0);

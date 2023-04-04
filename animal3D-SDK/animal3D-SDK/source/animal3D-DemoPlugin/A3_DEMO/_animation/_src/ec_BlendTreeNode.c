@@ -64,8 +64,8 @@ a3ret ec_blendTreeNodeEvaluate_ScalePerNode(ec_BlendTreeNode* node)
 a3ret ec_blendTreeNodeCleanup(ec_BlendTreeNode* node_out)
 {
 	assert(node_out->out);
-	free(node_out->out);
-	node_out->out = NULL;
+	free(node_out->out->pose);
+	node_out->out->pose = NULL;
 
 	//Special case: Is there a better way that's still clean?
 	if (node_out->type == BT_SCALE_PER_NODE)
@@ -81,10 +81,10 @@ a3ret ec_blendTreeNodeCleanup(ec_BlendTreeNode* node_out)
 ec_BlendTreeNode* ec_blendTreeNodeInternalCreate(ec_BlendTreeNode* node_out, a3ui32 numNodes, ec_BlendTreeNodeType type)
 {
 	assert(node_out);
-	assert(!node_out->out);
+	//assert(!node_out->out);
 	node_out->type = type;
 	node_out->numNodes = numNodes;
-	node_out->out = calloc(numNodes, sizeof(a3_HierarchyPose));
+	node_out->out->pose = calloc(numNodes, sizeof(a3_SpatialPose));
 	return node_out;
 }
 

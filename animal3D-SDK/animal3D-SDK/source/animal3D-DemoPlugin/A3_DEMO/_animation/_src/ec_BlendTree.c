@@ -2,35 +2,36 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
-a3ret ec_blendTreeCreate(ec_BlendTree* node_out, a3ui32 numBtNodes)
+a3ret ec_blendTreeCreate(ec_BlendTree* tree_out, a3ui32 numBtNodes)
 {
-	assert(node_out);
-	assert(!node_out->btNodes);
+	assert(tree_out);
+	assert(!tree_out->btNodes);
 
-	node_out->numBtNodes = numBtNodes;
-	node_out->btNodes = calloc(numBtNodes, sizeof(ec_BlendTreeNode));
+	tree_out->numBtNodes = numBtNodes;
+	tree_out->btNodes = calloc(numBtNodes, sizeof(ec_BlendTreeNode));
 
 	return 1;
 }
 
-a3ret ec_blendTreeCleanup(ec_BlendTree* node)
+a3ret ec_blendTreeCleanup(ec_BlendTree* tree)
 {
-	assert(node);
-	assert(node->btNodes);
+	assert(tree);
+	assert(tree->btNodes);
 
-	free(node->btNodes);
-	node->btNodes = NULL;
+	free(tree->btNodes);
+	tree->btNodes = NULL;
 
 	return 1;
 }
 
-a3ret ec_blendTreeEvaluate(ec_BlendTree* node)
+a3ret ec_blendTreeEvaluate(ec_BlendTree* tree)
 {
-	assert(node);
-	for (a3index i = 0; i < node->numBtNodes; ++i)
+	assert(tree);
+	for (a3index i = 0; i < tree->numBtNodes; ++i)
 	{
-		ec_blendTreeNodeEvaluate(&node->btNodes[i]);
+		ec_blendTreeNodeEvaluate(&tree->btNodes[i]);
 	}
 	return 1;
 }
