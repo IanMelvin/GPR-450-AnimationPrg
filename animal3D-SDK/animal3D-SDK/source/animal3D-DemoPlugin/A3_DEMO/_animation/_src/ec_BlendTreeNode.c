@@ -78,48 +78,48 @@ a3ret ec_blendTreeNodeCleanup(ec_BlendTreeNode* node_out)
 	return 1;
 }
 
-a3ret ec_blendTreeNodeInternalCreate(ec_BlendTreeNode* node_out, a3ui32 numNodes, ec_BlendTreeNodeType type)
+ec_BlendTreeNode* ec_blendTreeNodeInternalCreate(ec_BlendTreeNode* node_out, a3ui32 numNodes, ec_BlendTreeNodeType type)
 {
 	assert(node_out);
 	assert(!node_out->out);
 	node_out->type = type;
 	node_out->numNodes = numNodes;
 	node_out->out = calloc(numNodes, sizeof(a3_HierarchyPose));
-	return 1;
+	return node_out;
 }
 
-a3ret ec_blendTreeNodeCreateLerp(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real param)
+ec_BlendTreeNode* ec_blendTreeNodeCreateLerp(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real param)
 {
 	ec_blendTreeNodeInternalCreate(node_out, numNodes, BT_LERP);
 	node_out->data.lerp.x0 = x0;
 	node_out->data.lerp.x1 = x1;
 	node_out->data.lerp.param = param;
-	return 1;
+	return node_out;
 }
 
-a3ret ec_blendTreeNodeCreateAdd(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* a, a3_HierarchyPose* b)
+ec_BlendTreeNode* ec_blendTreeNodeCreateAdd(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* a, a3_HierarchyPose* b)
 {
 	ec_blendTreeNodeInternalCreate(node_out, numNodes, BT_ADD);
 	node_out->data.add.a = a;
 	node_out->data.add.b = b;
-	return 1;
+	return node_out;
 }
 
-a3ret ec_blendTreeNodeCreateScaleUniform(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real scaleFactor)
+ec_BlendTreeNode* ec_blendTreeNodeCreateScaleUniform(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real scaleFactor)
 {
 	ec_blendTreeNodeInternalCreate(node_out, numNodes, BT_SCALE_UNIFORM);
 	node_out->data.scaleUniform.in = in;
 	node_out->data.scaleUniform.scaleFactor = scaleFactor;
-	return 1;
+	return node_out;
 }
 
-a3ret ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real defaultScaleFactor)
+ec_BlendTreeNode* ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real defaultScaleFactor)
 {
 	ec_blendTreeNodeInternalCreate(node_out, numNodes, BT_SCALE_PER_NODE);
 	node_out->data.scalePerNode.in = in;
 	node_out->data.scalePerNode.scaleFactors = calloc(numNodes, sizeof(a3real));
 	for (a3index i = 0; i < numNodes; ++i) node_out->data.scalePerNode.scaleFactors[i] = defaultScaleFactor;
-	return 1;
+	return node_out;
 }
 
 #pragma endregion Lifecycle family

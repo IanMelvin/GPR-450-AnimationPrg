@@ -31,7 +31,7 @@
 #include "../a3_DemoMode1_Animation.h"
 
 #include "../a3_DemoState.h"
-
+#include "A3_DEMO/_animation/ec_BlendTree.h"
 
 //-----------------------------------------------------------------------------
 
@@ -407,7 +407,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	hierarchyState = demoMode->hierarchyState_skel + 1;
 	hierarchyState->hierarchy = 0;
 	a3hierarchyStateCreate(hierarchyState, hierarchy);
-
+	
 
 	// clips and controllers
 	{
@@ -472,6 +472,26 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		a3clipControllerInit(demoMode->clipCtrlA, "xbot_ctrlA", demoMode->clipPool, j, rate, fps);
 		j = a3clipGetIndexInPool(demoMode->clipPool, "xbot_walk_f");
 		a3clipControllerInit(demoMode->clipCtrlB, "xbot_ctrlB", demoMode->clipPool, j, rate, fps);
+	}
+
+	//Blend tree
+	{
+		ec_blendTreeCreate(&demoMode->blendTree, 0);
+
+		a3index j = 0;
+
+		ec_BlendTreeNode* basicLocomotion = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, animOutputWalk, animOutputTargetStrafeDir, 0);
+
+		ec_BlendTreeNode* lowerBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, 1);
+		//TODO apply mask
+
+		ec_BlendTreeNode* upperBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, armsAction, 1);
+		//TODO apply mask
+
+		ec_BlendTreeNode* finalMasked = ec_blendTreeNodeCreateAdd(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, lowerBodyMasked->out, upperBodyMasked->out);
+
+		//Option to just ignore masking and use locomotion part for upper body as well
+		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, finalMasked->out, 1);
 	}
 }
 

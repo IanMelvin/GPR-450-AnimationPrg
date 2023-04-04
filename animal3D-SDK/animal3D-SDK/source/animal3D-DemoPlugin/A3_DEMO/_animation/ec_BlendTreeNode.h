@@ -16,10 +16,10 @@ typedef enum	ec_BlendTreeNodeType	ec_BlendTreeNodeType;
 
 a3ret ec_blendTreeNodeEvaluate(ec_BlendTreeNode* node);
 a3ret ec_blendTreeNodeCleanup(ec_BlendTreeNode* node);
-a3ret ec_blendTreeNodeCreateLerp        (ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real param);
-a3ret ec_blendTreeNodeCreateAdd         (ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* a, a3_HierarchyPose* b);
-a3ret ec_blendTreeNodeCreateScaleUniform(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real scaleFactor);
-a3ret ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real defaultScaleFactor);
+ec_BlendTreeNode* ec_blendTreeNodeCreateLerp(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real param);
+ec_BlendTreeNode* ec_blendTreeNodeCreateAdd(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* a, a3_HierarchyPose* b);
+ec_BlendTreeNode* ec_blendTreeNodeCreateScaleUniform(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real scaleFactor);
+ec_BlendTreeNode* ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real defaultScaleFactor);
 
 enum ec_BlendTreeNodeType
 {
