@@ -70,6 +70,10 @@ void* defaultCubic(void* val_out, const void* v1, const void* v2, const void* v3
 		funcs->concat(val_out, val_out, val4);
 
 		funcs->scale(val_out, 0.5f);
+
+		free(val2);
+		free(val3);
+		free(val4);
 	}
 	return val_out;
 }
@@ -101,6 +105,9 @@ void* defaultTriangular(void* val_out, const void* v0, const void* v1, const voi
 
 		funcs->concat(val_out, val_out, val1);
 		funcs->concat(val_out, val_out, val2);
+
+		free(val1);
+		free(val2);
 	}
 
 	return val_out;
@@ -113,7 +120,7 @@ void* defaultBiLerp(void* val_out, const void* v00, const void* v01, const void*
 	funcs->lerp(vx0, v00, v01, paramX0, funcs);
 	funcs->lerp(vx1, v10, v11, paramX1, funcs);
 	funcs->lerp(val_out, vx0, vx1, paramY, funcs);
-	free(vx0);
+	free(vx0); //Also gets vx1
 	return val_out;
 }
 
@@ -139,6 +146,11 @@ void* defaultBiCubic(void* val_out, const void* v1, const void* v2, const void* 
 			funcs->cubic(val3, v9, v10, v11, v12, param2, funcs),
 			funcs->cubic(val4, v13, v14, v15, v16, param3, funcs),
 			param4, funcs);
+
+		free(val1);
+		free(val2);
+		free(val3);
+		free(val4);
 	}
 
 	return val_out;
@@ -313,11 +325,6 @@ a3_HierarchyPose* hierarchyPoseBiCubic(a3_HierarchyPose* hierarchyPose_Out, cons
 	}
 
 	return hierarchyPose_Out;
-}
-
-a3_HierarchyPose* hierarchyPoseSmoothStep(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pose1, a3real param, const a3ui32 numNodes)
-{
-	return nullptr;
 }
 
 a3_HierarchyPose* hierarchyConvert(a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes)
