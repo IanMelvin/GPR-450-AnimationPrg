@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <Math.h>
+#include <assert.h>
 
 #include <animal3D-A3DM/animal3D-A3DM.h>
 
@@ -21,9 +22,6 @@ void vtable_setDefaults(ec_DataVtable* out)
 	out->biLerp     = defaultBiLerp    ;
 	out->biNearest  = defaultBiNearest ;
 	out->biCubic    = defaultBiCubic   ;
-	out->smoothStep = defaultSmoothStep;
-	out->FK			= defaultFK		   ;
-	out->IK			= defaultIK		   ;
 }
 
 void* defaultCopy(void* dst, const void* src, const ec_DataVtable* funcs)
@@ -145,31 +143,17 @@ void* defaultBiCubic(void* val_out, const void* v1, const void* v2, const void* 
 
 	return val_out;
 }
-void* defaultSmoothStep(void* val_out, const void* v1, a3real param)
-{
-	
-	return val_out;
-}
-void* defaultConvert(void* val_out)
-{
 
-	return val_out;
-}
-void* defaultRevert(void* val_out)
+a3real smoothStep(a3real x, a3real sharpness)
 {
+	assert(sharpness > 0);
+	assert(0 <= x && x <= 1);
+	// slope will be 0 at x=0 and x=1, therefore must have derivative (x)(x-1)
+	// integrated derivative: -x^3/3 + x^2/2
+	// rescaled to pass through (0,0) and (1,1): -2x^3 + 3x^2
+	return -2*x*x*x + 3*x*x;
+}
 
-	return val_out;
-}
-void* defaultFK(void* val_out, const void* hierarchy, const void* objSpaceTransform, const void* localSpaceTransform)
-{
-	
-	return val_out;
-}
-void* defaultIK(void* val_out, const void* hierarchy, const void* objSpaceTransform, const void* localSpaceTransform)
-{
-
-	return val_out;
-}
 #pragma endregion
 
 #pragma region SpacialPose Specific Functions
@@ -360,16 +344,6 @@ a3_HierarchyPose* hierarchyRevert(a3_HierarchyPose* hierarchyPose_Out, const a3u
 	}
 
 	return hierarchyPose_Out;
-}
-
-a3_HierarchyPose* hierarchyFK(a3_HierarchyPose* hierarchyPose_Out, const a3_Hierarchy* hierarchy, const a3_HierarchyPose* objSpaceTransform, const a3_HierarchyPose* localSpaceTransform, const a3ui32 numNodes)
-{
-	return nullptr;
-}
-
-a3_HierarchyPose* hierarchyIK(a3_HierarchyPose* hierarchyPose_Out, const a3_Hierarchy* hierarchy, const a3_HierarchyPose* objSpaceTransform, const a3_HierarchyPose* localSpaceTransform, const a3ui32 numNodes)
-{
-	return nullptr;
 }
 
 #pragma endregion

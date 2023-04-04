@@ -52,8 +52,6 @@ struct ec_DataVtable
 	void* (*biNearest )(void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
 	void* (*biCubic   )(void* val_out, const void* v1, const void* v2, const void* v3, const void* v4, const void* v5, const void* v6, const void* v7, const void* v8, const void* v9, const void* v10, const void* v11, const void* v12, const void* v13, const void* v14, const void* v15, const void* v16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const ec_DataVtable* funcs);
 	void* (*smoothStep)(void* val_out, const void* v1, a3real param);
-	void* (*FK)		   (void* val_out, const void* hierarchy, const void* objTransform, const void* localTransform);
-	void* (*IK)		   (void* val_out, const void* hierarchy, const void* objTransform, const void* localTransform);
 };
 
 //Defaults
@@ -66,9 +64,8 @@ void* defaultTriangular(void* val_out, const void* v0, const void* v1, const voi
 void* defaultBiLerp    (void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
 void* defaultBiNearest (void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs);
 void* defaultBiCubic   (void* val_out, const void* v1, const void* v2, const void* v3, const void* v4, const void* v5, const void* v6, const void* v7, const void* v8, const void* v9, const void* v10, const void* v11, const void* v12, const void* v13, const void* v14, const void* v15, const void* v16, const a3real param0, const a3real param1, const a3real param2, const a3real param3, const a3real param4, const ec_DataVtable* funcs);
-void* defaultSmoothStep(void* val_out, const void* v1, a3real param);
-void* defaultFK		   (void* val_out, const void* hierarchy, const void* objSpaceTransform, const void* localSpaceTransform);
-void* defaultIK		   (void* val_out, const void* hierarchy, const void* objSpaceTransform, const void* localSpaceTransform);
+
+a3real smoothStep(a3real param, a3real sharpness);
 
 //SpacialPoseSpecific
 a3_SpatialPose* spacialPoseConvert		 (a3_SpatialPose* spacialPose_Out);
@@ -89,8 +86,6 @@ a3_HierarchyPose* hierarchyPoseBiCubic   (a3_HierarchyPose* hierarchyPose_Out, c
 a3_HierarchyPose* hierarchyPoseSmoothStep(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* pose1, a3real param, const a3ui32 numNodes);
 a3_HierarchyPose* hierarchyConvert		 (a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes);
 a3_HierarchyPose* hierarchyRevert		 (a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes);
-a3_HierarchyPose* hierarchyFK(a3_HierarchyPose* hierarchyPose_Out, const a3_Hierarchy* hierarchy, const a3_HierarchyPose* objSpaceTransform, const a3_HierarchyPose* localSpaceTransform, const a3ui32 numNodes);
-a3_HierarchyPose* hierarchyIK(a3_HierarchyPose* hierarchyPose_Out, const a3_Hierarchy* hierarchy, const a3_HierarchyPose* objSpaceTransform, const a3_HierarchyPose* localSpaceTransform, const a3ui32 numNodes);
 
 
 #endif
