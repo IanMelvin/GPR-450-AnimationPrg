@@ -377,9 +377,18 @@ a3real3* a3real3InvertLength(a3real3* val_inout)
 
 a3real3* a3real3PowS(a3real3* val_inout, const a3real power)
 {
-	a3real invLen;
-	a3real3NormalizeGetInvLength(*val_inout, &invLen);
-	a3real3MulS(*val_inout, (a3real)pow(1/invLen, power));
+	(*val_inout)[0] = (a3real)pow((*val_inout)[0], power);
+	(*val_inout)[1] = (a3real)pow((*val_inout)[1], power);
+	(*val_inout)[2] = (a3real)pow((*val_inout)[2], power);
+
+	/*
+	a3real invLen = a3real3LengthInverse(*val_inout);
+	a3real len = 1/invLen;
+	a3real3MulS(*val_inout, invLen);
+	
+	a3real targetLen = (a3real)pow(len, power);
+	a3real3MulS(*val_inout, targetLen);
+	*/
 	return val_inout;
 }
 
@@ -412,9 +421,10 @@ a3_SpatialPose* a3spatialPoseMulS(a3_SpatialPose* val_inout, const a3real scale)
 {
 	vtable_vec3Additive      .scale(&val_inout->translate, scale);
 	vtable_vec3Additive      .scale(&val_inout->rotate     , scale);
-	vtable_quat              .scale(&val_inout->transformDQ, scale);
+	//vtable_quat              .scale(&val_inout->transformDQ, scale);
 	vtable_vec3Multiplicative.scale(&val_inout->scale      , scale);
-	vtable_mat4              .scale(&val_inout->transformMat  , scale);
+	a3spatialPoseConvert(val_inout, ~0, a3poseEulerOrder_zxy);
+	//vtable_mat4              .scale(&val_inout->transformMat  , scale);
 	return val_inout;
 }
 
