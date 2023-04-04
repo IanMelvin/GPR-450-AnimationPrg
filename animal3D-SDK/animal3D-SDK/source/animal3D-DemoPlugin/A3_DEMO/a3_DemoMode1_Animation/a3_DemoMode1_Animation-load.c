@@ -482,8 +482,8 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		a3clipControllerInit(demoMode->clipCtrlStrafeL, "xbot_strafe_l_m", demoMode->clipPool, j, rate, fps);
 		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_strafe_r_m");
 		a3clipControllerInit(demoMode->clipCtrlStrafeR, "xbot_strafe_r_m", demoMode->clipPool, j, rate, fps);
-		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_walk_m");
-		a3clipControllerInit(demoMode->clipCtrlWalk,    "xbot_walk_m", demoMode->clipPool, j, rate, fps);
+		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_run_m");
+		a3clipControllerInit(demoMode->clipCtrlWalk,    "xbot_run_m", demoMode->clipPool, j, rate, fps);
 		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_idle_pistol");
 		a3clipControllerInit(demoMode->clipCtrlPistol,  "xbot_idle_pistol", demoMode->clipPool, j, rate, fps);
 	}
@@ -504,44 +504,41 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 		//Lower body part of animations
 		ec_BlendTreeNode* lowerBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, 1);
-		lowerBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "Spine")] = 0; //Set and propagate ignores: Lower body should ignore anything past Spine
+		lowerBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Spine")] = 0; //Set and propagate ignores: Lower body should ignore anything past Spine
 		for (a3index i = 0; i < hierarchy->numNodes; ++i)
 		{
 			if (hierarchy->nodes[i].parentIndex >= 0)
 			{
 				a3real parentScaleFactor = lowerBodyMasked->data.scalePerNode.scaleFactors[hierarchy->nodes[i].parentIndex];
-				lowerBodyMasked->data.scalePerNode.scaleFactors[i] *= parentScaleFactor;
+				if (parentScaleFactor == 0) lowerBodyMasked->data.scalePerNode.scaleFactors[i] = 0;
 			}
 		}
 
 		//Upper body part of animations
 		ec_BlendTreeNode* upperBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputArmsAction, 1);
 		//Set and propagate ignores: Upper body should ignore anything past LeftUpLeg, RightUpLeg
-		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "LeftUpLeg")] = 0;
-		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "RightUpLeg")] = 0;
+		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftUpLeg")] = 0;
+		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightUpLeg")] = 0;
 		for (a3index i = 0; i < hierarchy->numNodes; ++i)
 		{
 			if (hierarchy->nodes[i].parentIndex >= 0)
 			{
 				a3real parentScaleFactor = upperBodyMasked->data.scalePerNode.scaleFactors[hierarchy->nodes[i].parentIndex];
-				upperBodyMasked->data.scalePerNode.scaleFactors[i] *= parentScaleFactor;
+				if (parentScaleFactor == 0) upperBodyMasked->data.scalePerNode.scaleFactors[i] = 0;
 			}
 		}
-		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "Hips")] = 0; //Also ignore Hips, because lower body controls that, but don't propagate
+		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Hips")] = 0; //Also ignore Hips, because lower body controls that, but don't propagate
 
 		//Mixed upper + lower body split animations
 		ec_BlendTreeNode* finalMasked = ec_blendTreeNodeCreateAdd(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, lowerBodyMasked->out, upperBodyMasked->out);
 
 		//Option to just ignore masking and use locomotion part for upper body as well
-		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, finalMasked->out, 1);
+		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, finalMasked->out, 0);
 
 		assert(j == demoMode->blendTree.numBtNodes);
 
 		demoMode->blendTree_output = finalOutput->out;
 		demoMode->blendTree_ctlStrafe = &basicLocomotion->data.lerp.param;
-
-		//TEST
-		//demoMode->blendTree_output = lowerBodyMasked->out;
 	}
 }
 

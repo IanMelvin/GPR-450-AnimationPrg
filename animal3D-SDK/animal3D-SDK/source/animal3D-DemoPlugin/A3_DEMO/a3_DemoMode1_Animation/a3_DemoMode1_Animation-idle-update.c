@@ -186,6 +186,7 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			(a3f32)demoMode->clipCtrlPistol->keyframeParam, demoMode->hierarchy_skel->numNodes);
 		ec_blendTreeEvaluate(&demoMode->blendTree);
 		a3hierarchyPoseCopy(activeHS->animPose, demoMode->blendTree_output, activeHS->hierarchy->numNodes);
+		activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
 
 		// FK pipeline
 		a3hierarchyPoseConcat(activeHS->localSpace,	// goal to calculate
