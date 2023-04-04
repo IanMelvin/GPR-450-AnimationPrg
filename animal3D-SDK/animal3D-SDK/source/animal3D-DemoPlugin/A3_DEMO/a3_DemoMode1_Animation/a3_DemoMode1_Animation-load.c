@@ -30,6 +30,8 @@
 
 #include "../a3_DemoMode1_Animation.h"
 
+#include <stdlib.h>
+
 #include "../a3_DemoState.h"
 #include "A3_DEMO/_animation/ec_BlendTree.h"
 
@@ -486,8 +488,14 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 	//Blend tree
 	{
-		ec_blendTreeCreate(&demoMode->blendTree, 0);
+		//Intermediate resources
+		demoMode->animOutputWalk			= calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose));
+		demoMode->animOutputTargetStrafeDir	= calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose));
+		demoMode->animOutputArmsAction		= calloc(hierarchy->numNodes, sizeof(a3_HierarchyPose));
 
+
+		//Blend tree proper
+		ec_blendTreeCreate(&demoMode->blendTree, 0);
 		a3index j = 0;
 
 		ec_BlendTreeNode* basicLocomotion = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputWalk, demoMode->animOutputTargetStrafeDir, 0);
@@ -505,7 +513,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		}
 
 		//Upper body part of animations
-		ec_BlendTreeNode* upperBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->armsAction, 1);
+		ec_BlendTreeNode* upperBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputArmsAction, 1);
 		//Set and propagate ignores: Upper body should ignore anything past LeftUpLeg, RightUpLeg
 		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "LeftUpLeg")] = 0;
 		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "RightUpLeg")] = 0;
