@@ -165,7 +165,7 @@ void a3demo_render_interface(const a3_DemoState* demoState,
 	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
 		"Blend Animation 2: %s", demoState->demoMode1_animation->clipPool->clip[demoState->demoMode1_animation->blend2Index].name);
 	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
-		"Blend Animation 1 (Upper Half) ('y') | Blend Animation 2 (Lower Half) ('u')");
+		"Blend Animation 1 ('y') | Blend Animation 2 ('u')");
 	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
 		"Finalize Changes ('o')");
 	// display some general data
