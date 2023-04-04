@@ -154,6 +154,38 @@ void a3demo_render_controls_gen(a3_DemoState const* demoState,
 
 
 // scene data (HUD)
+void a3demo_render_interface(const a3_DemoState* demoState,
+	a3_TextRenderer const* text, a3vec4 const col,
+	a3f32 const textAlign, a3f32 const textDepth, a3f32 const textOffsetDelta, a3f32 textOffset)
+{
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a, 
+		"Active Blend tree");
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		"Blend Animation 1: %s", demoState->demoMode1_animation->clipPool->clip[demoState->demoMode1_animation->blend1Index].name);
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		"Blend Animation 2: %s", demoState->demoMode1_animation->clipPool->clip[demoState->demoMode1_animation->blend2Index].name);
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		"Blend Animation 1 (Upper Half) ('y') | Blend Animation 2 (Lower Half) ('u')");
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		"Finalize Changes ('o')");
+	// display some general data
+	//a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		//"fps_target = %07.4lf F/s", demoState->timer->ticksPerSecond);//(a3f64)demoState->timer_display->ticks / demoState->timer_display->totalTime);
+	/*a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		"fps_current = %07.4lf F/s", 1.0 / (demoState->dt_timer));//demoState->timer_display->previousTick));
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		"fps_average = %07.4lf F/s", (a3f64)demoState->n_timer / (demoState->dt_timer_tot));//(a3f64)demoState->n_timer / demoState->timer_display->totalTime);//(a3f64)demoState->timer_display->ticks / demoState->timer_display->totalTime);
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		"dt_render = %07.4lf ms", (demoState->dt_timer) * 1000.0);//demoState->timer_display->previousTick * 1000.0);
+	a3textDraw(text, textAlign, textOffset += textOffsetDelta, textDepth, col.r, col.g, col.b, col.a,
+		"t_render = %07.4lf s | n_render = %lu", demoState->timer_display->totalTime, demoState->n_timer);//demoState->timer_display->totalTime, demoState->timer_display->ticks);*/
+
+	// global/input-dependent controls
+	textOffset = -0.6f;
+	a3demo_render_controls_global(demoState, text, col,
+		textAlign, textDepth, textOffsetDelta, textOffset);
+}
+
 void a3demo_render_data(const a3_DemoState* demoState,
 	a3_TextRenderer const* text, a3vec4 const col,
 	a3f32 const textAlign, a3f32 const textDepth, a3f32 const textOffsetDelta, a3f32 textOffset)
@@ -253,6 +285,9 @@ void a3demo_render(a3_DemoState const* demoState, a3f64 const dt)
 				// general data
 			case demoState_textData:
 				a3demo_render_data(demoState, text, col, textAlign + x, textDepth, textOffsetDelta, textOffset + y);
+				break;
+			case demoState_textInterface:
+				a3demo_render_interface(demoState, text, col, textAlign + x, textDepth, textOffsetDelta, textOffset + y);
 				break;
 			}
 		}

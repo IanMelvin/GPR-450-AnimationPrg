@@ -514,6 +514,8 @@ A3DYLIBSYMBOL void a3demoCB_keyCharPress(a3_DemoState *demoState, a3i32 asciiKey
 
 		// toggle text mode
 		a3demoCtrlCaseIncLoop(demoState->textMode, demoState_text_max, 't');
+		a3demoCtrlCaseIncLoop(demoState->demoMode1_animation->blend1Index, demoState->demoMode1_animation->clipPool->clipCount, 'y');
+		a3demoCtrlCaseIncLoop(demoState->demoMode1_animation->blend2Index, demoState->demoMode1_animation->clipPool->clipCount, 'u');
 
 		// reload text
 	case 'T':

@@ -79,6 +79,7 @@ enum a3_DemoState_TextDisplayName
 	demoState_textControls,			// display controls
 	demoState_textControls_gen,		// display general controls
 	demoState_textData,				// display data
+	demoState_textInterface,		// display blend tree data
 
 	demoState_text_max
 };

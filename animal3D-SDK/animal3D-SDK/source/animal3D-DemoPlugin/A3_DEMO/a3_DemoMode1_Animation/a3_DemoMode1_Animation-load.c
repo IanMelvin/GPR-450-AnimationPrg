@@ -483,13 +483,16 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_strafe_r_m");
 		a3clipControllerInit(demoMode->clipCtrlStrafeR, "xbot_strafe_r_m", demoMode->clipPool, j, rate, fps);
 		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_run_m");
+		demoMode->blend2Index = j;
 		a3clipControllerInit(demoMode->clipCtrlWalk,    "xbot_run_m", demoMode->clipPool, j, rate, fps);
 		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_idle_pistol");
+		demoMode->blend1Index = j;
 		a3clipControllerInit(demoMode->clipCtrlPistol,  "xbot_idle_pistol", demoMode->clipPool, j, rate, fps);
 	}
 
 	//Blend tree
 	{
+
 		//Intermediate resources
 		setupVtables();
 		demoMode->animOutputWalk           ->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
@@ -539,6 +542,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 		demoMode->blendTree_output = finalOutput->out;
 		demoMode->blendTree_ctlStrafe = &basicLocomotion->data.lerp.param;
+		demoMode->updateBlendTree = false;
 	}
 }
 

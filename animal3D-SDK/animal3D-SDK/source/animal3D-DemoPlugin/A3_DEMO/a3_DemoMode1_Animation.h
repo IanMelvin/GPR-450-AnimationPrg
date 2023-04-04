@@ -169,6 +169,9 @@ typedef enum a3_DemoMode1_Animation_InputMode				a3_DemoMode1_Animation_InputMod
 		ec_BlendTree blendTree;
 		a3_ClipController clipCtrlStrafeL[1], clipCtrlStrafeR[1], clipCtrlWalk[1], clipCtrlPistol[1];
 		a3_HierarchyPose animOutputWalk[1], animOutputTargetStrafeDir[1], animOutputArmsAction[1];
+
+		a3ui32 blend1Index, blend2Index;
+		a3boolean updateBlendTree;
 		//Convenience stuff
 		a3_HierarchyPose* blendTree_output;
 		a3real* blendTree_ctlStrafe;

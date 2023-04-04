@@ -166,6 +166,14 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 		//	(a3f32)clipCtrl->keyframeParam, demoMode->hierarchy_skel->numNodes);
 
 		//Custom blend tree stuff
+		if (demoMode->updateBlendTree)
+		{
+			a3ui32 const rate = 24;
+			a3f64 const fps = (a3f64)rate;
+			a3clipControllerSetClip(demoMode->clipCtrlPistol, demoMode->clipPool, demoMode->blend1Index, rate, fps);
+			a3clipControllerSetClip(demoMode->clipCtrlWalk, demoMode->clipPool, demoMode->blend2Index, rate, fps);
+			demoMode->updateBlendTree = false;
+		}
 		a3clipControllerUpdate(demoMode->clipCtrlStrafeL, dt);
 		a3clipControllerUpdate(demoMode->clipCtrlStrafeR, dt);
 		a3clipControllerUpdate(demoMode->clipCtrlWalk, dt);
