@@ -472,6 +472,16 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		a3clipControllerInit(demoMode->clipCtrlA, "xbot_ctrlA", demoMode->clipPool, j, rate, fps);
 		j = a3clipGetIndexInPool(demoMode->clipPool, "xbot_walk_f");
 		a3clipControllerInit(demoMode->clipCtrlB, "xbot_ctrlB", demoMode->clipPool, j, rate, fps);
+
+		//CUSTOM STUFF for blend tree
+		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_strafe_l_f");
+		a3clipControllerInit(demoMode->clipCtrlStrafeL, "xbot_strafe_l_f", demoMode->clipPool, j, rate, fps);
+		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_strafe_r_f");
+		a3clipControllerInit(demoMode->clipCtrlStrafeR, "xbot_strafe_r_f", demoMode->clipPool, j, rate, fps);
+		j = a3clipGetIndexInPool(demoMode->clipPool, "xbot_walk_f");
+		a3clipControllerInit(demoMode->clipCtrlWalk, "xbot_walk_f", demoMode->clipPool, j, rate, fps);
+		j = a3clipGetIndexInPool(demoMode->clipPool, "xbot_idle_pistol");
+		a3clipControllerInit(demoMode->clipCtrlPistol, "xbot_idle_pistol", demoMode->clipPool, j, rate, fps);
 	}
 
 	//Blend tree
@@ -480,7 +490,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 		a3index j = 0;
 
-		ec_BlendTreeNode* basicLocomotion = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, animOutputWalk, animOutputTargetStrafeDir, 0);
+		ec_BlendTreeNode* basicLocomotion = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputWalk, demoMode->animOutputTargetStrafeDir, 0);
 
 		//Lower body part of animations
 		ec_BlendTreeNode* lowerBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, 1);
@@ -495,7 +505,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		}
 
 		//Upper body part of animations
-		ec_BlendTreeNode* upperBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, armsAction, 1);
+		ec_BlendTreeNode* upperBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->armsAction, 1);
 		//Set and propagate ignores: Upper body should ignore anything past LeftUpLeg, RightUpLeg
 		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "LeftUpLeg")] = 0;
 		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "RightUpLeg")] = 0;
