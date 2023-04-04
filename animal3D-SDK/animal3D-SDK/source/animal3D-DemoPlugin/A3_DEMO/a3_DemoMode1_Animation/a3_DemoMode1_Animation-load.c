@@ -482,12 +482,34 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 		ec_BlendTreeNode* basicLocomotion = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, animOutputWalk, animOutputTargetStrafeDir, 0);
 
+		//Lower body part of animations
 		ec_BlendTreeNode* lowerBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, 1);
-		//TODO apply mask
+		lowerBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "Spine")] = 0; //Set and propagate ignores: Lower body should ignore anything past Spine
+		for (a3index i = 0; i < hierarchy->numNodes; ++i)
+		{
+			if (hierarchy->nodes[i].parentIndex >= 0)
+			{
+				a3real parentScaleFactor = lowerBodyMasked->data.scalePerNode.scaleFactors[hierarchy->nodes[i].parentIndex];
+				lowerBodyMasked->data.scalePerNode.scaleFactors[i] *= parentScaleFactor;
+			}
+		}
 
+		//Upper body part of animations
 		ec_BlendTreeNode* upperBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, armsAction, 1);
-		//TODO apply mask
+		//Set and propagate ignores: Upper body should ignore anything past LeftUpLeg, RightUpLeg
+		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "LeftUpLeg")] = 0;
+		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "RightUpLeg")] = 0;
+		for (a3index i = 0; i < hierarchy->numNodes; ++i)
+		{
+			if (hierarchy->nodes[i].parentIndex >= 0)
+			{
+				a3real parentScaleFactor = upperBodyMasked->data.scalePerNode.scaleFactors[hierarchy->nodes[i].parentIndex];
+				upperBodyMasked->data.scalePerNode.scaleFactors[i] *= parentScaleFactor;
+			}
+		}
+		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "Hips")] = 0; //Also ignore Hips, because lower body controls that, but don't propagate
 
+		//Mixed upper + lower body split animations
 		ec_BlendTreeNode* finalMasked = ec_blendTreeNodeCreateAdd(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, lowerBodyMasked->out, upperBodyMasked->out);
 
 		//Option to just ignore masking and use locomotion part for upper body as well
