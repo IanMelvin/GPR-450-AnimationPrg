@@ -8,7 +8,8 @@
 #pragma region Evaluate family
 
 //Internal helper functions
-a3ret ec_blendTreeNodeEvaluate_Lerp        (ec_BlendTreeNode* node);
+a3ret ec_blendTreeNodeEvaluate_LerpUniform (ec_BlendTreeNode* node);
+a3ret ec_blendTreeNodeEvaluate_LerpPerNode (ec_BlendTreeNode* node);
 a3ret ec_blendTreeNodeEvaluate_Add         (ec_BlendTreeNode* node);
 a3ret ec_blendTreeNodeEvaluate_ScaleUniform(ec_BlendTreeNode* node);
 a3ret ec_blendTreeNodeEvaluate_ScalePerNode(ec_BlendTreeNode* node);
@@ -19,7 +20,10 @@ a3ret ec_blendTreeNodeEvaluate(ec_BlendTreeNode* node)
 
 	switch (node->type)
 	{
-	case BT_LERP          : return ec_blendTreeNodeEvaluate_Lerp        (node);
+	case BT_NO_OP         : return 1; //No-op: Do nothing
+
+	case BT_LERP_UNIFORM  : return ec_blendTreeNodeEvaluate_LerpUniform (node);
+	case BT_LERP_PER_NODE : return ec_blendTreeNodeEvaluate_LerpPerNode (node);
 	case BT_ADD           : return ec_blendTreeNodeEvaluate_Add         (node);
 	case BT_SCALE_UNIFORM : return ec_blendTreeNodeEvaluate_ScaleUniform(node);
 	case BT_SCALE_PER_NODE: return ec_blendTreeNodeEvaluate_ScalePerNode(node);
@@ -28,11 +32,25 @@ a3ret ec_blendTreeNodeEvaluate(ec_BlendTreeNode* node)
 	}
 }
 
-a3ret ec_blendTreeNodeEvaluate_Lerp(ec_BlendTreeNode* node)
+a3ret ec_blendTreeNodeEvaluate_LerpUniform(ec_BlendTreeNode* node)
 {
-	assert(node->data.lerp.x0);
-	assert(node->data.lerp.x1);
-	hierarchyPoseLerp(node->out, node->data.lerp.x0, node->data.lerp.x1, node->numNodes, node->data.lerp.param);
+	assert(node->data.lerpUniform.x0);
+	assert(node->data.lerpUniform.x1);
+	hierarchyPoseLerp(node->out, node->data.lerpUniform.x0, node->data.lerpUniform.x1, node->numNodes, node->data.lerpUniform.param);
+	return 1;
+}
+
+a3ret ec_blendTreeNodeEvaluate_LerpPerNode(ec_BlendTreeNode* node)
+{
+	assert(node->data.lerpPerNode.x0);
+	assert(node->data.lerpPerNode.x1);
+	assert(node->data.lerpPerNode.params);
+
+	for (a3ui32 i = 0; i < node->numNodes; i++)
+	{
+		vtable_SpatialPose.lerp(&node->out->pose[i], &node->data.lerpPerNode.x0->pose[i], &node->data.lerpPerNode.x1->pose[i], node->data.lerpPerNode.params[i], &vtable_SpatialPose);
+	}
+
 	return 1;
 }
 
@@ -68,7 +86,13 @@ a3ret ec_blendTreeNodeCleanup(ec_BlendTreeNode* node_out)
 	node_out->out->pose = NULL;
 
 	//Special case: Is there a better way that's still clean?
-	if (node_out->type == BT_SCALE_PER_NODE)
+	if (node_out->type == BT_LERP_PER_NODE)
+	{
+		assert(node_out->data.lerpPerNode.params);
+		free(node_out->data.lerpPerNode.params);
+		node_out->data.lerpPerNode.params = NULL;
+	}
+	else if (node_out->type == BT_SCALE_PER_NODE)
 	{
 		assert(node_out->data.scalePerNode.scaleFactors);
 		free(node_out->data.scalePerNode.scaleFactors);
@@ -88,12 +112,22 @@ ec_BlendTreeNode* ec_blendTreeNodeInternalCreate(ec_BlendTreeNode* node_out, a3u
 	return node_out;
 }
 
-ec_BlendTreeNode* ec_blendTreeNodeCreateLerp(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real param)
+ec_BlendTreeNode* ec_blendTreeNodeCreateLerpUniform(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real param)
 {
-	ec_blendTreeNodeInternalCreate(node_out, numNodes, BT_LERP);
-	node_out->data.lerp.x0 = x0;
-	node_out->data.lerp.x1 = x1;
-	node_out->data.lerp.param = param;
+	ec_blendTreeNodeInternalCreate(node_out, numNodes, BT_LERP_UNIFORM);
+	node_out->data.lerpUniform.x0 = x0;
+	node_out->data.lerpUniform.x1 = x1;
+	node_out->data.lerpUniform.param = param;
+	return node_out;
+}
+
+ec_BlendTreeNode* ec_blendTreeNodeCreateLerpPerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real defaultParam)
+{
+	ec_blendTreeNodeInternalCreate(node_out, numNodes, BT_LERP_PER_NODE);
+	node_out->data.lerpPerNode.x0 = x0;
+	node_out->data.lerpPerNode.x1 = x1;
+	node_out->data.lerpPerNode.params = calloc(numNodes, sizeof(a3real));
+	for (a3index i = 0; i < numNodes; ++i) node_out->data.lerpPerNode.params[i] = defaultParam;
 	return node_out;
 }
 

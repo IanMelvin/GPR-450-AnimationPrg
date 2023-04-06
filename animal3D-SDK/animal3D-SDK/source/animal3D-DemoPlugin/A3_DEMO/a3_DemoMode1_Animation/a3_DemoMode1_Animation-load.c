@@ -503,7 +503,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		ec_blendTreeCreate(&demoMode->blendTree, 5);
 		a3index j = 0;
 
-		ec_BlendTreeNode* basicLocomotion = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputWalk, demoMode->animOutputTargetStrafeDir, 0);
+		ec_BlendTreeNode* basicLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputWalk, demoMode->animOutputTargetStrafeDir, 0);
 
 		//Lower body part of animations
 		ec_BlendTreeNode* lowerBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, 1);
@@ -536,12 +536,12 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		ec_BlendTreeNode* finalMasked = ec_blendTreeNodeCreateAdd(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, lowerBodyMasked->out, upperBodyMasked->out);
 
 		//Option to just ignore masking and use locomotion part for upper body as well
-		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerp(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, finalMasked->out, 1);
+		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, finalMasked->out, 1);
 
-		assert(j == demoMode->blendTree.numBtNodes);
+		assert(j == demoMode->blendTree.numBtNodes); //If this errors, the blend tree is either too big or too small, so adjust how many nodes you're allocating
 
 		demoMode->blendTree_output = finalOutput->out;
-		demoMode->blendTree_ctlStrafe = &basicLocomotion->data.lerp.param;
+		demoMode->blendTree_ctlStrafe = &basicLocomotion->data.lerpUniform.param;
 		demoMode->updateBlendTree = false;
 	}
 }
