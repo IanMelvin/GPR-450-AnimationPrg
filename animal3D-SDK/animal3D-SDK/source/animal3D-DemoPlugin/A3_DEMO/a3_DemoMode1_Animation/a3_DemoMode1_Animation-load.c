@@ -538,7 +538,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		//Option to just ignore masking and use locomotion part for upper body as well
 		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, finalMasked->out, 1);
 
-		assert(j == demoMode->blendTree.numBtNodes); //If this errors, the blend tree is either too big or too small, so adjust how many nodes you're allocating
+		assert(j <= demoMode->blendTree.numBtNodes); //If this errors, the blend tree is too small, so allocate more
 
 		demoMode->blendTree_output = finalOutput->out;
 		demoMode->blendTree_ctlStrafe = &basicLocomotion->data.lerpUniform.param;
