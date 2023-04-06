@@ -34,7 +34,7 @@ enum ec_BlendTreeNodeType
 
 struct ec_BlendTreeNode
 {
-	a3ui32 numNodes;
+	a3ui32 numHierarchyNodes;
 	a3_HierarchyPose out[1]; //Managed by self
 
 	ec_BlendTreeNodeType type;

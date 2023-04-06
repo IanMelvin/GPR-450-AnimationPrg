@@ -36,7 +36,7 @@ a3ret ec_blendTreeNodeEvaluate_LerpUniform(ec_BlendTreeNode* node)
 {
 	assert(node->data.lerpUniform.x0);
 	assert(node->data.lerpUniform.x1);
-	hierarchyPoseLerp(node->out, node->data.lerpUniform.x0, node->data.lerpUniform.x1, node->numNodes, node->data.lerpUniform.param);
+	hierarchyPoseLerp(node->out, node->data.lerpUniform.x0, node->data.lerpUniform.x1, node->numHierarchyNodes, node->data.lerpUniform.param);
 	return 1;
 }
 
@@ -46,7 +46,7 @@ a3ret ec_blendTreeNodeEvaluate_LerpPerNode(ec_BlendTreeNode* node)
 	assert(node->data.lerpPerNode.x1);
 	assert(node->data.lerpPerNode.params);
 
-	for (a3ui32 i = 0; i < node->numNodes; i++)
+	for (a3ui32 i = 0; i < node->numHierarchyNodes; i++)
 	{
 		vtable_SpatialPose.lerp(&node->out->pose[i], &node->data.lerpPerNode.x0->pose[i], &node->data.lerpPerNode.x1->pose[i], node->data.lerpPerNode.params[i], &vtable_SpatialPose);
 	}
@@ -58,20 +58,20 @@ a3ret ec_blendTreeNodeEvaluate_Add(ec_BlendTreeNode* node)
 {
 	assert(node->data.add.a);
 	assert(node->data.add.b);
-	a3hierarchyPoseConcat(node->out, node->data.add.a, node->data.add.b, node->numNodes);
+	a3hierarchyPoseConcat(node->out, node->data.add.a, node->data.add.b, node->numHierarchyNodes);
 	return 1;
 }
 
 a3ret ec_blendTreeNodeEvaluate_ScaleUniform(ec_BlendTreeNode* node)
 {
-	hierarchyPoseScaleUniform(node->out, node->data.scaleUniform.in, node->data.scaleUniform.scaleFactor, node->numNodes);
+	hierarchyPoseScaleUniform(node->out, node->data.scaleUniform.in, node->data.scaleUniform.scaleFactor, node->numHierarchyNodes);
 	return 1;
 }
 
 a3ret ec_blendTreeNodeEvaluate_ScalePerNode(ec_BlendTreeNode* node)
 {
 	assert(node->data.scalePerNode.scaleFactors);
-	hierarchyPoseScalePerNode(node->out, node->data.scalePerNode.in, node->data.scalePerNode.scaleFactors, node->numNodes);
+	hierarchyPoseScalePerNode(node->out, node->data.scalePerNode.in, node->data.scalePerNode.scaleFactors, node->numHierarchyNodes);
 	return 1;
 }
 
@@ -105,9 +105,9 @@ a3ret ec_blendTreeNodeCleanup(ec_BlendTreeNode* node_out)
 ec_BlendTreeNode* ec_blendTreeNodeInternalCreate(ec_BlendTreeNode* node_out, a3ui32 numNodes, ec_BlendTreeNodeType type)
 {
 	assert(node_out);
-	//assert(!node_out->out);
+	assert(!node_out->out->pose);
 	node_out->type = type;
-	node_out->numNodes = numNodes;
+	node_out->numHierarchyNodes = numNodes;
 	node_out->out->pose = calloc(numNodes, sizeof(a3_SpatialPose));
 	return node_out;
 }

@@ -11,6 +11,7 @@ a3ret ec_blendTreeCreate(ec_BlendTree* tree_out, a3ui32 numBtNodes)
 
 	tree_out->numBtNodes = numBtNodes;
 	tree_out->btNodes = calloc(numBtNodes, sizeof(ec_BlendTreeNode));
+	memset(tree_out->btNodes, 0, numBtNodes*sizeof(ec_BlendTreeNode));
 
 	return 1;
 }
