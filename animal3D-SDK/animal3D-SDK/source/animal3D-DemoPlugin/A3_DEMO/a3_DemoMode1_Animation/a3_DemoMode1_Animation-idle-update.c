@@ -171,8 +171,8 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			a3ui32 const rate = 24;
 			a3f64 const fps = (a3f64)rate;
 			a3clipControllerSetClip(demoMode->clipCtrlPistol, demoMode->clipPool, demoMode->blend1Index, rate, fps);
-			a3clipControllerSetClip(demoMode->clipCtrlStrafeR, demoMode->clipPool, demoMode->blend1Index, rate, fps);
-			a3clipControllerSetClip(demoMode->clipCtrlStrafeL, demoMode->clipPool, demoMode->blend1Index, rate, fps);
+			//a3clipControllerSetClip(demoMode->clipCtrlStrafeR, demoMode->clipPool, demoMode->blend1Index, rate, fps);
+			//a3clipControllerSetClip(demoMode->clipCtrlStrafeL, demoMode->clipPool, demoMode->blend1Index, rate, fps);
 			a3clipControllerSetClip(demoMode->clipCtrlWalk, demoMode->clipPool, demoMode->blend2Index, rate, fps);
 			demoMode->updateBlendTree = false;
 			//demoMode->strafeRaw = -0.5;
