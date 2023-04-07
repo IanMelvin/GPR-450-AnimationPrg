@@ -492,7 +492,6 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 	//Blend tree
 	{
-
 		//Intermediate resources
 		setupVtables();
 		demoMode->animOutputWalk           ->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
@@ -504,36 +503,21 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		a3index j = 0;
 
 		ec_BlendTreeNode* basicLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputWalk, demoMode->animOutputTargetStrafeDir, 0);
-
-		//Lower body part of animations
-		ec_BlendTreeNode* lowerBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, 1);
-		lowerBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Spine")] = 0; //Set and propagate ignores: Lower body should ignore anything past Spine
-		for (a3index i = 0; i < hierarchy->numNodes; ++i)
-		{
-			if (hierarchy->nodes[i].parentIndex >= 0)
-			{
-				a3real parentScaleFactor = lowerBodyMasked->data.scalePerNode.scaleFactors[hierarchy->nodes[i].parentIndex];
-				if (parentScaleFactor == 0) lowerBodyMasked->data.scalePerNode.scaleFactors[i] = 0;
-			}
-		}
-
-		//Upper body part of animations
-		ec_BlendTreeNode* upperBodyMasked = ec_blendTreeNodeCreateScalePerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputArmsAction, 1);
-		//Set and propagate ignores: Upper body should ignore anything past LeftUpLeg, RightUpLeg
-		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftUpLeg")] = 0;
-		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightUpLeg")] = 0;
-		for (a3index i = 0; i < hierarchy->numNodes; ++i)
-		{
-			if (hierarchy->nodes[i].parentIndex >= 0)
-			{
-				a3real parentScaleFactor = upperBodyMasked->data.scalePerNode.scaleFactors[hierarchy->nodes[i].parentIndex];
-				if (parentScaleFactor == 0) upperBodyMasked->data.scalePerNode.scaleFactors[i] = 0;
-			}
-		}
-		upperBodyMasked->data.scalePerNode.scaleFactors[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Hips")] = 0; //Also ignore Hips, because lower body controls that, but don't propagate
-
+		
 		//Mixed upper + lower body split animations
-		ec_BlendTreeNode* finalMasked = ec_blendTreeNodeCreateAdd(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, lowerBodyMasked->out, upperBodyMasked->out);
+		ec_BlendTreeNode* finalMasked = ec_blendTreeNodeCreateLerpPerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, demoMode->animOutputArmsAction, 1);
+		//Set and propagate mask: Anything past legs belongs to lower body
+		finalMasked->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftUpLeg")] = 0;
+		finalMasked->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightUpLeg")] = 0;
+		for (a3index i = 0; i < hierarchy->numNodes; ++i)
+		{
+			if (hierarchy->nodes[i].parentIndex >= 0)
+			{
+				a3real parentScaleFactor = finalMasked->data.lerpPerNode.params[hierarchy->nodes[i].parentIndex];
+				if (parentScaleFactor == 0) finalMasked->data.lerpPerNode.params[i] = 0;
+			}
+		}
+		finalMasked->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Hips")] = 0; //Hips are also lower body
 
 		//Option to just ignore masking and use locomotion part for upper body as well
 		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, finalMasked->out, 1);
