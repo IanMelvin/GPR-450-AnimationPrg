@@ -482,6 +482,8 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		a3clipControllerInit(demoMode->clipCtrlStrafeL, "xbot_strafe_l_m", demoMode->clipPool, j, rate, fps);
 		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_strafe_r_m");
 		a3clipControllerInit(demoMode->clipCtrlStrafeR, "xbot_strafe_r_m", demoMode->clipPool, j, rate, fps);
+		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_idle_m");
+		a3clipControllerInit(demoMode->clipCtrlIdle,    "xbot_idle_m", demoMode->clipPool, j, rate, fps);
 		j = a3clipGetIndexInPool(demoMode->clipPool,    "xbot_run_m");
 		demoMode->blend2Index = j;
 		a3clipControllerInit(demoMode->clipCtrlWalk,    "xbot_run_m", demoMode->clipPool, j, rate, fps);
@@ -495,37 +497,44 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		//Intermediate resources
 		setupVtables();
 		demoMode->animOutputWalk           ->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
+		demoMode->animOutputIdle           ->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
 		demoMode->animOutputTargetStrafeDir->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
 		demoMode->animOutputArmsAction     ->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
-
+		
 		//Blend tree proper
 		ec_blendTreeCreate(&demoMode->blendTree, 5);
 		a3index j = 0;
 
-		ec_BlendTreeNode* basicLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputWalk, demoMode->animOutputTargetStrafeDir, 0);
+		ec_BlendTreeNode* forwardLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputIdle, demoMode->animOutputWalk, 0);
+		demoMode->blendTree_ctlForward = &forwardLocomotion->data.lerpUniform.param;
+		
+		ec_BlendTreeNode* strafeLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, demoMode->animOutputIdle, demoMode->animOutputTargetStrafeDir, 0);
+		demoMode->blendTree_ctlStrafe = &strafeLocomotion->data.lerpUniform.param;
+		
+		ec_BlendTreeNode* finalLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, forwardLocomotion->out, strafeLocomotion->out, 0);
+		demoMode->blendTree_ctlStrafeAngle = &finalLocomotion->data.lerpUniform.param;
 		
 		//Mixed upper + lower body split animations
-		ec_BlendTreeNode* finalMasked = ec_blendTreeNodeCreateLerpPerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, demoMode->animOutputArmsAction, 1);
+		ec_BlendTreeNode* upperBodyMixIn = ec_blendTreeNodeCreateLerpPerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, finalLocomotion->out, demoMode->animOutputArmsAction, 1);
 		//Set and propagate mask: Anything past legs belongs to lower body
-		finalMasked->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftUpLeg")] = 0;
-		finalMasked->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightUpLeg")] = 0;
+		upperBodyMixIn->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftUpLeg")] = 0;
+		upperBodyMixIn->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightUpLeg")] = 0;
 		for (a3index i = 0; i < hierarchy->numNodes; ++i)
 		{
 			if (hierarchy->nodes[i].parentIndex >= 0)
 			{
-				a3real parentScaleFactor = finalMasked->data.lerpPerNode.params[hierarchy->nodes[i].parentIndex];
-				if (parentScaleFactor == 0) finalMasked->data.lerpPerNode.params[i] = 0;
+				a3real parentScaleFactor = upperBodyMixIn->data.lerpPerNode.params[hierarchy->nodes[i].parentIndex];
+				if (parentScaleFactor == 0) upperBodyMixIn->data.lerpPerNode.params[i] = 0;
 			}
 		}
-		finalMasked->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Hips")] = 0; //Hips are also lower body
+		upperBodyMixIn->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Hips")] = 0; //Hips are locomotion, and therefore lower body
 
 		//Option to just ignore masking and use locomotion part for upper body as well
-		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, basicLocomotion->out, finalMasked->out, 1);
-
+		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, finalLocomotion->out, upperBodyMixIn->out, 1);
+		demoMode->blendTree_output = finalOutput->out;
+		
 		assert(j <= demoMode->blendTree.numBtNodes); //If this errors, the blend tree is too small, so allocate more
 
-		demoMode->blendTree_output = finalOutput->out;
-		demoMode->blendTree_ctlStrafe = &basicLocomotion->data.lerpUniform.param;
 		demoMode->updateBlendTree = false;
 	}
 }

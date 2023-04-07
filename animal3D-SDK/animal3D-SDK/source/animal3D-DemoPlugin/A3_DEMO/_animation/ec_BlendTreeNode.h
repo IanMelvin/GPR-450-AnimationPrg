@@ -46,12 +46,14 @@ struct ec_BlendTreeNode
 			a3_HierarchyPose* x0; //External
 			a3_HierarchyPose* x1; //External
 			a3real param;
+			a3real paramMin;
+			a3real paramMax;
 		} lerpUniform;
 
 		struct {
 			a3_HierarchyPose* x0; //External
 			a3_HierarchyPose* x1; //External
-			a3real* params;
+			a3real* params; //Managed by self
 		} lerpPerNode;
 
 		struct {

@@ -36,7 +36,9 @@ a3ret ec_blendTreeNodeEvaluate_LerpUniform(ec_BlendTreeNode* node)
 {
 	assert(node->data.lerpUniform.x0);
 	assert(node->data.lerpUniform.x1);
-	hierarchyPoseLerp(node->out, node->data.lerpUniform.x0, node->data.lerpUniform.x1, node->numHierarchyNodes, node->data.lerpUniform.param);
+	a3real t = a3lerpInverse(node->data.lerpUniform.paramMin, node->data.lerpUniform.paramMax, node->data.lerpUniform.param);
+	t = a3clamp(0, 1, t);
+	hierarchyPoseLerp(node->out, node->data.lerpUniform.x0, node->data.lerpUniform.x1, node->numHierarchyNodes, t);
 	return 1;
 }
 
@@ -118,6 +120,8 @@ ec_BlendTreeNode* ec_blendTreeNodeCreateLerpUniform(ec_BlendTreeNode* node_out, 
 	node_out->data.lerpUniform.x0 = x0;
 	node_out->data.lerpUniform.x1 = x1;
 	node_out->data.lerpUniform.param = param;
+	node_out->data.lerpUniform.paramMin = 0;
+	node_out->data.lerpUniform.paramMax = 1;
 	return node_out;
 }
 
