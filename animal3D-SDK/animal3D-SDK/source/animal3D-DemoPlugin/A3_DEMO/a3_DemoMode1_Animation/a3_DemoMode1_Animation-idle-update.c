@@ -175,14 +175,28 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			a3clipControllerSetClip(demoMode->clipCtrlStrafeL, demoMode->clipPool, demoMode->blend1Index, rate, fps);
 			a3clipControllerSetClip(demoMode->clipCtrlWalk, demoMode->clipPool, demoMode->blend2Index, rate, fps);
 			demoMode->updateBlendTree = false;
-			demoMode->strafeRaw = -0.5;
+			//demoMode->strafeRaw = -0.5;
 		}
+
+		//Fetch input and parse as vec2
+		a3vec2 input = a3vec2_zero;
+		if (demoState->keyboard->key.key[a3key_W]) input.y++;
+		if (demoState->keyboard->key.key[a3key_S]) input.y--;
+		if (demoState->keyboard->key.key[a3key_D]) input.x++;
+		if (demoState->keyboard->key.key[a3key_A]) input.x--;
+		input.x += (a3real)demoState->xcontrol[0].ctrl.lThumbX_unit;
+		input.y += (a3real)demoState->xcontrol[0].ctrl.lThumbY_unit;
+		a3real2Lerp(demoMode->smoothedInput.v, demoMode->smoothedInput.v, input.v, 0.1f);
+
+		//Update all clips used by blend tree
 		a3clipControllerUpdate(demoMode->clipCtrlStrafeL, dt);
 		a3clipControllerUpdate(demoMode->clipCtrlStrafeR, dt);
 		a3clipControllerUpdate(demoMode->clipCtrlWalk, dt);
 		a3clipControllerUpdate(demoMode->clipCtrlPistol, dt);
-		a3_ClipController* strafeClipSrc = demoMode->strafeRaw > 0 ? demoMode->clipCtrlStrafeR : demoMode->clipCtrlStrafeL;
-		*demoMode->blendTree_ctlStrafe = (a3real)fabs(demoMode->strafeRaw);
+
+		//Write input data for blend tree
+		a3_ClipController* strafeClipSrc = demoMode->smoothedInput.x > 0 ? demoMode->clipCtrlStrafeR : demoMode->clipCtrlStrafeL;
+		*demoMode->blendTree_ctlStrafe = (a3real)fabs(demoMode->smoothedInput.x);
 		a3hierarchyPoseLerp(demoMode->animOutputTargetStrafeDir,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[strafeClipSrc->keyframeIndex].sampleIndex0,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[strafeClipSrc->keyframeIndex].sampleIndex1,
@@ -195,6 +209,8 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlPistol->keyframeIndex].sampleIndex0,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlPistol->keyframeIndex].sampleIndex1,
 			(a3f32)demoMode->clipCtrlPistol->keyframeParam, demoMode->hierarchy_skel->numNodes);
+
+		//Run blend tree and copy output to render objects
 		ec_blendTreeEvaluate(&demoMode->blendTree);
 		a3hierarchyPoseCopy(activeHS->animPose, demoMode->blendTree_output, activeHS->hierarchy->numNodes);
 		activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
