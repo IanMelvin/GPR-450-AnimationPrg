@@ -88,5 +88,4 @@ a3_HierarchyPose* hierarchyPoseBiCubic   (a3_HierarchyPose* hierarchyPose_Out, c
 a3_HierarchyPose* hierarchyConvert		 (a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes);
 a3_HierarchyPose* hierarchyRevert		 (a3_HierarchyPose* hierarchyPose_Out, const a3ui32 numNodes);
 
-
 #endif
