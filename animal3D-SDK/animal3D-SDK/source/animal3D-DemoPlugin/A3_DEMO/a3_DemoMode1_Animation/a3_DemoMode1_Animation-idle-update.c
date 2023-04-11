@@ -200,19 +200,19 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 		*demoMode->blendTree_ctlStrafe = (a3real)fabs(demoMode->smoothedInput.x);
 		*demoMode->blendTree_ctlForward = a3maximum(demoMode->smoothedInput.y, 0);
 		*demoMode->blendTree_ctlStrafeAngle = (a3real)fabs( a3atan2d(-demoMode->smoothedInput.x, demoMode->smoothedInput.y)/90 );
-		a3hierarchyPoseLerp(demoMode->animOutputTargetStrafeDir,
+		a3hierarchyPoseLerp(demoMode->animOutputTargetStrafeDir->out,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[strafeClipSrc->keyframeIndex].sampleIndex0,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[strafeClipSrc->keyframeIndex].sampleIndex1,
 			(a3f32)strafeClipSrc->keyframeParam, demoMode->hierarchy_skel->numNodes);
-		a3hierarchyPoseLerp(demoMode->animOutputWalk,
+		a3hierarchyPoseLerp(demoMode->animOutputWalk->out,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlWalk->keyframeIndex].sampleIndex0,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlWalk->keyframeIndex].sampleIndex1,
 			(a3f32)demoMode->clipCtrlWalk->keyframeParam, demoMode->hierarchy_skel->numNodes);
-		a3hierarchyPoseLerp(demoMode->animOutputIdle,
+		a3hierarchyPoseLerp(demoMode->animOutputIdle->out,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlIdle->keyframeIndex].sampleIndex0,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlIdle->keyframeIndex].sampleIndex1,
 			(a3f32)demoMode->clipCtrlIdle->keyframeParam, demoMode->hierarchy_skel->numNodes);
-		a3hierarchyPoseLerp(demoMode->animOutputArmsAction,
+		a3hierarchyPoseLerp(demoMode->animOutputArmsAction->out,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlPistol->keyframeIndex].sampleIndex0,
 			demoMode->hierarchyPoseGroup_skel->hpose + demoMode->clipPool->keyframe[demoMode->clipCtrlPistol->keyframeIndex].sampleIndex1,
 			(a3f32)demoMode->clipCtrlPistol->keyframeParam, demoMode->hierarchy_skel->numNodes);

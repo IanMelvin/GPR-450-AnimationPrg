@@ -496,14 +496,15 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 	{
 		//Intermediate resources
 		setupVtables();
-		demoMode->animOutputWalk           ->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
-		demoMode->animOutputIdle           ->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
-		demoMode->animOutputTargetStrafeDir->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
-		demoMode->animOutputArmsAction     ->pose = calloc(hierarchy->numNodes, sizeof(a3_SpatialPose));
-		
+
 		//Blend tree proper
-		ec_blendTreeCreate(&demoMode->blendTree, 5);
+		ec_blendTreeCreate(&demoMode->blendTree, 10);
 		a3index j = 0;
+
+		demoMode->animOutputWalk			= ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+		demoMode->animOutputIdle			= ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+		demoMode->animOutputTargetStrafeDir	= ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+		demoMode->animOutputArmsAction		= ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
 
 		ec_BlendTreeNode* forwardLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], demoMode->animOutputIdle, demoMode->animOutputWalk, 0);
 		demoMode->blendTree_ctlForward = &forwardLocomotion->data.lerpUniform.param;

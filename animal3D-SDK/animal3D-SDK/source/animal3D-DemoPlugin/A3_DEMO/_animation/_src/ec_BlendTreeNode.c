@@ -12,18 +12,25 @@ a3ret ec_blendTreeNodeEvaluate_Add         (ec_BlendTreeNode* node, ec_DataVtabl
 a3ret ec_blendTreeNodeEvaluate_ScaleUniform(ec_BlendTreeNode* node, ec_DataVtable* vtable);
 a3ret ec_blendTreeNodeEvaluate_ScalePerNode(ec_BlendTreeNode* node, ec_DataVtable* vtable);
 
-a3ret ec_blendTreeNodeEvaluate(ec_BlendTreeNode* node, ec_DataVtable* vtable)
+size_t ec_blendTreeNode_ensureHasSpace(ec_BlendTreeNode* node, ec_DataVtable* vtable)
 {
-	assert(node);
-
-	//Ensure we have enough space for output
+	//Note that this will also work on dummy no-op nodes, which is intentional!
 	size_t minSize = vtable->unitSize * vtable->arrayCount;
 	if (node->outAllocSize < minSize)
 	{
 		node->out = realloc(node->out, minSize);
 		node->outAllocSize = minSize;
 	}
+	return node->outAllocSize;
+}
 
+a3ret ec_blendTreeNodeEvaluate(ec_BlendTreeNode* node, ec_DataVtable* vtable)
+{
+	assert(node);
+
+	//Ensure we have enough space for output
+	ec_blendTreeNode_ensureHasSpace(node, vtable);
+	
 	switch (node->type)
 	{
 	case BT_NO_OP         : return 1; //No-op: Do nothing
@@ -144,7 +151,12 @@ ec_BlendTreeNode* ec_blendTreeNodeInternalCreate(ec_BlendTreeNode* node_out, ec_
 	return node_out;
 }
 
-ec_BlendTreeNode* ec_blendTreeNodeCreateLerpUniform(ec_BlendTreeNode* node_out, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real param)
+ec_BlendTreeNode* ec_blendTreeNodeCreateDummy(ec_BlendTreeNode* node_out)
+{
+	return ec_blendTreeNodeInternalCreate(node_out, BT_NO_OP);
+}
+
+ec_BlendTreeNode* ec_blendTreeNodeCreateLerpUniform(ec_BlendTreeNode* node_out, ec_BlendTreeNode* x0, ec_BlendTreeNode* x1, a3real param)
 {
 	ec_blendTreeNodeInternalCreate(node_out, BT_LERP_UNIFORM);
 	node_out->data.lerpUniform.x0 = x0;
@@ -155,7 +167,7 @@ ec_BlendTreeNode* ec_blendTreeNodeCreateLerpUniform(ec_BlendTreeNode* node_out, 
 	return node_out;
 }
 
-ec_BlendTreeNode* ec_blendTreeNodeCreateLerpPerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real defaultParam)
+ec_BlendTreeNode* ec_blendTreeNodeCreateLerpPerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, ec_BlendTreeNode* x0, ec_BlendTreeNode* x1, a3real defaultParam)
 {
 	ec_blendTreeNodeInternalCreate(node_out, BT_LERP_PER_NODE);
 	node_out->data.lerpPerNode.x0 = x0;
@@ -165,7 +177,7 @@ ec_BlendTreeNode* ec_blendTreeNodeCreateLerpPerNode(ec_BlendTreeNode* node_out, 
 	return node_out;
 }
 
-ec_BlendTreeNode* ec_blendTreeNodeCreateAdd(ec_BlendTreeNode* node_out, a3_HierarchyPose* a, a3_HierarchyPose* b)
+ec_BlendTreeNode* ec_blendTreeNodeCreateAdd(ec_BlendTreeNode* node_out, ec_BlendTreeNode* a, ec_BlendTreeNode* b)
 {
 	ec_blendTreeNodeInternalCreate(node_out, BT_ADD);
 	node_out->data.add.a = a;
@@ -173,7 +185,7 @@ ec_BlendTreeNode* ec_blendTreeNodeCreateAdd(ec_BlendTreeNode* node_out, a3_Hiera
 	return node_out;
 }
 
-ec_BlendTreeNode* ec_blendTreeNodeCreateScaleUniform(ec_BlendTreeNode* node_out, a3_HierarchyPose* in, a3real scaleFactor)
+ec_BlendTreeNode* ec_blendTreeNodeCreateScaleUniform(ec_BlendTreeNode* node_out, ec_BlendTreeNode* in, a3real scaleFactor)
 {
 	ec_blendTreeNodeInternalCreate(node_out, BT_SCALE_UNIFORM);
 	node_out->data.scaleUniform.in = in;
@@ -181,7 +193,7 @@ ec_BlendTreeNode* ec_blendTreeNodeCreateScaleUniform(ec_BlendTreeNode* node_out,
 	return node_out;
 }
 
-ec_BlendTreeNode* ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real defaultScaleFactor)
+ec_BlendTreeNode* ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, ec_BlendTreeNode* in, a3real defaultScaleFactor)
 {
 	ec_blendTreeNodeInternalCreate(node_out, BT_SCALE_PER_NODE);
 	node_out->data.scalePerNode.in = in;

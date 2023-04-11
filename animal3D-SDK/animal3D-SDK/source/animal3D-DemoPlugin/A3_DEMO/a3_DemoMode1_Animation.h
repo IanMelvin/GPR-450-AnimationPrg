@@ -166,8 +166,8 @@ typedef enum a3_DemoMode1_Animation_InputMode				a3_DemoMode1_Animation_InputMod
 		//Blend tree persistent data
 		ec_BlendTree blendTree;
 		a3_ClipController clipCtrlStrafeL[1], clipCtrlStrafeR[1], clipCtrlWalk[1], clipCtrlIdle[1], clipCtrlPistol[1];
-		a3_HierarchyPose animOutputWalk[1], animOutputIdle[1], animOutputTargetStrafeDir[1], animOutputArmsAction[1];
 		//Blend tree convenience stuff so we don't have to do funky indexing
+		ec_BlendTreeNode *animOutputWalk, *animOutputIdle, *animOutputTargetStrafeDir, *animOutputArmsAction;
 		ec_BlendTreeNode* blendTree_output;
 		a3real* blendTree_ctlForward;
 		a3real* blendTree_ctlStrafe;

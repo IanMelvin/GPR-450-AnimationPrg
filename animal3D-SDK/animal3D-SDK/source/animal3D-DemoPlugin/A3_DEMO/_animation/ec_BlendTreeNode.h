@@ -17,11 +17,12 @@ typedef enum	ec_BlendTreeNodeType	ec_BlendTreeNodeType;
 
 a3ret ec_blendTreeNodeEvaluate(ec_BlendTreeNode* node, ec_DataVtable* vtable);
 a3ret ec_blendTreeNodeCleanup(ec_BlendTreeNode* node);
-ec_BlendTreeNode* ec_blendTreeNodeCreateLerpUniform(ec_BlendTreeNode* node_out, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real param);
-ec_BlendTreeNode* ec_blendTreeNodeCreateLerpPerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* x0, a3_HierarchyPose* x1, a3real defaultParam);
-ec_BlendTreeNode* ec_blendTreeNodeCreateAdd(ec_BlendTreeNode* node_out, a3_HierarchyPose* a, a3_HierarchyPose* b);
-ec_BlendTreeNode* ec_blendTreeNodeCreateScaleUniform(ec_BlendTreeNode* node_out, a3_HierarchyPose* in, a3real scaleFactor);
-ec_BlendTreeNode* ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, a3_HierarchyPose* in, a3real defaultScaleFactor);
+ec_BlendTreeNode* ec_blendTreeNodeCreateDummy(ec_BlendTreeNode* node_out); //Good for getting input poses into the blend tree
+ec_BlendTreeNode* ec_blendTreeNodeCreateLerpUniform(ec_BlendTreeNode* node_out, ec_BlendTreeNode* x0, ec_BlendTreeNode* x1, a3real param);
+ec_BlendTreeNode* ec_blendTreeNodeCreateLerpPerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, ec_BlendTreeNode* x0, ec_BlendTreeNode* x1, a3real defaultParam);
+ec_BlendTreeNode* ec_blendTreeNodeCreateAdd(ec_BlendTreeNode* node_out, ec_BlendTreeNode* a, ec_BlendTreeNode* b);
+ec_BlendTreeNode* ec_blendTreeNodeCreateScaleUniform(ec_BlendTreeNode* node_out, ec_BlendTreeNode* in, a3real scaleFactor);
+ec_BlendTreeNode* ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, ec_BlendTreeNode* in, a3real defaultScaleFactor);
 
 enum ec_BlendTreeNodeType
 {
@@ -44,31 +45,31 @@ struct ec_BlendTreeNode
 	union {
 
 		struct {
-			a3_HierarchyPose* x0; //External
-			a3_HierarchyPose* x1; //External
+			ec_BlendTreeNode* x0; //External
+			ec_BlendTreeNode* x1; //External
 			a3real param;
 			a3real paramMin;
 			a3real paramMax;
 		} lerpUniform;
 
 		struct {
-			a3_HierarchyPose* x0; //External
-			a3_HierarchyPose* x1; //External
+			ec_BlendTreeNode* x0; //External
+			ec_BlendTreeNode* x1; //External
 			a3real* params; //Managed by self
 		} lerpPerNode;
 
 		struct {
-			a3_HierarchyPose* a; //External
-			a3_HierarchyPose* b; //External
+			ec_BlendTreeNode* a; //External
+			ec_BlendTreeNode* b; //External
 		} add;
 
 		struct {
-			a3_HierarchyPose* in; //External
+			ec_BlendTreeNode* in; //External
 			a3real* scaleFactors; //Managed by self
 		} scalePerNode;
 
 		struct {
-			a3_HierarchyPose* in; //External
+			ec_BlendTreeNode* in; //External
 			a3real scaleFactor;
 		} scaleUniform;
 
