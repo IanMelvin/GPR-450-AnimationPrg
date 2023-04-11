@@ -15,6 +15,9 @@
 
 typedef struct ec_DataVtable ec_DataVtable;
 
+//Some operations need temp storage
+void* allocTemp(const ec_DataVtable* vtable);
+a3ret releaseTemp(void* memory, const ec_DataVtable* vtable);
 void vtable_setDefaults(ec_DataVtable* out); // Sets defaults for order 2+ (any that take a vtable ptr)
 void setupVtables();
 extern ec_DataVtable vtable_mat4;
@@ -33,18 +36,27 @@ typedef void* (*fp_lerp    )(void* val_out, const void* val_0, const void* val_1
 
 struct ec_DataVtable
 {
-	size_t size;
+	size_t unitSize; //Size of a single unit of data
+	size_t arrayCount; //For batch operations
 
 	//1st order essential functions
-	fp_identity identity;
-	fp_invert   invert;
-	fp_concat   concat;
-	fp_scale    scale;
-	fp_descale	descale;
+	fp_identity unitIdentity;
+	fp_invert   unitInvert;
+	fp_concat   unitConcat;
+	fp_scale    unitScale;
+	fp_descale	unitDescale;
 
 	//Optional to override, vtable_setDefaults sets these to the functions below
+
+	//Batch operations
+	void* (*arrayIdentity)(void* val_out, const ec_DataVtable* funcs);
+	void* (*arrayInvert  )(void* val_inout, const ec_DataVtable* funcs);
+	void* (*arrayConcat  )(void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs);
+	void* (*arrayScale   )(void* val_inout, const a3real scale, const ec_DataVtable* funcs);
+	void* (*arrayDescale )(void* val_inout, const a3real scale, const ec_DataVtable* funcs);
+	void* (*copy         )(void* dst, const void* src, const ec_DataVtable* funcs); //NOTE: Copies entire array
 	
-	void* (*copy      )(void* dst, const void* src, const ec_DataVtable* funcs);
+	//Advanced operations
 	void* (*lerp      )(void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
 	void* (*nearest   )(void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
 	void* (*cubic     )(void* val_out, const void* v1, const void* v2, const void* v3, const void* v4, const a3real param, const ec_DataVtable* funcs);
@@ -57,6 +69,11 @@ struct ec_DataVtable
 };
 
 //Defaults
+void* defaultArrayIdentity(void* val_out, const ec_DataVtable* funcs);
+void* defaultArrayInvert  (void* val_inout, const ec_DataVtable* funcs);
+void* defaultArrayConcat  (void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs);
+void* defaultArrayScale   (void* val_inout, const a3real scale, const ec_DataVtable* funcs);
+void* defaultArrayDescale (void* val_inout, const a3real scale, const ec_DataVtable* funcs);
 void* defaultCopy      (void* dst, const void* src, const ec_DataVtable* funcs);
 void* defaultLerp      (void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
 void* defaultNearest   (void* val_out, const void* v0, const void* v1, const a3real param, const ec_DataVtable* funcs);
