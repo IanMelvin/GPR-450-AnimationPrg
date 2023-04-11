@@ -27,12 +27,12 @@ a3ret ec_blendTreeCleanup(ec_BlendTree* tree)
 	return 1;
 }
 
-a3ret ec_blendTreeEvaluate(ec_BlendTree* tree)
+a3ret ec_blendTreeEvaluate(ec_BlendTree* tree, ec_DataVtable* vtable)
 {
 	assert(tree);
 	for (a3index i = 0; i < tree->numBtNodes; ++i)
 	{
-		ec_blendTreeNodeEvaluate(&tree->btNodes[i]);
+		ec_blendTreeNodeEvaluate(&tree->btNodes[i], vtable);
 	}
 	return 1;
 }

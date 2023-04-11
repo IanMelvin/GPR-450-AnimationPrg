@@ -25,6 +25,7 @@ extern ec_DataVtable vtable_SpatialPose;
 extern ec_DataVtable vtable_vec3Additive;       // translation and euler angles
 extern ec_DataVtable vtable_vec3Multiplicative; // scale
 extern ec_DataVtable vtable_quat;               // quat, multiplicative
+extern ec_DataVtable vtable_HierarchyPose;      // defers to SpatialPose array
 
 typedef void* (*fp_identity)(void* val_out);
 typedef void* (*fp_invert  )(void* val_inout);

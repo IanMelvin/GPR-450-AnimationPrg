@@ -50,31 +50,31 @@ void vtable_setDefaults(ec_DataVtable* out)
 
 void* defaultArrayIdentity(void* val_out, const ec_DataVtable* funcs)
 {
-	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->arrayIdentity( ((char*)val_out)+funcs->unitSize, funcs );
+	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitIdentity( ((char*)val_out)+funcs->unitSize );
 	return val_out;
 }
 
 void* defaultArrayInvert(void* val_inout, const ec_DataVtable* funcs)
 {
-	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->arrayInvert( ((char*)val_inout)+funcs->unitSize, funcs);
+	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitInvert( ((char*)val_inout)+funcs->unitSize );
 	return val_inout;
 }
 
 void* defaultArrayConcat(void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs)
 {
-	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->arrayConcat( ((char*)val_out)+funcs->unitSize, ((char*)lhs)+funcs->unitSize, ((char*)rhs)+funcs->unitSize, funcs);
+	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitConcat( ((char*)val_out)+funcs->unitSize, ((char*)lhs)+funcs->unitSize, ((char*)rhs)+funcs->unitSize );
 	return val_out;
 }
 
 void* defaultArrayScale(void* val_inout, const a3real scale, const ec_DataVtable* funcs)
 {
-	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->arrayScale( ((char*)val_inout)+funcs->unitSize, scale, funcs);
+	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitScale( ((char*)val_inout)+funcs->unitSize, scale );
 	return val_inout;
 }
 
 void* defaultArrayDescale(void* val_inout, const a3real scale, const ec_DataVtable* funcs)
 {
-	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->arrayDescale( ((char*)val_inout)+funcs->unitSize, scale, funcs);
+	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitDescale( ((char*)val_inout)+funcs->unitSize, scale );
 	return val_inout;
 }
 
@@ -242,7 +242,7 @@ a3_SpatialPose* spacialPoseRevert(a3_SpatialPose* spacialPose_Out)
 
 #pragma endregion
 
-#pragma region HierarchyPose Variants
+#pragma region Additional HierarchyPose operations
 
 a3_HierarchyPose* hierarchyPoseScaleUniform(a3_HierarchyPose* hierarchyPose_Out, const a3_HierarchyPose* in, const a3real scale, a3ui32 numNodes)
 {
@@ -404,6 +404,43 @@ a3_HierarchyPose* hierarchyRevert(a3_HierarchyPose* hierarchyPose_Out, const a3u
 
 #pragma endregion
 
+#pragma region HierarchyPose adapters for vtable
+
+a3_HierarchyPose* hierarchyPose_arrayIdentity(a3_HierarchyPose* val_out, const ec_DataVtable* funcs)
+{
+	a3hierarchyPoseReset(val_out, (a3ui32)funcs->arrayCount);
+	return val_out;
+}
+
+a3_HierarchyPose* hierarchyPose_arrayInvert(a3_HierarchyPose* val_inout, const ec_DataVtable* funcs)
+{
+	for (a3index i = 0; i < funcs->arrayCount; ++i)
+	{
+		a3spatialPoseInvert(&val_inout->pose[i]);
+	}
+	return val_inout;
+}
+
+a3_HierarchyPose* hierarchyPose_arrayConcat(a3_HierarchyPose* val_out, const a3_HierarchyPose* lhs, const a3_HierarchyPose* rhs, const ec_DataVtable* funcs)
+{
+	a3hierarchyPoseConcat(val_out, lhs, rhs, (a3ui32)funcs->arrayCount);
+	return val_out;
+}
+
+a3_HierarchyPose* hierarchyPose_arrayScale(a3_HierarchyPose* val_inout, const a3real scale, const ec_DataVtable* funcs)
+{
+	hierarchyPoseScaleUniform(val_inout, val_inout, scale, (a3ui32)funcs->arrayCount);
+	return val_inout;
+}
+
+a3_HierarchyPose* hierarchyPose_arrayDescale(a3_HierarchyPose* val_inout, const a3real scale, const ec_DataVtable* funcs)
+{
+	hierarchyPoseScaleUniform(val_inout, val_inout, 1/scale, (a3ui32)funcs->arrayCount);
+	return val_inout;
+}
+
+#pragma endregion
+
 #pragma region "Missing" functions
 
 a3real3* a3real3SetZero(a3real3* val_out)
@@ -503,6 +540,7 @@ ec_DataVtable vtable_SpatialPose;
 ec_DataVtable vtable_vec3Additive;       // translation and euler angles
 ec_DataVtable vtable_vec3Multiplicative; // scale
 ec_DataVtable vtable_quat;               // quat, multiplicative
+ec_DataVtable vtable_HierarchyPose;      // defers to SpatialPose array
 
 void setupVtables()
 {
@@ -513,6 +551,7 @@ void setupVtables()
 	memset(&vtable_vec3Additive      , 0, sizeof(ec_DataVtable));
 	memset(&vtable_vec3Multiplicative, 0, sizeof(ec_DataVtable));
 	memset(&vtable_quat              , 0, sizeof(ec_DataVtable));
+	memset(&vtable_HierarchyPose     , 0, sizeof(ec_DataVtable));
 #endif
 
 	//Set all defaults, size
@@ -521,11 +560,13 @@ void setupVtables()
 	vtable_setDefaults(&vtable_vec3Additive      );
 	vtable_setDefaults(&vtable_vec3Multiplicative);
 	vtable_setDefaults(&vtable_quat              );
+	vtable_setDefaults(&vtable_HierarchyPose     );
 	vtable_mat4              .unitSize = sizeof(a3mat4);
 	vtable_SpatialPose       .unitSize = sizeof(a3_SpatialPose);
 	vtable_vec3Additive      .unitSize = sizeof(a3vec3);
 	vtable_vec3Multiplicative.unitSize = sizeof(a3vec3);
 	vtable_quat              .unitSize = sizeof(a3quat);
+	vtable_HierarchyPose     .unitSize = sizeof(a3_HierarchyState);
 
 	//mat4
 	vtable_mat4.unitIdentity = (fp_identity) a3real4x4SetIdentity;
@@ -561,6 +602,18 @@ void setupVtables()
 	vtable_vec3Multiplicative.unitConcat   = (fp_concat  ) a3real3MulComp;
 	vtable_vec3Multiplicative.unitScale	   = (fp_scale   ) a3real3PowS;
 	vtable_vec3Multiplicative.unitDescale  = (fp_descale ) a3real3DivideS;
+
+	//HierarchyPose
+	vtable_HierarchyPose.unitIdentity = NULL; //DO NOT call unit functions for hierarchy pose!
+	vtable_HierarchyPose.unitInvert   = NULL; //Instead call array functions, since HierarchyPose is inherently an array
+	vtable_HierarchyPose.unitConcat   = NULL;
+	vtable_HierarchyPose.unitScale    = NULL;
+	vtable_HierarchyPose.unitDescale  = NULL;
+	vtable_HierarchyPose.arrayIdentity = hierarchyPose_arrayIdentity;
+	vtable_HierarchyPose.arrayInvert   = hierarchyPose_arrayInvert;
+	vtable_HierarchyPose.arrayConcat   = hierarchyPose_arrayConcat;
+	vtable_HierarchyPose.arrayScale    = hierarchyPose_arrayScale;
+	vtable_HierarchyPose.arrayDescale  = hierarchyPose_arrayDescale;
 }
 
 #pragma endregion
