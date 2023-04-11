@@ -153,11 +153,11 @@ void* defaultTriangular(void* val_out, const void* v0, const void* v1, const voi
 		funcs->copy(val_out, v0, funcs);
 		funcs->arrayScale(val_out, param3, funcs);
 
-		void* val1 = malloc(sizeof(v0));
+		void* val1 = allocTemp(funcs);
 		funcs->copy(val1, v1, funcs);
 		funcs->arrayScale(val1, param1, funcs);
 
-		void* val2 = malloc(sizeof(v0));
+		void* val2 = allocTemp(funcs);
 		funcs->copy(val2, v2, funcs);
 		funcs->arrayScale(val2, param2, funcs);
 
