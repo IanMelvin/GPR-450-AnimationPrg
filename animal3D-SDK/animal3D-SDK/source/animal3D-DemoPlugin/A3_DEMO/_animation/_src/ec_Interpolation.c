@@ -11,22 +11,12 @@
 
 #pragma region Helpers and defaults
 
-void* allocTemp(const ec_DataVtable* vtable)
-{
-	//TODO use stack allocator
-	return calloc(vtable->arrayCount, vtable->unitSize);
-}
-
-a3ret releaseTemp(void* memory, const ec_DataVtable* vtable)
-{
-	free(memory);
-	return 1;
-}
-
 void vtable_setDefaults(ec_DataVtable* out)
 {
-	out->arrayCount = 1;
+	out->alloc   = defaultAlloc;
+	out->release = defaultRelease;
 
+	out->arrayCount = 1;
 	out->arrayIdentity = defaultArrayIdentity;
 	out->arrayInvert   = defaultArrayInvert  ;
 	out->arrayConcat   = defaultArrayConcat  ;
@@ -46,35 +36,47 @@ void vtable_setDefaults(ec_DataVtable* out)
 
 #pragma endregion
 
+void* defaultAlloc(const ec_DataVtable* vtable)
+{
+	//TODO use stack allocator
+	return calloc(vtable->arrayCount, vtable->unitSize);
+}
+
+a3ret defaultRelease(void* memory)
+{
+	free(memory);
+	return 1;
+}
+
 #pragma region Default array operations
 
 void* defaultArrayIdentity(void* val_out, const ec_DataVtable* funcs)
 {
-	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitIdentity( ((char*)val_out)+funcs->unitSize );
+	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitIdentity( ((char*)val_out)+i*funcs->unitSize );
 	return val_out;
 }
 
 void* defaultArrayInvert(void* val_inout, const ec_DataVtable* funcs)
 {
-	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitInvert( ((char*)val_inout)+funcs->unitSize );
+	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitInvert( ((char*)val_inout)+i*funcs->unitSize );
 	return val_inout;
 }
 
 void* defaultArrayConcat(void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs)
 {
-	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitConcat( ((char*)val_out)+funcs->unitSize, ((char*)lhs)+funcs->unitSize, ((char*)rhs)+funcs->unitSize );
+	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitConcat( ((char*)val_out)+i*funcs->unitSize, ((char*)lhs)+i*funcs->unitSize, ((char*)rhs)+i*funcs->unitSize );
 	return val_out;
 }
 
 void* defaultArrayScale(void* val_inout, const a3real scale, const ec_DataVtable* funcs)
 {
-	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitScale( ((char*)val_inout)+funcs->unitSize, scale );
+	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitScale( ((char*)val_inout)+i*funcs->unitSize, scale );
 	return val_inout;
 }
 
 void* defaultArrayDescale(void* val_inout, const a3real scale, const ec_DataVtable* funcs)
 {
-	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitDescale( ((char*)val_inout)+funcs->unitSize, scale );
+	for (a3index i = 0; i < funcs->arrayCount; ++i) funcs->unitDescale( ((char*)val_inout)+i*funcs->unitSize, scale );
 	return val_inout;
 }
 
@@ -109,13 +111,13 @@ void* defaultCubic(void* val_out, const void* v1, const void* v2, const void* v3
 	{
 		funcs->copy(val_out, v1, funcs);
 
-		void* val2 = allocTemp(funcs);
+		void* val2 = funcs->alloc(funcs);
 		funcs->copy(val2, v2, funcs);
 
-		void* val3 = allocTemp(funcs);
+		void* val3 = funcs->alloc(funcs);
 		funcs->copy(val3, v3, funcs);
 
-		void* val4 = allocTemp(funcs);
+		void* val4 = funcs->alloc(funcs);
 		funcs->copy(val4, v4, funcs);
 
 		funcs->arrayScale(val_out, (a3real)(-param + 2 * pow(param, 2) - pow(param, 3)), funcs);
@@ -129,9 +131,9 @@ void* defaultCubic(void* val_out, const void* v1, const void* v2, const void* v3
 
 		funcs->arrayScale(val_out, 0.5f, funcs);
 
-		releaseTemp(val2, funcs);
-		releaseTemp(val3, funcs);
-		releaseTemp(val4, funcs);
+		funcs->release(val2);
+		funcs->release(val3);
+		funcs->release(val4);
 	}
 	return val_out;
 }
@@ -153,19 +155,19 @@ void* defaultTriangular(void* val_out, const void* v0, const void* v1, const voi
 		funcs->copy(val_out, v0, funcs);
 		funcs->arrayScale(val_out, param3, funcs);
 
-		void* val1 = allocTemp(funcs);
+		void* val1 = funcs->alloc(funcs);
 		funcs->copy(val1, v1, funcs);
 		funcs->arrayScale(val1, param1, funcs);
 
-		void* val2 = allocTemp(funcs);
+		void* val2 = funcs->alloc(funcs);
 		funcs->copy(val2, v2, funcs);
 		funcs->arrayScale(val2, param2, funcs);
 
 		funcs->arrayConcat(val_out, val_out, val1, funcs);
 		funcs->arrayConcat(val_out, val_out, val2, funcs);
 
-		releaseTemp(val1, funcs);
-		releaseTemp(val2, funcs);
+		funcs->release(val1);
+		funcs->release(val2);
 	}
 
 	return val_out;
@@ -173,13 +175,13 @@ void* defaultTriangular(void* val_out, const void* v0, const void* v1, const voi
 
 void* defaultBiLerp(void* val_out, const void* v00, const void* v01, const void* v10, const void* v11, const a3real paramX0, const a3real paramX1, const a3real paramY, const ec_DataVtable* funcs)
 {
-	void* vx0 = allocTemp(funcs);
-	void* vx1 = allocTemp(funcs);
+	void* vx0 = funcs->alloc(funcs);
+	void* vx1 = funcs->alloc(funcs);
 	funcs->lerp(vx0, v00, v01, paramX0, funcs);
 	funcs->lerp(vx1, v10, v11, paramX1, funcs);
 	funcs->lerp(val_out, vx0, vx1, paramY, funcs);
-	releaseTemp(vx0, funcs);
-	releaseTemp(vx1, funcs);
+	funcs->release(vx0);
+	funcs->release(vx1);
 	return val_out;
 }
 
@@ -194,10 +196,10 @@ void* defaultBiCubic(void* val_out, const void* v1, const void* v2, const void* 
 {
 	if (val_out && v1 && v2 && v3 && v4 && v5 && v6 && v7 && v8 && v9 && v10 && v11 && v12 && v13 && v14 && v15 && v16)
 	{
-		void* val1 = allocTemp(funcs);
-		void* val2 = allocTemp(funcs);
-		void* val3 = allocTemp(funcs);
-		void* val4 = allocTemp(funcs);
+		void* val1 = funcs->alloc(funcs);
+		void* val2 = funcs->alloc(funcs);
+		void* val3 = funcs->alloc(funcs);
+		void* val4 = funcs->alloc(funcs);
 
 		funcs->cubic(val_out,
 			funcs->cubic(val1, v1, v2, v3, v4, param0, funcs),
@@ -206,10 +208,10 @@ void* defaultBiCubic(void* val_out, const void* v1, const void* v2, const void* 
 			funcs->cubic(val4, v13, v14, v15, v16, param3, funcs),
 			param4, funcs);
 
-		releaseTemp(val1, funcs);
-		releaseTemp(val2, funcs);
-		releaseTemp(val3, funcs);
-		releaseTemp(val4, funcs);
+		funcs->release(val1);
+		funcs->release(val2);
+		funcs->release(val3);
+		funcs->release(val4);
 	}
 
 	return val_out;
@@ -439,6 +441,21 @@ a3_HierarchyPose* hierarchyPose_arrayDescale(a3_HierarchyPose* val_inout, const 
 	return val_inout;
 }
 
+a3_HierarchyPose* hierarchyPose_alloc(const ec_DataVtable* vtable)
+{
+	//TODO use stack allocator
+	a3_HierarchyPose* hpose = malloc(sizeof(a3_HierarchyPose));
+	hpose->pose = calloc(vtable->arrayCount, vtable->unitSize);
+	return hpose;
+}
+
+a3ret hierarchyPose_release(a3_HierarchyPose* hpose)
+{
+	free(hpose->pose);
+	free(hpose);
+	return 1;
+}
+
 #pragma endregion
 
 #pragma region "Missing" functions
@@ -614,6 +631,8 @@ void setupVtables()
 	vtable_HierarchyPose.arrayConcat   = hierarchyPose_arrayConcat;
 	vtable_HierarchyPose.arrayScale    = hierarchyPose_arrayScale;
 	vtable_HierarchyPose.arrayDescale  = hierarchyPose_arrayDescale;
+	vtable_HierarchyPose.alloc     = hierarchyPose_alloc;
+	vtable_HierarchyPose.release   = hierarchyPose_release;
 }
 
 #pragma endregion

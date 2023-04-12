@@ -195,6 +195,14 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 		a3clipControllerUpdate(demoMode->clipCtrlIdle, dt);
 		a3clipControllerUpdate(demoMode->clipCtrlPistol, dt);
 
+		//Ensure we have space in the blend tree's input nodes for data
+		ec_DataVtable vtable = vtable_HierarchyPose; //Must be instanced, writing to global copy is bad
+		vtable.arrayCount = activeHS->hierarchy->numNodes;
+		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputWalk           , &vtable);
+		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputIdle           , &vtable);
+		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputTargetStrafeDir, &vtable);
+		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputArmsAction     , &vtable);
+
 		//Write input data for blend tree
 		a3_ClipController* strafeClipSrc = demoMode->smoothedInput.x > 0 ? demoMode->clipCtrlStrafeR : demoMode->clipCtrlStrafeL;
 		*demoMode->blendTree_ctlStrafe = (a3real)fabs(demoMode->smoothedInput.x);
@@ -218,8 +226,6 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			(a3f32)demoMode->clipCtrlPistol->keyframeParam, demoMode->hierarchy_skel->numNodes);
 
 		//Run blend tree and copy output to render objects
-		ec_DataVtable vtable = vtable_HierarchyPose;
-		vtable.arrayCount = activeHS->hierarchy->numNodes;
 		ec_blendTreeEvaluate(&demoMode->blendTree, &vtable);
 		a3hierarchyPoseCopy(activeHS->animPose, demoMode->blendTree_output->out, activeHS->hierarchy->numNodes);
 		//activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!

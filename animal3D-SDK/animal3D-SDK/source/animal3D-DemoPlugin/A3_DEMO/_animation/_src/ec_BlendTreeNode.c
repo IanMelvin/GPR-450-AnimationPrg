@@ -14,13 +14,16 @@ a3ret ec_blendTreeNodeEvaluate_ScalePerNode(ec_BlendTreeNode* node, ec_DataVtabl
 
 size_t ec_blendTreeNode_ensureHasSpace(ec_BlendTreeNode* node, ec_DataVtable* vtable)
 {
+	//*
 	//Note that this will also work on dummy no-op nodes, which is intentional!
 	size_t minSize = vtable->unitSize * vtable->arrayCount;
 	if (node->outAllocSize < minSize)
 	{
-		node->out = realloc(node->out, minSize);
+		if (node->out) vtable->release(node->out); //No need to copy old data as it will likely be overwritten soon
+		node->out = vtable->alloc(vtable);
 		node->outAllocSize = minSize;
 	}
+	
 	return node->outAllocSize;
 }
 

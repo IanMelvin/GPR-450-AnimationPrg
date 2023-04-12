@@ -15,6 +15,7 @@
 typedef struct	ec_BlendTreeNode		ec_BlendTreeNode;
 typedef enum	ec_BlendTreeNodeType	ec_BlendTreeNodeType;
 
+size_t ec_blendTreeNode_ensureHasSpace(ec_BlendTreeNode* node, ec_DataVtable* vtable);
 a3ret ec_blendTreeNodeEvaluate(ec_BlendTreeNode* node, ec_DataVtable* vtable);
 a3ret ec_blendTreeNodeCleanup(ec_BlendTreeNode* node);
 ec_BlendTreeNode* ec_blendTreeNodeCreateDummy(ec_BlendTreeNode* node_out); //Good for getting input poses into the blend tree

@@ -15,9 +15,6 @@
 
 typedef struct ec_DataVtable ec_DataVtable;
 
-//Some operations need temp storage
-void* allocTemp(const ec_DataVtable* vtable);
-a3ret releaseTemp(void* memory, const ec_DataVtable* vtable);
 void vtable_setDefaults(ec_DataVtable* out); // Sets defaults for order 2+ (any that take a vtable ptr)
 void setupVtables();
 extern ec_DataVtable vtable_mat4;
@@ -34,7 +31,6 @@ typedef void* (*fp_scale   )(void* val_inout, const a3real scale);
 typedef void* (*fp_descale )(void* val_inout, const a3real scale);
 typedef void* (*fp_lerp    )(void* val_out, const void* val_0, const void* val_1, const a3real u, const ec_DataVtable* funcs);
 
-
 struct ec_DataVtable
 {
 	size_t unitSize; //Size of a single unit of data
@@ -48,6 +44,10 @@ struct ec_DataVtable
 	fp_descale	unitDescale;
 
 	//Optional to override, vtable_setDefaults sets these to the functions below
+
+	//Memory functions - Some operations need temp storage, some need permanent
+	void* (*  alloc)(const ec_DataVtable* vtable);
+	a3ret (*release)(void* memory);
 
 	//Batch operations
 	void* (*arrayIdentity)(void* val_out, const ec_DataVtable* funcs);
@@ -70,6 +70,8 @@ struct ec_DataVtable
 };
 
 //Defaults
+void* defaultAlloc(const ec_DataVtable* vtable);
+a3ret defaultRelease(void* memory);
 void* defaultArrayIdentity(void* val_out, const ec_DataVtable* funcs);
 void* defaultArrayInvert  (void* val_inout, const ec_DataVtable* funcs);
 void* defaultArrayConcat  (void* val_out, const void* lhs, const void* rhs, const ec_DataVtable* funcs);
