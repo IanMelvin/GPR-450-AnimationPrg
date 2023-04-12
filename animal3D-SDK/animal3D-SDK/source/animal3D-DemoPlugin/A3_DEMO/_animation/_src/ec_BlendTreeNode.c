@@ -54,7 +54,7 @@ a3ret ec_blendTreeNodeEvaluate_LerpUniform(ec_BlendTreeNode* node, ec_DataVtable
 	assert(node->data.lerpUniform.x1);
 	a3real t = a3lerpInverse(node->data.lerpUniform.paramMin, node->data.lerpUniform.paramMax, node->data.lerpUniform.param);
 	t = a3clamp(0, 1, t);
-	vtable->lerp(node->out, node->data.lerpUniform.x0, node->data.lerpUniform.x1, t, vtable);
+	vtable->lerp(node->out, node->data.lerpUniform.x0->out, node->data.lerpUniform.x1->out, t, vtable);
 	return 1;
 }
 
@@ -72,8 +72,8 @@ a3ret ec_blendTreeNodeEvaluate_LerpPerNode(ec_BlendTreeNode* node, ec_DataVtable
 	{
 		vtable.lerp(
 			((char*)node->out)+vtable.unitSize*i,
-			((char*)node->data.lerpPerNode.x0)+vtable.unitSize*i,
-			((char*)node->data.lerpPerNode.x1)+vtable.unitSize*i,
+			((char*)node->data.lerpPerNode.x0->out)+vtable.unitSize*i,
+			((char*)node->data.lerpPerNode.x1->out)+vtable.unitSize*i,
 			node->data.lerpPerNode.params[i],
 			&vtable
 		);

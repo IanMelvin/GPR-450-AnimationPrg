@@ -512,11 +512,11 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		ec_BlendTreeNode* strafeLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], demoMode->animOutputIdle, demoMode->animOutputTargetStrafeDir, 0);
 		demoMode->blendTree_ctlStrafe = &strafeLocomotion->data.lerpUniform.param;
 		
-		ec_BlendTreeNode* finalLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], forwardLocomotion->out, strafeLocomotion->out, 0);
+		ec_BlendTreeNode* finalLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], forwardLocomotion, strafeLocomotion, 0);
 		demoMode->blendTree_ctlStrafeAngle = &finalLocomotion->data.lerpUniform.param;
 		
 		//Mixed upper + lower body split animations
-		ec_BlendTreeNode* upperBodyMixIn = ec_blendTreeNodeCreateLerpPerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, finalLocomotion->out, demoMode->animOutputArmsAction, 1);
+		ec_BlendTreeNode* upperBodyMixIn = ec_blendTreeNodeCreateLerpPerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, finalLocomotion, demoMode->animOutputArmsAction, 1);
 		//Set and propagate mask: Anything past legs belongs to lower body
 		upperBodyMixIn->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftUpLeg")] = 0;
 		upperBodyMixIn->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightUpLeg")] = 0;
@@ -531,7 +531,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		upperBodyMixIn->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Hips")] = 0; //Hips are locomotion, and therefore lower body
 
 		//Option to just ignore masking and use locomotion part for upper body as well
-		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], finalLocomotion->out, upperBodyMixIn->out, 1);
+		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], finalLocomotion, upperBodyMixIn, 1);
 		demoMode->blendTree_output = finalOutput;
 		
 		assert(j <= demoMode->blendTree.numBtNodes); //If this errors, the blend tree is too small, so allocate more
