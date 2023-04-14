@@ -198,9 +198,9 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 		//Ensure we have space in the blend tree's input nodes for data
 		ec_DataVtable vtable = vtable_SpatialPose; //Must be instanced, writing to global copy is bad
 		vtable.arrayCount = activeHS->hierarchy->numNodes;
+		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputTargetStrafeDir, &vtable);
 		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputWalk           , &vtable);
 		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputIdle           , &vtable);
-		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputTargetStrafeDir, &vtable);
 		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputArmsAction     , &vtable);
 
 		//Write input data for blend tree
@@ -208,22 +208,10 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 		*demoMode->blendTree_ctlStrafe = (a3real)fabs(demoMode->smoothedInput.x);
 		*demoMode->blendTree_ctlForward = a3maximum(demoMode->smoothedInput.y, 0);
 		*demoMode->blendTree_ctlStrafeAngle = (a3real)fabs( a3atan2d(-demoMode->smoothedInput.x, demoMode->smoothedInput.y)/90 );
-		vtable.lerp(demoMode->animOutputTargetStrafeDir->out,
-			demoMode->hierarchyPoseGroup_skel->hpose[ demoMode->clipPool->keyframe[strafeClipSrc->keyframeIndex].sampleIndex0 ].pose,
-			demoMode->hierarchyPoseGroup_skel->hpose[ demoMode->clipPool->keyframe[strafeClipSrc->keyframeIndex].sampleIndex1 ].pose,
-			(a3f32)strafeClipSrc->keyframeParam, &vtable);
-		vtable.lerp(demoMode->animOutputWalk->out,
-			demoMode->hierarchyPoseGroup_skel->hpose[ demoMode->clipPool->keyframe[demoMode->clipCtrlWalk->keyframeIndex].sampleIndex0 ].pose,
-			demoMode->hierarchyPoseGroup_skel->hpose[ demoMode->clipPool->keyframe[demoMode->clipCtrlWalk->keyframeIndex].sampleIndex1 ].pose,
-			(a3f32)demoMode->clipCtrlWalk->keyframeParam, &vtable);
-		vtable.lerp(demoMode->animOutputIdle->out,
-			demoMode->hierarchyPoseGroup_skel->hpose[ demoMode->clipPool->keyframe[demoMode->clipCtrlIdle->keyframeIndex].sampleIndex0 ].pose,
-			demoMode->hierarchyPoseGroup_skel->hpose[ demoMode->clipPool->keyframe[demoMode->clipCtrlIdle->keyframeIndex].sampleIndex1 ].pose,
-			(a3f32)demoMode->clipCtrlIdle->keyframeParam, &vtable);
-		vtable.lerp(demoMode->animOutputArmsAction->out,
-			demoMode->hierarchyPoseGroup_skel->hpose[ demoMode->clipPool->keyframe[demoMode->clipCtrlPistol->keyframeIndex].sampleIndex0 ].pose,
-			demoMode->hierarchyPoseGroup_skel->hpose[ demoMode->clipPool->keyframe[demoMode->clipCtrlPistol->keyframeIndex].sampleIndex1 ].pose,
-			(a3f32)demoMode->clipCtrlPistol->keyframeParam, &vtable);
+		a3clipControllerEvaluate(strafeClipSrc           , demoMode->animOutputTargetStrafeDir->out, demoMode->hierarchyPoseGroup_skel);
+		a3clipControllerEvaluate(demoMode->clipCtrlWalk  , demoMode->animOutputWalk           ->out, demoMode->hierarchyPoseGroup_skel);
+		a3clipControllerEvaluate(demoMode->clipCtrlIdle  , demoMode->animOutputIdle           ->out, demoMode->hierarchyPoseGroup_skel);
+		a3clipControllerEvaluate(demoMode->clipCtrlPistol, demoMode->animOutputArmsAction     ->out, demoMode->hierarchyPoseGroup_skel);
 
 		//Run blend tree and copy output to render objects
 		ec_blendTreeEvaluate(&demoMode->blendTree, &vtable);

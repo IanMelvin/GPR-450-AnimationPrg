@@ -28,6 +28,7 @@
 
 
 #include "a3_KeyframeAnimation.h"
+#include "a3_HierarchyState.h"
 
 
 //-----------------------------------------------------------------------------
@@ -74,6 +75,9 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 
 // update clip controller
 a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, a3f64 dt);
+
+// evaluate clip
+a3i32 a3clipControllerEvaluate(a3_ClipController const* clipCtrl, a3_SpatialPose* poses_out, a3_HierarchyPoseGroup const* posePool);
 
 // set playback state
 a3i32 a3clipControllerSetPlayback(a3_ClipController* clipCtrl, const a3i32 playback_step, const a3f64 playback_stepPerSec);

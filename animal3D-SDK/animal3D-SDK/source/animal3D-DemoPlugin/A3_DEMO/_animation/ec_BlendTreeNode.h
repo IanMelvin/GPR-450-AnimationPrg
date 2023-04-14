@@ -37,7 +37,7 @@ enum ec_BlendTreeNodeType
 
 struct ec_BlendTreeNode
 {
-	void* out; //Managed by self. Usually a HierarchyPose, but not always.
+	void* out; //Managed by self. Usually a SpatialPose array, but not always.
 	size_t outAllocSize;
 
 	ec_BlendTreeNodeType type;

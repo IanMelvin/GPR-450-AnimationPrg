@@ -26,8 +26,26 @@
 #ifndef __ANIMAL3D_KEYFRAMEANIMATIONCONTROLLER_INL
 #define __ANIMAL3D_KEYFRAMEANIMATIONCONTROLLER_INL
 
+#include <assert.h>
+
+#include "A3_DEMO/_animation/ec_Interpolation.h"
 
 //-----------------------------------------------------------------------------
+
+// evaluate clip
+inline a3i32 a3clipControllerEvaluate(a3_ClipController const* clipCtrl, a3_SpatialPose* poses_out, a3_HierarchyPoseGroup const* posePool)
+{
+	assert(clipCtrl);
+	assert(poses_out);
+	assert(posePool);
+	ec_DataVtable vtable = vtable_SpatialPose; //Must be instanced, writing to global copy is bad
+	vtable.arrayCount = posePool->hierarchy->numNodes;
+	vtable.lerp(poses_out,
+		posePool->hpose[ clipCtrl->clipPool->keyframe[clipCtrl->keyframeIndex].sampleIndex0 ].pose,
+		posePool->hpose[ clipCtrl->clipPool->keyframe[clipCtrl->keyframeIndex].sampleIndex1 ].pose,
+		(a3f32)clipCtrl->keyframeParam, &vtable);
+	return (a3i32) vtable.arrayCount;
+}
 
 inline a3i32 a3clipControllerSetPlayback(a3_ClipController* clipCtrl, const a3i32 playback_step, const a3f64 playback_stepPerSec)
 {
