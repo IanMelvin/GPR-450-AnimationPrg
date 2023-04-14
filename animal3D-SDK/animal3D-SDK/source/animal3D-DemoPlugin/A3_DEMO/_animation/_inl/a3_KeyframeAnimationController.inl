@@ -29,6 +29,7 @@
 #include <assert.h>
 
 #include "A3_DEMO/_animation/ec_Interpolation.h"
+#include "..\a3_KeyframeAnimationController.h"
 
 //-----------------------------------------------------------------------------
 
@@ -107,12 +108,15 @@ inline a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, a3f64 dt)
 			// are we passing the forward terminus of the clip
 			if (clipCtrl->keyframeIndex == clipCtrl->clip->keyframeIndex_final)
 			{
+				//RSC MOD 4/14
+
 				// handle forward transition
+				a3clipControllerExecuteTransitionGroup(clipCtrl, clipCtrl->clip->transitionForward);
 
 				// default testing behavior: loop with overstep
-				clipCtrl->keyframeIndex = clipCtrl->clip->keyframeIndex_first;
-				clipCtrl->keyframe = clipCtrl->clipPool->keyframe + clipCtrl->keyframeIndex;
-				clipCtrl->keyframeTime_sec = overstep;
+				//clipCtrl->keyframeIndex = clipCtrl->clip->keyframeIndex_first;
+				//clipCtrl->keyframe = clipCtrl->clipPool->keyframe + clipCtrl->keyframeIndex;
+				//clipCtrl->keyframeTime_sec = overstep;
 			}
 			// are we simply moving to the next keyframe
 			else
@@ -134,12 +138,15 @@ inline a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, a3f64 dt)
 			// are we passing the reverse terminus of the clip
 			if (clipCtrl->keyframeIndex == clipCtrl->clip->keyframeIndex_first)
 			{
+				//RSC MOD 4/14
+
 				// handle reverse transition
+				a3clipControllerExecuteTransitionGroup(clipCtrl, clipCtrl->clip->transitionReverse);
 
 				// default testing behavior: loop with overstep
-				clipCtrl->keyframeIndex = clipCtrl->clip->keyframeIndex_final;
-				clipCtrl->keyframe = clipCtrl->clipPool->keyframe + clipCtrl->keyframeIndex;
-				clipCtrl->keyframeTime_sec = overstep + clipCtrl->keyframe->duration_sec;
+				//clipCtrl->keyframeIndex = clipCtrl->clip->keyframeIndex_final;
+				//clipCtrl->keyframe = clipCtrl->clipPool->keyframe + clipCtrl->keyframeIndex;
+				//clipCtrl->keyframeTime_sec = overstep + clipCtrl->keyframe->duration_sec;
 			}
 			// are we simply moving to the previous keyframe
 			else
@@ -162,6 +169,30 @@ inline a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, a3f64 dt)
 		return 1;
 	}
 	return -1;
+}
+
+inline a3ui32 a3clipControllerExecuteTransitionGroup(a3_ClipController* clipCtrl, a3_ClipTransitionGroup const* group)
+{
+	//Try conditionals first...
+	a3ui32 i;
+	for (i = 0; i < group->nConditionals; ++i)
+	{
+		assert(group->conditionals[i].isValid != NULL); //Sanity check: must assign function
+		if (group->conditionals[i].isValid())
+		{
+			a3clipControllerExecuteTransition(clipCtrl, group->conditionals[i].transition);
+			return i;
+		}
+	}
+
+	//Fallback
+	a3clipControllerExecuteTransition(clipCtrl, group->fallback);
+	return i;
+}
+
+inline a3ui32 a3clipControllerExecuteTransition(a3_ClipController* clipCtrl, a3_ClipTransition const* transition)
+{
+	return a3clipControllerSetClip(clipCtrl, clipCtrl->clipPool, transition->clipIndex, clipCtrl->playback_step, clipCtrl->playback_stepPerSec);
 }
 
 

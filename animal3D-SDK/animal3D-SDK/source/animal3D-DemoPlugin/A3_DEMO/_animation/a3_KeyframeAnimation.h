@@ -121,7 +121,7 @@ struct a3_ClipTransition
 
 struct a3_ConditionalClipTransition
 {
-	a3_ClipTransition transition;
+	a3_ClipTransition transition[1];
 	a3boolean(*isValid)();
 };
 

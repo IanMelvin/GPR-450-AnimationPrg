@@ -76,6 +76,10 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 // update clip controller
 a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, a3f64 dt);
 
+// helper funcs: execute a transition
+a3ui32 a3clipControllerExecuteTransitionGroup(a3_ClipController* clipCtrl, a3_ClipTransitionGroup const* group);
+a3ui32 a3clipControllerExecuteTransition(a3_ClipController* clipCtrl, a3_ClipTransition const* transition);
+
 // evaluate clip
 a3i32 a3clipControllerEvaluate(a3_ClipController const* clipCtrl, a3_SpatialPose* poses_out, a3_HierarchyPoseGroup const* posePool);
 
