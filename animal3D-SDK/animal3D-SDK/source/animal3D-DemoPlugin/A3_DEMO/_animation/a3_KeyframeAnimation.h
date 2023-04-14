@@ -112,11 +112,13 @@ enum a3_ClipTransitionFlag
 };
 
 // clip transition
+typedef struct a3_ClipController a3_ClipController;
 struct a3_ClipTransition
 {
 	a3_ClipTransitionFlag flag;
 	a3i32 offset;
 	a3i32 clipIndex;
+	a3i32(*onExecuted)(a3_ClipController* clipCtrl, a3_Clip const* before, a3_Clip const* after, a3_ClipTransition const* self);
 };
 
 struct a3_ConditionalClipTransition

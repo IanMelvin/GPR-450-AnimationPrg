@@ -192,7 +192,14 @@ inline a3ui32 a3clipControllerExecuteTransitionGroup(a3_ClipController* clipCtrl
 
 inline a3ui32 a3clipControllerExecuteTransition(a3_ClipController* clipCtrl, a3_ClipTransition const* transition)
 {
-	return a3clipControllerSetClip(clipCtrl, clipCtrl->clipPool, transition->clipIndex, clipCtrl->playback_step, clipCtrl->playback_stepPerSec);
+	a3_Clip const* before = clipCtrl->clip;
+	a3clipControllerSetClip(clipCtrl, clipCtrl->clipPool, transition->clipIndex, clipCtrl->playback_step, clipCtrl->playback_stepPerSec);
+	a3_Clip const* after = clipCtrl->clip;
+
+	//Run callback, if present
+	if (transition->onExecuted != NULL) transition->onExecuted(clipCtrl, before, after, transition);
+
+	return 1;
 }
 
 

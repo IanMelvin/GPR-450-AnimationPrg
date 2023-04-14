@@ -113,6 +113,7 @@ a3i32 a3clipTransitionInit(a3_ClipTransition* transition, a3_ClipTransitionFlag 
 		transition->flag = transitionFlag;
 		transition->offset = offset;
 		transition->clipIndex = clip->index;
+		transition->onExecuted = NULL;
 		return transitionFlag;
 	}
 	return -1;
