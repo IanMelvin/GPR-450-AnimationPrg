@@ -498,21 +498,29 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		setupVtables();
 
 		//Blend tree proper
-		ec_blendTreeCreate(&demoMode->blendTree, 10);
+		ec_blendTreeCreate(&demoMode->blendTree, 15);
 		a3index j = 0;
 
-		demoMode->animOutputWalk			= ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
-		demoMode->animOutputIdle			= ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
-		demoMode->animOutputTargetStrafeDir	= ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
-		demoMode->animOutputArmsAction		= ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+		demoMode->animOutputWalk       = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+		demoMode->animOutputIdle       = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+		demoMode->animOutputStrafeL    = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+		demoMode->animOutputStrafeR    = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+		demoMode->animOutputArmsAction = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
 
 		ec_BlendTreeNode* forwardLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], demoMode->animOutputIdle, demoMode->animOutputWalk, 0);
 		demoMode->blendTree_ctlForward = &forwardLocomotion->data.lerpUniform.param;
 		
-		ec_BlendTreeNode* strafeLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], demoMode->animOutputIdle, demoMode->animOutputTargetStrafeDir, 0);
-		demoMode->blendTree_ctlStrafe = &strafeLocomotion->data.lerpUniform.param;
+		ec_BlendTreeNode* strafeLocomotion1 = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], demoMode->animOutputStrafeL, demoMode->animOutputIdle, 0);
+		strafeLocomotion1->data.lerpUniform.paramMin = -1;
+		strafeLocomotion1->data.lerpUniform.paramMax = 0;
+		demoMode->blendTree_ctlStrafe1 = &strafeLocomotion1->data.lerpUniform.param;
+
+		ec_BlendTreeNode* strafeLocomotion2 = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], strafeLocomotion1, demoMode->animOutputStrafeR, 0);
+		strafeLocomotion2->data.lerpUniform.paramMin = 0;
+		strafeLocomotion2->data.lerpUniform.paramMax = 1;
+		demoMode->blendTree_ctlStrafe2 = &strafeLocomotion2->data.lerpUniform.param;
 		
-		ec_BlendTreeNode* finalLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], forwardLocomotion, strafeLocomotion, 0);
+		ec_BlendTreeNode* finalLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], forwardLocomotion, strafeLocomotion2, 0);
 		demoMode->blendTree_ctlStrafeAngle = &finalLocomotion->data.lerpUniform.param;
 		
 		//Mixed upper + lower body split animations

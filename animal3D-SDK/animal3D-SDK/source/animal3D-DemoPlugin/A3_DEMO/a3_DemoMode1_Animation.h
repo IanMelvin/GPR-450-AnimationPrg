@@ -167,10 +167,10 @@ typedef enum a3_DemoMode1_Animation_InputMode				a3_DemoMode1_Animation_InputMod
 		ec_BlendTree blendTree;
 		a3_ClipController clipCtrlStrafeL[1], clipCtrlStrafeR[1], clipCtrlWalk[1], clipCtrlIdle[1], clipCtrlPistol[1];
 		//Blend tree convenience stuff so we don't have to do funky indexing
-		ec_BlendTreeNode *animOutputWalk, *animOutputIdle, *animOutputTargetStrafeDir, *animOutputArmsAction;
+		ec_BlendTreeNode *animOutputWalk, *animOutputIdle, *animOutputStrafeL, *animOutputStrafeR, *animOutputArmsAction;
 		ec_BlendTreeNode* blendTree_output;
 		a3real* blendTree_ctlForward;
-		a3real* blendTree_ctlStrafe;
+		a3real *blendTree_ctlStrafe1, *blendTree_ctlStrafe2; //RSC NOTE: These belong to different nodes, but should be set to the same value at all times
 		a3real* blendTree_ctlStrafeAngle;
 		//Blend tree testing rig
 		a3ui32 blend1Index, blend2Index;

@@ -177,46 +177,62 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			demoMode->updateBlendTree = false;
 			//demoMode->strafeRaw = -0.5;
 		}
+		
+		/////////////// Blend tree business logic ///////////////
+		{
+			////// Control parameters //////
 
-		//Fetch input and parse as vec2
-		a3vec2 input = a3vec2_zero;
-		if (demoState->keyboard->key.key[a3key_upArrow   ]) input.y++;
-		if (demoState->keyboard->key.key[a3key_downArrow ]) input.y--;
-		if (demoState->keyboard->key.key[a3key_rightArrow]) input.x++;
-		if (demoState->keyboard->key.key[a3key_leftArrow ]) input.x--;
-		input.x += (a3real)demoState->xcontrol[0].ctrl.lThumbX_unit;
-		input.y += (a3real)demoState->xcontrol[0].ctrl.lThumbY_unit;
-		a3real2Lerp(demoMode->smoothedInput.v, demoMode->smoothedInput.v, input.v, 0.1f);
+			//Fetch input and parse as vec2
+			a3vec2 input = a3vec2_zero;
+			if (demoState->keyboard->key.key[a3key_upArrow   ]) input.y++;
+			if (demoState->keyboard->key.key[a3key_downArrow ]) input.y--;
+			if (demoState->keyboard->key.key[a3key_rightArrow]) input.x++;
+			if (demoState->keyboard->key.key[a3key_leftArrow ]) input.x--;
+			input.x += (a3real)demoState->xcontrol[0].ctrl.lThumbX_unit;
+			input.y += (a3real)demoState->xcontrol[0].ctrl.lThumbY_unit;
+			a3real2Lerp(demoMode->smoothedInput.v, demoMode->smoothedInput.v, input.v, 0.1f);
 
-		//Update all clips used by blend tree
-		a3clipControllerUpdate(demoMode->clipCtrlStrafeL, dt);
-		a3clipControllerUpdate(demoMode->clipCtrlStrafeR, dt);
-		a3clipControllerUpdate(demoMode->clipCtrlWalk, dt);
-		a3clipControllerUpdate(demoMode->clipCtrlIdle, dt);
-		a3clipControllerUpdate(demoMode->clipCtrlPistol, dt);
+			//Write control parameters for blend tree
+			//a3_ClipController* strafeClipSrc = demoMode->smoothedInput.x > 0 ? demoMode->clipCtrlStrafeR : demoMode->clipCtrlStrafeL;
+			//*demoMode->blendTree_ctlStrafe = (a3real)fabs(demoMode->smoothedInput.x);
+			*demoMode->blendTree_ctlStrafe1 = *demoMode->blendTree_ctlStrafe2 = demoMode->smoothedInput.x;
+			*demoMode->blendTree_ctlForward = a3maximum(demoMode->smoothedInput.y, 0);
+			*demoMode->blendTree_ctlStrafeAngle = (a3real)fabs( a3atan2d(-demoMode->smoothedInput.x, demoMode->smoothedInput.y)/90 );
 
-		//Ensure we have space in the blend tree's input nodes for data
-		ec_DataVtable vtable = vtable_SpatialPose; //Must be instanced, writing to global copy is bad
-		vtable.arrayCount = activeHS->hierarchy->numNodes;
-		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputTargetStrafeDir, &vtable);
-		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputWalk           , &vtable);
-		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputIdle           , &vtable);
-		ec_blendTreeNode_ensureHasSpace(demoMode->animOutputArmsAction     , &vtable);
 
-		//Write input data for blend tree
-		a3_ClipController* strafeClipSrc = demoMode->smoothedInput.x > 0 ? demoMode->clipCtrlStrafeR : demoMode->clipCtrlStrafeL;
-		*demoMode->blendTree_ctlStrafe = (a3real)fabs(demoMode->smoothedInput.x);
-		*demoMode->blendTree_ctlForward = a3maximum(demoMode->smoothedInput.y, 0);
-		*demoMode->blendTree_ctlStrafeAngle = (a3real)fabs( a3atan2d(-demoMode->smoothedInput.x, demoMode->smoothedInput.y)/90 );
-		a3clipControllerEvaluate(strafeClipSrc           , demoMode->animOutputTargetStrafeDir->out, demoMode->hierarchyPoseGroup_skel);
-		a3clipControllerEvaluate(demoMode->clipCtrlWalk  , demoMode->animOutputWalk           ->out, demoMode->hierarchyPoseGroup_skel);
-		a3clipControllerEvaluate(demoMode->clipCtrlIdle  , demoMode->animOutputIdle           ->out, demoMode->hierarchyPoseGroup_skel);
-		a3clipControllerEvaluate(demoMode->clipCtrlPistol, demoMode->animOutputArmsAction     ->out, demoMode->hierarchyPoseGroup_skel);
+			////// Poses //////
+			
+			//Ensure we have space in BT input nodes for poses
+			ec_DataVtable vtable = vtable_SpatialPose; //Must be instanced, writing to global copy is bad
+			vtable.arrayCount = activeHS->hierarchy->numNodes;
+			ec_blendTreeNode_ensureHasSpace(demoMode->animOutputStrafeL   , &vtable);
+			ec_blendTreeNode_ensureHasSpace(demoMode->animOutputStrafeR   , &vtable);
+			ec_blendTreeNode_ensureHasSpace(demoMode->animOutputWalk      , &vtable);
+			ec_blendTreeNode_ensureHasSpace(demoMode->animOutputIdle      , &vtable);
+			ec_blendTreeNode_ensureHasSpace(demoMode->animOutputArmsAction, &vtable);
 
-		//Run blend tree and copy output to render objects
-		ec_blendTreeEvaluate(&demoMode->blendTree, &vtable);
-		vtable.copy(activeHS->animPose->pose, demoMode->blendTree_output->out, &vtable);
-		//activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
+			//Update all clips used by blend tree
+			a3clipControllerUpdate(demoMode->clipCtrlStrafeL, dt);
+			a3clipControllerUpdate(demoMode->clipCtrlStrafeR, dt);
+			a3clipControllerUpdate(demoMode->clipCtrlWalk   , dt);
+			a3clipControllerUpdate(demoMode->clipCtrlIdle   , dt);
+			a3clipControllerUpdate(demoMode->clipCtrlPistol , dt);
+
+			//Load poses into BT input nodes
+			a3clipControllerEvaluate(demoMode->clipCtrlStrafeL, demoMode->animOutputStrafeL   ->out, demoMode->hierarchyPoseGroup_skel);
+			a3clipControllerEvaluate(demoMode->clipCtrlStrafeR, demoMode->animOutputStrafeR   ->out, demoMode->hierarchyPoseGroup_skel);
+			a3clipControllerEvaluate(demoMode->clipCtrlWalk   , demoMode->animOutputWalk      ->out, demoMode->hierarchyPoseGroup_skel);
+			a3clipControllerEvaluate(demoMode->clipCtrlIdle   , demoMode->animOutputIdle      ->out, demoMode->hierarchyPoseGroup_skel);
+			a3clipControllerEvaluate(demoMode->clipCtrlPistol , demoMode->animOutputArmsAction->out, demoMode->hierarchyPoseGroup_skel);
+
+
+			////// Execute //////
+
+			//Run blend tree and copy output to render objects
+			ec_blendTreeEvaluate(&demoMode->blendTree, &vtable);
+			vtable.copy(activeHS->animPose->pose, demoMode->blendTree_output->out, &vtable);
+			//activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
+		}
 
 		// FK pipeline
 		a3hierarchyPoseConcat(activeHS->localSpace,	// goal to calculate
