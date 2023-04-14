@@ -40,6 +40,8 @@ typedef struct a3_Sample					a3_Sample;
 typedef struct a3_Keyframe					a3_Keyframe;
 typedef enum a3_ClipTransitionFlag			a3_ClipTransitionFlag;
 typedef struct a3_ClipTransition			a3_ClipTransition;
+typedef struct a3_ConditionalClipTransition	a3_ConditionalClipTransition;
+typedef struct a3_ClipTransitionGroup		a3_ClipTransitionGroup;
 typedef struct a3_Clip						a3_Clip;
 typedef struct a3_ClipPool					a3_ClipPool;
 #endif	// __cplusplus
@@ -117,6 +119,20 @@ struct a3_ClipTransition
 	a3i32 clipIndex;
 };
 
+struct a3_ConditionalClipTransition
+{
+	a3_ClipTransition transition;
+	a3boolean(*isValid)();
+};
+
+struct a3_ClipTransitionGroup
+{
+	a3_ConditionalClipTransition* conditionals;
+	a3ui32 nConditionals;
+
+	a3_ClipTransition fallback[1];
+};
+
 // description of single clip
 // metaphor: timeline
 struct a3_Clip
@@ -137,7 +153,7 @@ struct a3_Clip
 	a3f64 duration_sec, durationInv;
 
 	// transitions
-	a3_ClipTransition transitionForward[1], transitionReverse[1];
+	a3_ClipTransitionGroup transitionForward[1], transitionReverse[1];
 };
 
 // group of clips
@@ -165,6 +181,7 @@ a3i32 a3clipPoolRelease(a3_ClipPool* clipPool);
 
 // initialize clip transition
 a3i32 a3clipTransitionInit(a3_ClipTransition* transition, a3_ClipTransitionFlag const transitionFlag, const a3i32 offset, a3_Clip const* clip);
+a3i32 a3clipTransitionGroupInit(a3_ClipTransitionGroup* group_out, a3_ClipTransitionFlag const fallback_transitionFlag, const a3i32 fallback_offset, a3_Clip const* fallback_clip, a3ui32 nConditionals, a3_ConditionalClipTransition* conditionals);
 
 // initialize clip with first and last indices
 a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_nameLenMax], a3_Keyframe const* keyframe_first, a3_Keyframe const* keyframe_final);

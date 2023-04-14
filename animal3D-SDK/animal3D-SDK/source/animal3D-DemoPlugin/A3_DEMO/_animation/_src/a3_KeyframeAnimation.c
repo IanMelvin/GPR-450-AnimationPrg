@@ -118,6 +118,14 @@ a3i32 a3clipTransitionInit(a3_ClipTransition* transition, a3_ClipTransitionFlag 
 	return -1;
 }
 
+a3i32 a3clipTransitionGroupInit(a3_ClipTransitionGroup* group_out, a3_ClipTransitionFlag const fallback_transitionFlag, const a3i32 fallback_offset, a3_Clip const* fallback_clip, a3ui32 nConditionals, a3_ConditionalClipTransition* conditionals)
+{
+	group_out->conditionals = conditionals;
+	group_out->nConditionals = nConditionals;
+	a3clipTransitionInit(group_out->fallback, fallback_transitionFlag, fallback_offset, fallback_clip);
+	return 1;
+}
+
 // initialize clip with first and last indices
 a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_nameLenMax], a3_Keyframe const* keyframe_first, a3_Keyframe const* keyframe_final)
 {
@@ -129,8 +137,8 @@ a3i32 a3clipInit(a3_Clip* clip_out, const a3byte clipName[a3keyframeAnimation_na
 		clip_out->keyframeCount = clip_out->keyframeIndex_final - clip_out->keyframeIndex_first;
 		clip_out->keyframeDirection = a3sgn(clip_out->keyframeCount);
 		clip_out->keyframeCount = 1 + clip_out->keyframeCount * clip_out->keyframeDirection;
-		a3clipTransitionInit(clip_out->transitionForward, a3clip_stopFlag, 0, clip_out);
-		a3clipTransitionInit(clip_out->transitionReverse, a3clip_stopFlag, 0, clip_out);
+		a3clipTransitionGroupInit(clip_out->transitionForward, a3clip_stopFlag, 0, clip_out, 0, NULL);
+		a3clipTransitionGroupInit(clip_out->transitionReverse, a3clip_stopFlag, 0, clip_out, 0, NULL);
 		return clip_out->index;
 	}
 	return -1;
