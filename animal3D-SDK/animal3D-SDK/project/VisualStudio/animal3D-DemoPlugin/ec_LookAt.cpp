@@ -3,8 +3,11 @@
 #include <string.h>
 #include "ec_LookAt.h"
 
-void ec_LookAt(a3_DemoSceneObject characterObject, a3_DemoSceneObject targetObject, a3_Hierarchy* hierarchyCharacter, a3byte name[a3node_nameSize]) // name should equal "Neck" for xbot
+
+void ec_LookAt(a3_HierarchyState* hierarchyState, a3_DemoSceneObject characterObject, a3_DemoSceneObject targetObject, a3byte name[a3node_nameSize]) // name should equal "Neck" for xbot
 {
+	a3kinematicsSolveForward(hierarchyState);
+
 	//Getting target position in rig space
 	a3vec3 targetPosition = targetObject.position;
 	a3real4Real4x4Mul(characterObject.modelMatInv.m, targetPosition.v);
@@ -13,13 +16,9 @@ void ec_LookAt(a3_DemoSceneObject characterObject, a3_DemoSceneObject targetObje
 	a3vec3 charPosition = characterObject.position;
 	a3real4Real4x4Mul(characterObject.modelMatInv.m, charPosition.v);
 
-	//Talk with robert about connecting Fk and IK to this to replace the above lines and insert at the end
-
 	//Need 
-	a3ui32 index = a3hierarchyGetNodeIndex(hierarchyCharacter, name);
-
-
-
+	a3ui32 index = a3hierarchyGetNodeIndex(hierarchyState->hierarchy, name);
+	
 
 	a3vec3 z = targetPosition;
 	a3real3Sub(z.v, charPosition.v);
@@ -33,6 +32,8 @@ void ec_LookAt(a3_DemoSceneObject characterObject, a3_DemoSceneObject targetObje
 
 	a3vec3 rotation = (x, y, z); //???
 
+
+	a3kinematicsSolveInverse(hierarchyState);
 	//Need to do IK for blend tree to get local space info
 	//	Local = World Space * parent Inv World Space
 
