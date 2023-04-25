@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ec_LookAt.h"
+#include "A3_DEMO/_animation/ec_LookAt.h"
 
 void ec_LookAt(a3_DemoSceneObject characterObject, a3_DemoSceneObject targetObject, a3_Hierarchy* hierarchyCharacter, a3byte name[a3node_nameSize]) // name should equal "Neck" for xbot
 {

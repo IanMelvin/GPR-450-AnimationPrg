@@ -183,7 +183,10 @@
     <ClCompile Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\_src\ec_Integration.c">
       <Filter>Source Files\common\A3_DEMO\_animation\_src</Filter>
     </ClCompile>
-    <ClCompile Include="ec_LookAt.cpp">
+    <ClCompile Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\_src\ec_IK.c">
+      <Filter>Source Files\common\A3_DEMO\_animation\_src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\_src\ec_LookAt.cpp">
       <Filter>Source Files\common\A3_DEMO\_animation\_src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -245,7 +248,10 @@
     <ClInclude Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\ec_Integration.h">
       <Filter>Header Files\A3_DEMO\_animation</Filter>
     </ClInclude>
-    <ClInclude Include="ec_LookAt.h">
+    <ClInclude Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\ec_IK.h">
+      <Filter>Header Files\A3_DEMO\_animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\animal3D-DemoPlugin\A3_DEMO\_animation\ec_LookAt.h">
       <Filter>Header Files\A3_DEMO\_animation</Filter>
     </ClInclude>
   </ItemGroup>
