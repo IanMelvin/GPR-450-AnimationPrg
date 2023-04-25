@@ -23,7 +23,7 @@ enum ec_IKEffectorType
 
 struct ec_IKEffector
 {
-	a3i32 workingRoot;
+	a3i32 workingRoot; //ID on skeleton
 
 	ec_IKEffectorType type;
 	union {
@@ -35,10 +35,12 @@ struct ec_IKEffector
 		struct {
 			a3vec3 bendHint; //World space
 			a3vec3 endTarget; //World space
+			a3i32 elbowID; //ID on skeleton
+			a3i32 endID; //ID on skeleton
 		} triangle;
 
 	} data;
 };
 
 
-a3i32 ec_applyEffector(ec_IKEffector const* effector, a3_SpatialPose* poses_out, a3_Hierarchy const* hierarchy);
+a3i32 ec_applyEffector(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy);
