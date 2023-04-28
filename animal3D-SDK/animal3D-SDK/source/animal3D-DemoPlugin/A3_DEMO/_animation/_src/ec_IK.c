@@ -30,6 +30,12 @@ a3i32 ec_applyEffector_triangle(ec_IKEffector const* effector, a3_SpatialPose* p
 
 	a3real D = a3sqrt( L1*L1 - H*H );
 
-	a3vec3 elbowPos_world; //"p" in slides
-	// TODO slide 47
+	a3vec3 Hh = h; a3real3MulS(&Hh.v, H);
+	a3vec3 Dd = effectorDisplacement; a3real3MulS(&Dd.v, D);
+	a3vec3* elbowPos_world = &poses_out[effector->data.triangle.elbowID]; //"p" in slides
+	a3real3SetReal4(elbowPos_world->v, poses_out[effector->workingRoot].translate.v);
+	a3real3Add(elbowPos_world->v, Dd.v);
+	a3real3Add(elbowPos_world->v, Hh.v);
+
+	// slide 50
 }
