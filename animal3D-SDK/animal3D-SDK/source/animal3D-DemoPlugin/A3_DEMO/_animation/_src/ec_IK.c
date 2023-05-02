@@ -73,6 +73,7 @@ a3i32 ec_applyEffector_lookAt(ec_IKEffector const* effector, a3_SpatialPose* pos
 
 	a3real4x4MakeLookAt(poses_out[index].transformMat.m, invMat.m, poses_out[index].translate.v, targetPosition.v, up.v);
 
+	return 1;
 	/* 
 	* FK(Full), Solution, IK(Partial), FK(Partial)
 	* 
