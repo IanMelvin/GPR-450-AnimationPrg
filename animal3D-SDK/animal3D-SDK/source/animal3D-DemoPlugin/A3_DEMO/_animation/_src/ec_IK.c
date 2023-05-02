@@ -1,5 +1,7 @@
 #include "A3_DEMO/_animation/ec_IK.h"
 
+#include <stddef.h>
+
 a3i32 ec_applyEffector_triangle(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy);
 
 a3i32 ec_applyEffector_lookAt(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy);
@@ -9,7 +11,7 @@ a3i32 ec_applyEffector_lookAt(ec_IKEffector const* effector, a3_SpatialPose* pos
 a3i32 ec_applyEffector_triangle(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy)
 {
 	//////// Solve positions ////////
-
+	
 	a3vec3 constraintDisplacement; //"c" in slides
 	a3real3Diff(constraintDisplacement.v, effector->data.triangle.bendHint.v, posesRef_in[effector->workingRoot].translate.v);
 
@@ -32,14 +34,26 @@ a3i32 ec_applyEffector_triangle(ec_IKEffector const* effector, a3_SpatialPose* p
 
 	a3real D = a3sqrt( L1*L1 - H*H );
 
-	a3vec3 Hh = h; a3real3MulS(&Hh.v, H);
-	a3vec3 Dd = effectorDisplacement; a3real3MulS(&Dd.v, D);
-	a3vec3* elbowPos_world = &poses_out[effector->data.triangle.elbowID]; //"p" in slides
-	a3real3SetReal4(elbowPos_world->v, poses_out[effector->workingRoot].translate.v);
-	a3real3Add(elbowPos_world->v, Dd.v);
-	a3real3Add(elbowPos_world->v, Hh.v);
+	a3vec3 Hh = h; a3real3MulS(Hh.v, H);
+	a3vec3 Dd = effectorDisplacement; a3real3MulS(Dd.v, D);
+	a3_SpatialPose* elbow_out = &poses_out[effector->data.triangle.elbowID]; //"p" in slides
+	a3real3SetReal4(elbow_out->translate.v, posesRef_in[effector->workingRoot].translate.v);
+	a3real3Add(elbow_out->translate.v, Dd.v);
+	a3real3Add(elbow_out->translate.v, Hh.v);
 
-	// slide 50
+	//Frenet-serret frames
+
+	a3vec4 t0; a3real4Diff(t0.v, elbow_out->translate.v, posesRef_in[effector->workingRoot].translate.v);
+	a3vec4 n0 = posesRef_in[effector->workingRoot].transformMat.v1;
+	a3real4x4MakeLookAt(poses_out[effector->workingRoot].transformMat.m, NULL,
+		posesRef_in[effector->workingRoot].translate.v, elbow_out->translate.v, n0.v);
+
+	a3vec3 t1; a3real3Diff(t1.v, effector->data.triangle.endTarget.v, elbow_out->translate.v);
+	a3vec4 n1 = posesRef_in[effector->data.triangle.elbowID].transformMat.v1;
+	a3real4x4MakeLookAt(poses_out[effector->data.triangle.elbowID].transformMat.m, NULL,
+		elbow_out->translate.v, effector->data.triangle.endTarget.v, n1.v);
+
+	return 1;
 }
 
 a3i32 ec_applyEffector_lookAt(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy) //Check if Robert thinks I need last 2 param in array
