@@ -9,6 +9,7 @@
 #include <animal3D-A3DM/animal3D-A3DM.h>
 
 #include "a3_Hierarchy.h"
+#include "a3_HierarchyState.h"
 #include "a3_SpatialPose.h"
 
 typedef enum ec_IKEffectorType	ec_IKEffectorType;
@@ -30,6 +31,7 @@ struct ec_IKEffector
 
 		struct {
 			a3vec3 target; //World space
+			a3i32 neckID; //ID on skeleton
 		} lookAt;
 			
 		struct {

@@ -2,6 +2,8 @@
 
 a3i32 ec_applyEffector_triangle(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy);
 
+a3i32 ec_applyEffector_lookAt(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy);
+
 // ec_applyEffector impl. goes here
 
 a3i32 ec_applyEffector_triangle(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy)
@@ -38,4 +40,34 @@ a3i32 ec_applyEffector_triangle(ec_IKEffector const* effector, a3_SpatialPose* p
 	a3real3Add(elbowPos_world->v, Hh.v);
 
 	// slide 50
+}
+
+a3i32 ec_applyEffector_lookAt(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy) //Check if Robert thinks I need last 2 param in array
+{
+	a3vec3 targetPosition = effector->data.lookAt.target;
+
+	//Restores the position, rotation, and scale values from the transform matrix
+	a3ui32 index = effector->data.lookAt.neckID;
+	a3spatialPoseRestore(&poses_out[index], a3poseChannel_none, a3poseEulerOrder_xyz);
+
+	//Define up
+	a3vec3 up;
+	up.x = 0, up.y = 1, up.z = 0;
+
+	//Define storageVar
+	a3mat4 invMat;
+
+	a3real4x4MakeLookAt(poses_out[index].transformMat.m, invMat.m, poses_out[index].translate.v, targetPosition.v, up.v);
+
+	/* 
+	* FK(Full), Solution, IK(Partial), FK(Partial)
+	* 
+	* 1. a3kinematicsSolveForward(hierarchyState);
+	* 
+	* 2. this function
+	* 
+	* 3. a3kinematicsSolveInversePartial(hierarchyState, index, hierarchyState->hierarchy->numNodes);
+	* 
+	* 4. a3kinematicsSolveForwardPartial(hierarchyState, index, hierarchyState->hierarchy->numNodes);
+	*/	
 }
