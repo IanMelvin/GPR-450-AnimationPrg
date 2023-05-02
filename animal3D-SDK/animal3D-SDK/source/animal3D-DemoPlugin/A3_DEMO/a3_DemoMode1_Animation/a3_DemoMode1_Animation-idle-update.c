@@ -244,6 +244,9 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			demoMode->hierarchyPoseGroup_skel->channel,
 			demoMode->hierarchyPoseGroup_skel->order);
 		a3kinematicsSolveForward(activeHS);
+
+		a3kinematicsSolveInverse(activeHS);
+		a3kinematicsSolveForward(activeHS);
 		a3hierarchyStateUpdateObjectInverse(activeHS);
 		a3hierarchyStateUpdateObjectBindToCurrent(activeHS, baseHS);
 
