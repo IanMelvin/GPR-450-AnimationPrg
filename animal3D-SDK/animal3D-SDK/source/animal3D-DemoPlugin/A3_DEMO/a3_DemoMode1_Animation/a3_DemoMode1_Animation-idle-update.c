@@ -291,10 +291,10 @@ void ec_character_blendPipeline_prepareForData(a3_DemoMode1_Animation* demoMode,
 	ec_blendTreeNode_ensureHasSpace(demoMode->animOutputArmsAction, vtable);
 }
 
-void ec_blendPipeline_runIK(a3_DemoMode1_Animation* demoMode)
+void ec_blendPipeline_runIK(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS)
 {
 	//TODO implement IK
-	//a3kinematicsSolveInverse(activeHS);
+	a3kinematicsSolveInverse(activeHS);
 }
 
 void ec_blendPipeline_runForward(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS)
@@ -343,7 +343,7 @@ void ec_blendPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animation* d
 	ec_blendPipeline_runForward(demoMode, activeHS, baseHS);
 
 	//Run IK
-	ec_blendPipeline_runIK(demoMode);
+	ec_blendPipeline_runIK(demoMode, activeHS);
 
 	//Run forward again now that IK values are in
 	ec_blendTreeEvaluate(&demoMode->blendTree, &vtable_poses);
