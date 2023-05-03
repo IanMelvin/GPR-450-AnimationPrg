@@ -501,45 +501,61 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		ec_blendTreeCreate(&demoMode->blendTree, 15);
 		a3index j = 0;
 
-		demoMode->animOutputWalk       = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
-		demoMode->animOutputIdle       = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
-		demoMode->animOutputStrafeL    = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
-		demoMode->animOutputStrafeR    = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
-		demoMode->animOutputArmsAction = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+		//Lower legs and locomotion
+		ec_BlendTreeNode* finalLocomotion;
+		{
+			//Clip inputs
+			demoMode->animOutputWalk       = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+			demoMode->animOutputIdle       = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+			demoMode->animOutputStrafeL    = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+			demoMode->animOutputStrafeR    = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
 
-		ec_BlendTreeNode* forwardLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], demoMode->animOutputIdle, demoMode->animOutputWalk, 0);
-		demoMode->blendTree_ctlForward = &forwardLocomotion->data.lerpUniform.param;
+			ec_BlendTreeNode* forwardLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], demoMode->animOutputIdle, demoMode->animOutputWalk, 0);
+			demoMode->blendTree_ctlForward = &forwardLocomotion->data.lerpUniform.param;
 		
-		ec_BlendTreeNode* strafeLocomotion1 = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], demoMode->animOutputStrafeL, demoMode->animOutputIdle, 0);
-		strafeLocomotion1->data.lerpUniform.paramMin = -1;
-		strafeLocomotion1->data.lerpUniform.paramMax = 0;
-		demoMode->blendTree_ctlStrafe1 = &strafeLocomotion1->data.lerpUniform.param;
+			ec_BlendTreeNode* strafeLocomotion1 = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], demoMode->animOutputStrafeL, demoMode->animOutputIdle, 0);
+			strafeLocomotion1->data.lerpUniform.paramMin = -1;
+			strafeLocomotion1->data.lerpUniform.paramMax = 0;
+			demoMode->blendTree_ctlStrafe1 = &strafeLocomotion1->data.lerpUniform.param;
+		
+			ec_BlendTreeNode* strafeLocomotion2 = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], strafeLocomotion1, demoMode->animOutputStrafeR, 0);
+			strafeLocomotion2->data.lerpUniform.paramMin = 0;
+			strafeLocomotion2->data.lerpUniform.paramMax = 1;
+			demoMode->blendTree_ctlStrafe2 = &strafeLocomotion2->data.lerpUniform.param;
+		
+			finalLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], forwardLocomotion, strafeLocomotion2, 0);
+			demoMode->blendTree_ctlStrafeAngle = &finalLocomotion->data.lerpUniform.param;
+		}
 
-		ec_BlendTreeNode* strafeLocomotion2 = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], strafeLocomotion1, demoMode->animOutputStrafeR, 0);
-		strafeLocomotion2->data.lerpUniform.paramMin = 0;
-		strafeLocomotion2->data.lerpUniform.paramMax = 1;
-		demoMode->blendTree_ctlStrafe2 = &strafeLocomotion2->data.lerpUniform.param;
-		
-		ec_BlendTreeNode* finalLocomotion = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], forwardLocomotion, strafeLocomotion2, 0);
-		demoMode->blendTree_ctlStrafeAngle = &finalLocomotion->data.lerpUniform.param;
-		
+		//Upper body: arms, grabbing, head, looking
+		{
+			//Clip inputs
+			demoMode->animOutputArmsAction = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+
+			//IK inputs
+			demoMode->ikOutputHead = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+			demoMode->ikOutputArmL = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+			demoMode->ikOutputArmR = ec_blendTreeNodeCreateDummy(&demoMode->blendTree.btNodes[j++]);
+
+		}
+
 		//Mixed upper + lower body split animations
-		ec_BlendTreeNode* upperBodyMixIn = ec_blendTreeNodeCreateLerpPerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, finalLocomotion, demoMode->animOutputArmsAction, 1);
+		ec_BlendTreeNode* splitControlFinal = ec_blendTreeNodeCreateLerpPerNode(&demoMode->blendTree.btNodes[j++], hierarchy->numNodes, finalLocomotion, demoMode->animOutputArmsAction, 1);
 		//Set and propagate mask: Anything past legs belongs to lower body
-		upperBodyMixIn->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftUpLeg")] = 0;
-		upperBodyMixIn->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightUpLeg")] = 0;
+		splitControlFinal->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftUpLeg")] = 0;
+		splitControlFinal->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightUpLeg")] = 0;
 		for (a3index i = 0; i < hierarchy->numNodes; ++i)
 		{
 			if (hierarchy->nodes[i].parentIndex >= 0)
 			{
-				a3real parentScaleFactor = upperBodyMixIn->data.lerpPerNode.params[hierarchy->nodes[i].parentIndex];
-				if (parentScaleFactor == 0) upperBodyMixIn->data.lerpPerNode.params[i] = 0;
+				a3real parentScaleFactor = splitControlFinal->data.lerpPerNode.params[hierarchy->nodes[i].parentIndex];
+				if (parentScaleFactor == 0) splitControlFinal->data.lerpPerNode.params[i] = 0;
 			}
 		}
-		upperBodyMixIn->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Hips")] = 0; //Hips are locomotion, and therefore lower body
+		splitControlFinal->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Hips")] = 0; //Hips are locomotion, and therefore lower body
 
 		//Option to just ignore masking and use locomotion part for upper body as well
-		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], finalLocomotion, upperBodyMixIn, 1);
+		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->blendTree.btNodes[j++], finalLocomotion, splitControlFinal, 1);
 		demoMode->blendTree_output = finalOutput;
 		
 		assert(j <= demoMode->blendTree.numBtNodes); //If this errors, the blend tree is too small, so allocate more

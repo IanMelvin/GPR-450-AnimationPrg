@@ -85,7 +85,7 @@ void a3demo_update_pointLight(a3_DemoSceneObject* obj_camera, a3_DemoPointLight*
 
 void a3demo_applyScale_internal(a3_DemoSceneObject* sceneObject, a3real4x4p s);
 
-void ec_blendPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS, a3f64 const dt);
+void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS, a3f64 const dt);
 
 void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMode, a3f64 const dt)
 {
@@ -180,7 +180,7 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			//demoMode->strafeRaw = -0.5;
 		}
 		
-		ec_blendPipeline_runFull(demoState, demoMode, activeHS, baseHS, dt);
+		ec_kinematicsPipeline_runFull(demoState, demoMode, activeHS, baseHS, dt);
 
 		// apply input
 		demoMode->obj_skeleton_ctrl->position.x = +(demoMode->pos.x);
@@ -281,23 +281,13 @@ void ec_character_blendPipeline_updateParameters(a3_DemoState* demoState, a3_Dem
 	*demoMode->blendTree_ctlStrafeAngle = (a3real)fabs( a3atan2d(-demoMode->smoothedInput.x, demoMode->smoothedInput.y)/90 );
 }
 
-void ec_character_blendPipeline_prepareForData(a3_DemoMode1_Animation* demoMode, ec_DataVtable* vtable)
-{
-	//Ensure we have space in BT input nodes for data
-	ec_blendTreeNode_ensureHasSpace(demoMode->animOutputStrafeL   , vtable);
-	ec_blendTreeNode_ensureHasSpace(demoMode->animOutputStrafeR   , vtable);
-	ec_blendTreeNode_ensureHasSpace(demoMode->animOutputWalk      , vtable);
-	ec_blendTreeNode_ensureHasSpace(demoMode->animOutputIdle      , vtable);
-	ec_blendTreeNode_ensureHasSpace(demoMode->animOutputArmsAction, vtable);
-}
-
-void ec_blendPipeline_runIK(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS)
+void ec_kinematicsPipeline_runIK(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS)
 {
 	//TODO implement IK
 	a3kinematicsSolveInverse(activeHS);
 }
 
-void ec_blendPipeline_runForward(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS)
+void ec_kinematicsPipeline_runForward(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS)
 {
 	// FK pipeline without IK values
 	a3hierarchyPoseConcat(activeHS->localSpace,	// goal to calculate
@@ -313,14 +303,14 @@ void ec_blendPipeline_runForward(a3_DemoMode1_Animation* demoMode, a3_HierarchyS
 	a3hierarchyStateUpdateObjectBindToCurrent(activeHS, baseHS);
 }
 
-void ec_blendPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS, a3f64 const dt)
+void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS, a3f64 const dt)
 {
 	ec_character_blendPipeline_updateParameters(demoState, demoMode);
 
 	//Prepare blend tree for SpatialPoses
 	ec_DataVtable vtable_poses = vtable_SpatialPose; //Must be instanced, writing to global copy is bad
 	vtable_poses.arrayCount = activeHS->hierarchy->numNodes;
-	ec_character_blendPipeline_prepareForData(demoMode, &vtable_poses);
+	ec_blendTree_ensureHasSpace(&demoMode->blendTree, &vtable_poses); //Ensure we have space in BT for data
 
 	//Update all clips used by blend tree
 	a3clipControllerUpdate(demoMode->clipCtrlStrafeL, dt);
@@ -340,16 +330,16 @@ void ec_blendPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animation* d
 	ec_blendTreeEvaluate(&demoMode->blendTree, &vtable_poses);
 	vtable_poses.copy(activeHS->animPose->pose, demoMode->blendTree_output->out, &vtable_poses);
 	activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
-	ec_blendPipeline_runForward(demoMode, activeHS, baseHS);
+	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
 
 	//Run IK
-	ec_blendPipeline_runIK(demoMode, activeHS);
+	ec_kinematicsPipeline_runIK(demoMode, activeHS);
 
 	//Run forward again now that IK values are in
 	ec_blendTreeEvaluate(&demoMode->blendTree, &vtable_poses);
 	vtable_poses.copy(activeHS->animPose->pose, demoMode->blendTree_output->out, &vtable_poses);
 	activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
-	ec_blendPipeline_runForward(demoMode, activeHS, baseHS);
+	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
 }
 
 

@@ -36,3 +36,12 @@ a3ret ec_blendTreeEvaluate(ec_BlendTree* tree, ec_DataVtable* vtable)
 	}
 	return 1;
 }
+
+a3ret ec_blendTree_ensureHasSpace(ec_BlendTree* tree, ec_DataVtable* vtable)
+{
+	for (a3index i = 0; i < tree->numBtNodes; ++i)
+	{
+		ec_blendTreeNode_ensureHasSpace(&tree->btNodes[i], vtable);
+	}
+	return 1;
+}
