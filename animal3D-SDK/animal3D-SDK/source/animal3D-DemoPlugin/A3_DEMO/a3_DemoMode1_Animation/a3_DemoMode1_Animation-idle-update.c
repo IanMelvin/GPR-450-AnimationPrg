@@ -180,7 +180,6 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 			//demoMode->strafeRaw = -0.5;
 		}
 		
-		// Run full animation pipeline, start to finish!
 		ec_blendPipeline_runFull(demoState, demoMode, activeHS, baseHS, dt);
 
 		// apply input
@@ -295,6 +294,7 @@ void ec_character_blendPipeline_prepareForData(a3_DemoMode1_Animation* demoMode,
 void ec_blendPipeline_runIK(a3_DemoMode1_Animation* demoMode)
 {
 	//TODO implement IK
+	//a3kinematicsSolveInverse(activeHS);
 }
 
 void ec_blendPipeline_runForward(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS)
