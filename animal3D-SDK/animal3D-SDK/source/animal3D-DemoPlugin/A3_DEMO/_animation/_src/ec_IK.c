@@ -6,8 +6,30 @@ a3i32 ec_applyEffector_triangle(ec_IKEffector const* effector, a3_SpatialPose* p
 
 a3i32 ec_applyEffector_lookAt(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy);
 
-// ec_applyEffector impl. goes here
-
+a3i32 ec_applyEffector(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy)
+{
+	if(effector && !pose_out && posesRef_in && hierarchy)
+	{
+		switch(effector.type)
+		{
+			case IK_LOOK_AT:
+				ec_applyEffector_lookAt(effector, poses_out, posesRef_in, hierarchy);
+				return 1;
+				break;
+			case IK_TRIANGLE:
+				ec_applyEffector_triangle(effector, poses_out, posesRef_in, hierarchy);
+				return 1;
+				break
+			case IK_NO_OP:
+				return 1;
+				break;
+			default:
+				return 1;
+				break;
+		}
+	}
+	return -1;
+}
 a3i32 ec_applyEffector_triangle(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy)
 {
 	//////// Solve positions ////////
