@@ -161,6 +161,7 @@ typedef enum a3_DemoMode1_Animation_InputMode				a3_DemoMode1_Animation_InputMod
 		a3real* blendTree_ctlForward;
 		a3real *blendTree_ctlStrafe1, *blendTree_ctlStrafe2; //RSC NOTE: These belong to different nodes, but should be set to the same value at all times
 		a3real* blendTree_ctlStrafeAngle;
+		a3real *blendTree_ctlIkStrengthHead, *blendTree_ctlIkStrengthArmL, *blendTree_ctlIkStrengthArmR; //IK blending
 	};
 
 	// demo mode for basic shading
