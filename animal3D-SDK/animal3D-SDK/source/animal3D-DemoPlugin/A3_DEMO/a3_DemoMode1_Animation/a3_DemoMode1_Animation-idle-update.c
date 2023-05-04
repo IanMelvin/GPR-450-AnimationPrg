@@ -307,37 +307,49 @@ void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animati
 {
 	ec_character_blendPipeline_updateParameters(demoState, demoMode);
 
+	ec_DemoMode1_CharacterAnimPipeline* chr = &demoMode->characterAnimPipeline; //Convenience variable
+
 	//Prepare blend tree for SpatialPoses
 	ec_DataVtable vtable_poses = vtable_SpatialPose; //Must be instanced, writing to global copy would be bad
 	vtable_poses.arrayCount = activeHS->hierarchy->numNodes;
-	ec_blendTree_ensureHasSpace(&demoMode->characterAnimPipeline.blendTree, &vtable_poses); //Ensure we have space in BT for data
+	ec_blendTree_ensureHasSpace(&chr->blendTree, &vtable_poses); //Ensure we have space in BT for data
 
 	//Update all clips used by blend tree
-	a3clipControllerUpdate(demoMode->characterAnimPipeline.clipCtrlStrafeL, dt);
-	a3clipControllerUpdate(demoMode->characterAnimPipeline.clipCtrlStrafeR, dt);
-	a3clipControllerUpdate(demoMode->characterAnimPipeline.clipCtrlWalk   , dt);
-	a3clipControllerUpdate(demoMode->characterAnimPipeline.clipCtrlIdle   , dt);
-	a3clipControllerUpdate(demoMode->characterAnimPipeline.clipCtrlPistol , dt);
+	a3clipControllerUpdate(chr->clipCtrlStrafeL, dt);
+	a3clipControllerUpdate(chr->clipCtrlStrafeR, dt);
+	a3clipControllerUpdate(chr->clipCtrlWalk   , dt);
+	a3clipControllerUpdate(chr->clipCtrlIdle   , dt);
+	a3clipControllerUpdate(chr->clipCtrlPistol , dt);
 
 	//Load poses into BT input nodes
-	a3clipControllerEvaluate(demoMode->characterAnimPipeline.clipCtrlStrafeL, demoMode->characterAnimPipeline.animOutputStrafeL   ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(demoMode->characterAnimPipeline.clipCtrlStrafeR, demoMode->characterAnimPipeline.animOutputStrafeR   ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(demoMode->characterAnimPipeline.clipCtrlWalk   , demoMode->characterAnimPipeline.animOutputWalk      ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(demoMode->characterAnimPipeline.clipCtrlIdle   , demoMode->characterAnimPipeline.animOutputIdle      ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(demoMode->characterAnimPipeline.clipCtrlPistol , demoMode->characterAnimPipeline.animOutputArmsAction->out, demoMode->hierarchyPoseGroup_skel);
+	a3clipControllerEvaluate(chr->clipCtrlStrafeL, chr->animOutputStrafeL   ->out, demoMode->hierarchyPoseGroup_skel);
+	a3clipControllerEvaluate(chr->clipCtrlStrafeR, chr->animOutputStrafeR   ->out, demoMode->hierarchyPoseGroup_skel);
+	a3clipControllerEvaluate(chr->clipCtrlWalk   , chr->animOutputWalk      ->out, demoMode->hierarchyPoseGroup_skel);
+	a3clipControllerEvaluate(chr->clipCtrlIdle   , chr->animOutputIdle      ->out, demoMode->hierarchyPoseGroup_skel);
+	a3clipControllerEvaluate(chr->clipCtrlPistol , chr->animOutputArmsAction->out, demoMode->hierarchyPoseGroup_skel);
+
+	//Tell blend tree to ignore IK
+	*chr->ikStrengthHead = 0;
+	*chr->ikStrengthArmL = 0;
+	*chr->ikStrengthArmR = 0;
 
 	//Run forward (without IK) and copy output to render objects
-	ec_blendTreeEvaluate(&demoMode->characterAnimPipeline.blendTree, &vtable_poses);
-	vtable_poses.copy(activeHS->animPose->pose, demoMode->characterAnimPipeline.blendTree_output->out, &vtable_poses);
+	ec_blendTreeEvaluate(&chr->blendTree, &vtable_poses);
+	vtable_poses.copy(activeHS->animPose->pose, chr->output->out, &vtable_poses);
 	activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
 	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
 
 	//Run IK
 	ec_kinematicsPipeline_runIK(demoMode, activeHS);
 
+	//Tell blend tree to use IK
+	*chr->ikStrengthHead = 1;
+	*chr->ikStrengthArmL = 1;
+	*chr->ikStrengthArmR = 1;
+
 	//Run forward again now that IK values are in
-	ec_blendTreeEvaluate(&demoMode->characterAnimPipeline.blendTree, &vtable_poses);
-	vtable_poses.copy(activeHS->animPose->pose, demoMode->characterAnimPipeline.blendTree_output->out, &vtable_poses);
+	ec_blendTreeEvaluate(&chr->blendTree, &vtable_poses);
+	vtable_poses.copy(activeHS->animPose->pose, chr->output->out, &vtable_poses);
 	activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
 	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
 }

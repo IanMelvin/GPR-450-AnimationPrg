@@ -148,20 +148,20 @@ typedef enum a3_DemoMode1_Animation_InputMode				a3_DemoMode1_Animation_InputMod
 	struct ec_DemoMode1_CharacterAnimPipeline
 	{
 		ec_BlendTree blendTree;
-		ec_BlendTreeNode* blendTree_output; //For convenience
+		ec_BlendTreeNode* output; //For convenience
 
 		//Clips feeding into blend tree
-		a3_ClipController clipCtrlStrafeL[1], clipCtrlStrafeR[1], clipCtrlWalk[1], clipCtrlIdle[1], clipCtrlPistol[1];
+		a3_ClipController clipCtrlWalk[1], clipCtrlIdle[1], clipCtrlStrafeL[1], clipCtrlStrafeR[1], clipCtrlPistol[1];
 		ec_BlendTreeNode *animOutputWalk, *animOutputIdle, *animOutputStrafeL, *animOutputStrafeR, *animOutputArmsAction;
 
 		//IK feeding into blend tree
-		ec_BlendTreeNode *ikOutputHead, *ikOutputArmL, *ikOutputArmR;
+		ec_BlendTreeNode *ikOutputHead,   *ikOutputArmL,   *ikOutputArmR;
+		a3real         *ikStrengthHead, *ikStrengthArmL, *ikStrengthArmR; //Blend strength when no IK target is present
 		
 		//Control parameters
 		a3real* blendTree_ctlForward;
 		a3real *blendTree_ctlStrafe1, *blendTree_ctlStrafe2; //RSC NOTE: These belong to different nodes, but should be set to the same value at all times
 		a3real* blendTree_ctlStrafeAngle;
-		a3real *blendTree_ctlIkStrengthHead, *blendTree_ctlIkStrengthArmL, *blendTree_ctlIkStrengthArmR; //IK blending
 	};
 
 	// demo mode for basic shading

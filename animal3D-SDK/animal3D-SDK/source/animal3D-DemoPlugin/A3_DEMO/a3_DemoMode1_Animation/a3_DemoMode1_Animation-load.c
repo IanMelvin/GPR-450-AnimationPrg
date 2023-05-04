@@ -546,17 +546,17 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 			ec_BlendTreeNode* maskHead = ec_blendTreeNodeCreateLerpPerNode(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], hierarchy->numNodes, demoMode->characterAnimPipeline.animOutputArmsAction, demoMode->characterAnimPipeline.ikOutputHead, 1);
 			ec_setChain(maskHead->data.lerpPerNode.params, 0, a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Neck"), hierarchy);
 			ec_BlendTreeNode* blendIkHead = ec_blendTreeNodeCreateLerpUniform(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], demoMode->characterAnimPipeline.animOutputArmsAction, maskHead, 1);
-			demoMode->characterAnimPipeline.blendTree_ctlIkStrengthHead = &blendIkHead->data.lerpUniform.param;
+			demoMode->characterAnimPipeline.ikStrengthHead = &blendIkHead->data.lerpUniform.param;
 
 			ec_BlendTreeNode* maskArmL = ec_blendTreeNodeCreateLerpPerNode(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], hierarchy->numNodes, blendIkHead, demoMode->characterAnimPipeline.ikOutputArmL, 1);
 			ec_setChain(maskArmL->data.lerpPerNode.params, 0, a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftShoulder"), hierarchy);
 			ec_BlendTreeNode* blendIkArmL = ec_blendTreeNodeCreateLerpUniform(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], blendIkHead, maskArmL, 1);
-			demoMode->characterAnimPipeline.blendTree_ctlIkStrengthArmL = &blendIkArmL->data.lerpUniform.param;
+			demoMode->characterAnimPipeline.ikStrengthArmL = &blendIkArmL->data.lerpUniform.param;
 
 			ec_BlendTreeNode* maskArmR = ec_blendTreeNodeCreateLerpPerNode(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], hierarchy->numNodes, blendIkArmL, demoMode->characterAnimPipeline.ikOutputArmR, 1);
 			ec_setChain(maskArmR->data.lerpPerNode.params, 0, a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightShoulder"), hierarchy);
 			ec_BlendTreeNode* blendIkArmR = ec_blendTreeNodeCreateLerpUniform(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], blendIkArmL, maskArmR, 1);
-			demoMode->characterAnimPipeline.blendTree_ctlIkStrengthArmR = &blendIkArmR->data.lerpUniform.param;
+			demoMode->characterAnimPipeline.ikStrengthArmR = &blendIkArmR->data.lerpUniform.param;
 
 			finalUpperBody = blendIkArmR;
 		}
@@ -570,7 +570,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 		//Option to just ignore masking and use locomotion part for upper body as well
 		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], finalLocomotion, splitControlFinal, 1);
-		demoMode->characterAnimPipeline.blendTree_output = finalOutput;
+		demoMode->characterAnimPipeline.output = finalOutput;
 		
 		assert(j <= demoMode->characterAnimPipeline.blendTree.numBtNodes); //If this errors, the blend tree is too small, so allocate more
 
