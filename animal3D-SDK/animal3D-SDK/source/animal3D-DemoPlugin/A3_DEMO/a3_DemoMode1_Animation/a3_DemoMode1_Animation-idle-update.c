@@ -172,10 +172,10 @@ void a3animation_update(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMod
 		{
 			a3ui32 const rate = 24;
 			a3f64 const fps = (a3f64)rate;
-			a3clipControllerSetClip(demoMode->clipCtrlPistol, demoMode->clipPool, demoMode->blend1Index, rate, fps);
-			//a3clipControllerSetClip(demoMode->clipCtrlStrafeR, demoMode->clipPool, demoMode->blend1Index, rate, fps);
-			//a3clipControllerSetClip(demoMode->clipCtrlStrafeL, demoMode->clipPool, demoMode->blend1Index, rate, fps);
-			a3clipControllerSetClip(demoMode->clipCtrlWalk, demoMode->clipPool, demoMode->blend2Index, rate, fps);
+			a3clipControllerSetClip(demoMode->characterAnimPipeline.clipCtrlPistol, demoMode->clipPool, demoMode->blend1Index, rate, fps);
+			//a3clipControllerSetClip(demoMode->blendPipeline.clipCtrlStrafeR, demoMode->clipPool, demoMode->blend1Index, rate, fps);
+			//a3clipControllerSetClip(demoMode->blendPipeline.clipCtrlStrafeL, demoMode->clipPool, demoMode->blend1Index, rate, fps);
+			a3clipControllerSetClip(demoMode->characterAnimPipeline.clipCtrlWalk, demoMode->clipPool, demoMode->blend2Index, rate, fps);
 			demoMode->updateBlendTree = false;
 			//demoMode->strafeRaw = -0.5;
 		}
@@ -276,9 +276,9 @@ void ec_character_blendPipeline_updateParameters(a3_DemoState* demoState, a3_Dem
 	//Write control parameters for blend tree
 	//a3_ClipController* strafeClipSrc = demoMode->smoothedInput.x > 0 ? demoMode->clipCtrlStrafeR : demoMode->clipCtrlStrafeL;
 	//*demoMode->blendTree_ctlStrafe = (a3real)fabs(demoMode->smoothedInput.x);
-	*demoMode->blendTree_ctlStrafe1 = *demoMode->blendTree_ctlStrafe2 = demoMode->smoothedInput.x;
-	*demoMode->blendTree_ctlForward = a3maximum(demoMode->smoothedInput.y, 0);
-	*demoMode->blendTree_ctlStrafeAngle = (a3real)fabs( a3atan2d(-demoMode->smoothedInput.x, demoMode->smoothedInput.y)/90 );
+	*demoMode->characterAnimPipeline.blendTree_ctlStrafe1 = *demoMode->characterAnimPipeline.blendTree_ctlStrafe2 = demoMode->smoothedInput.x;
+	*demoMode->characterAnimPipeline.blendTree_ctlForward = a3maximum(demoMode->smoothedInput.y, 0);
+	*demoMode->characterAnimPipeline.blendTree_ctlStrafeAngle = (a3real)fabs( a3atan2d(-demoMode->smoothedInput.x, demoMode->smoothedInput.y)/90 );
 }
 
 void ec_kinematicsPipeline_runIK(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS)
@@ -308,27 +308,27 @@ void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animati
 	ec_character_blendPipeline_updateParameters(demoState, demoMode);
 
 	//Prepare blend tree for SpatialPoses
-	ec_DataVtable vtable_poses = vtable_SpatialPose; //Must be instanced, writing to global copy is bad
+	ec_DataVtable vtable_poses = vtable_SpatialPose; //Must be instanced, writing to global copy would be bad
 	vtable_poses.arrayCount = activeHS->hierarchy->numNodes;
-	ec_blendTree_ensureHasSpace(&demoMode->blendTree, &vtable_poses); //Ensure we have space in BT for data
+	ec_blendTree_ensureHasSpace(&demoMode->characterAnimPipeline.blendTree, &vtable_poses); //Ensure we have space in BT for data
 
 	//Update all clips used by blend tree
-	a3clipControllerUpdate(demoMode->clipCtrlStrafeL, dt);
-	a3clipControllerUpdate(demoMode->clipCtrlStrafeR, dt);
-	a3clipControllerUpdate(demoMode->clipCtrlWalk   , dt);
-	a3clipControllerUpdate(demoMode->clipCtrlIdle   , dt);
-	a3clipControllerUpdate(demoMode->clipCtrlPistol , dt);
+	a3clipControllerUpdate(demoMode->characterAnimPipeline.clipCtrlStrafeL, dt);
+	a3clipControllerUpdate(demoMode->characterAnimPipeline.clipCtrlStrafeR, dt);
+	a3clipControllerUpdate(demoMode->characterAnimPipeline.clipCtrlWalk   , dt);
+	a3clipControllerUpdate(demoMode->characterAnimPipeline.clipCtrlIdle   , dt);
+	a3clipControllerUpdate(demoMode->characterAnimPipeline.clipCtrlPistol , dt);
 
 	//Load poses into BT input nodes
-	a3clipControllerEvaluate(demoMode->clipCtrlStrafeL, demoMode->animOutputStrafeL   ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(demoMode->clipCtrlStrafeR, demoMode->animOutputStrafeR   ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(demoMode->clipCtrlWalk   , demoMode->animOutputWalk      ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(demoMode->clipCtrlIdle   , demoMode->animOutputIdle      ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(demoMode->clipCtrlPistol , demoMode->animOutputArmsAction->out, demoMode->hierarchyPoseGroup_skel);
+	a3clipControllerEvaluate(demoMode->characterAnimPipeline.clipCtrlStrafeL, demoMode->characterAnimPipeline.animOutputStrafeL   ->out, demoMode->hierarchyPoseGroup_skel);
+	a3clipControllerEvaluate(demoMode->characterAnimPipeline.clipCtrlStrafeR, demoMode->characterAnimPipeline.animOutputStrafeR   ->out, demoMode->hierarchyPoseGroup_skel);
+	a3clipControllerEvaluate(demoMode->characterAnimPipeline.clipCtrlWalk   , demoMode->characterAnimPipeline.animOutputWalk      ->out, demoMode->hierarchyPoseGroup_skel);
+	a3clipControllerEvaluate(demoMode->characterAnimPipeline.clipCtrlIdle   , demoMode->characterAnimPipeline.animOutputIdle      ->out, demoMode->hierarchyPoseGroup_skel);
+	a3clipControllerEvaluate(demoMode->characterAnimPipeline.clipCtrlPistol , demoMode->characterAnimPipeline.animOutputArmsAction->out, demoMode->hierarchyPoseGroup_skel);
 
 	//Run forward (without IK) and copy output to render objects
-	ec_blendTreeEvaluate(&demoMode->blendTree, &vtable_poses);
-	vtable_poses.copy(activeHS->animPose->pose, demoMode->blendTree_output->out, &vtable_poses);
+	ec_blendTreeEvaluate(&demoMode->characterAnimPipeline.blendTree, &vtable_poses);
+	vtable_poses.copy(activeHS->animPose->pose, demoMode->characterAnimPipeline.blendTree_output->out, &vtable_poses);
 	activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
 	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
 
@@ -336,8 +336,8 @@ void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animati
 	ec_kinematicsPipeline_runIK(demoMode, activeHS);
 
 	//Run forward again now that IK values are in
-	ec_blendTreeEvaluate(&demoMode->blendTree, &vtable_poses);
-	vtable_poses.copy(activeHS->animPose->pose, demoMode->blendTree_output->out, &vtable_poses);
+	ec_blendTreeEvaluate(&demoMode->characterAnimPipeline.blendTree, &vtable_poses);
+	vtable_poses.copy(activeHS->animPose->pose, demoMode->characterAnimPipeline.blendTree_output->out, &vtable_poses);
 	activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
 	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
 }
