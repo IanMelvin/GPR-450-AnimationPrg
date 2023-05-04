@@ -558,17 +558,9 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		//Mixed upper + lower body split animations
 		ec_BlendTreeNode* splitControlFinal = ec_blendTreeNodeCreateLerpPerNode(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], hierarchy->numNodes, finalLocomotion, finalUpperBody, 1);
 		//Set and propagate mask: Anything past legs belongs to lower body
-		splitControlFinal->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftUpLeg")] = 0;
-		splitControlFinal->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightUpLeg")] = 0;
-		for (a3index i = 0; i < hierarchy->numNodes; ++i)
-		{
-			if (hierarchy->nodes[i].parentIndex >= 0)
-			{
-				a3real parentScaleFactor = splitControlFinal->data.lerpPerNode.params[hierarchy->nodes[i].parentIndex];
-				if (parentScaleFactor == 0) splitControlFinal->data.lerpPerNode.params[i] = 0;
-			}
-		}
-		splitControlFinal->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Hips")] = 0; //Hips are locomotion, and therefore lower body
+		ec_setChain(splitControlFinal->data.lerpPerNode.params, 0, a3hierarchyGetNodeIndex(hierarchy, "mixamorig:LeftUpLeg"), hierarchy);
+		ec_setChain(splitControlFinal->data.lerpPerNode.params, 0, a3hierarchyGetNodeIndex(hierarchy, "mixamorig:RightUpLeg"), hierarchy);
+		splitControlFinal->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Hips")] = 0; //Hips are locomotion, and therefore lower body, but don't include arms
 
 		//Option to just ignore masking and use locomotion part for upper body as well
 		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], finalLocomotion, splitControlFinal, 1);
