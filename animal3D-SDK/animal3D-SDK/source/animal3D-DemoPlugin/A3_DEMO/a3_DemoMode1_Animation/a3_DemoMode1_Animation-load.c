@@ -570,7 +570,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 		//Option to just ignore masking and use locomotion part for upper body as well
 		ec_BlendTreeNode* finalOutput = ec_blendTreeNodeCreateLerpUniform(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], finalLocomotion, splitControlFinal, 1);
-		demoMode->characterAnimPipeline.output = finalOutput;
+		demoMode->characterAnimPipeline.btOutput = finalOutput;
 		
 		assert(j <= demoMode->characterAnimPipeline.blendTree.numBtNodes); //If this errors, the blend tree is too small, so allocate more
 

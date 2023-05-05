@@ -303,6 +303,39 @@ void ec_kinematicsPipeline_runForward(a3_DemoMode1_Animation* demoMode, a3_Hiera
 	a3hierarchyStateUpdateObjectBindToCurrent(activeHS, baseHS);
 }
 
+a3i32 ec_clipController_updateAndEvaluate(a3_ClipController* clipCtrl, a3f64 const dt, ec_DataVtable const* vtable_poses, a3_SpatialPose* poses_out, a3_SpatialPose* changes_out, a3_HierarchyPoseGroup const* posePool)
+{
+	a3f64 startTime = clipCtrl->clipTime_sec;
+	a3_SpatialPose* prevVal = vtable_poses->alloc(vtable_poses);
+
+	a3clipControllerEvaluate(clipCtrl, prevVal, posePool);
+
+	a3clipControllerUpdate(clipCtrl, dt);
+	a3clipControllerEvaluate(clipCtrl, poses_out, posePool);
+
+	//Nasty hack, should prob process different in keyframes ahead of time instead
+	if (clipCtrl->clipTime_sec > startTime)
+	{
+		//Didn't loop, capture delta
+		vtable_poses->deconcat(changes_out, poses_out, prevVal, vtable_poses);
+	}
+	else
+	{
+		//We looped! Normal logic no longer applies.
+
+		//Just use identity pose for now (aka no motion)
+		vtable_poses->arrayIdentity(changes_out, vtable_poses);
+
+		//Rewind and retry
+		//A bit silly but it works
+		//a3clipControllerUpdate(clipCtrl, -dt);
+		//return ec_clipController_updateAndEvaluate(clipCtrl, dt, vtable_poses, poses_out, changes_out, posePool);
+	}
+
+	vtable_poses->release(prevVal);
+	return 1;
+}
+
 void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS, a3f64 const dt)
 {
 	ec_character_blendPipeline_updateParameters(demoState, demoMode);
@@ -314,19 +347,19 @@ void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animati
 	vtable_poses.arrayCount = activeHS->hierarchy->numNodes;
 	ec_blendTree_ensureHasSpace(&chr->blendTree, &vtable_poses); //Ensure we have space in BT for data
 
-	//Update all clips used by blend tree
-	a3clipControllerUpdate(chr->clipCtrlStrafeL, dt);
-	a3clipControllerUpdate(chr->clipCtrlStrafeR, dt);
-	a3clipControllerUpdate(chr->clipCtrlWalk   , dt);
-	a3clipControllerUpdate(chr->clipCtrlIdle   , dt);
-	a3clipControllerUpdate(chr->clipCtrlPistol , dt);
+	//Data for integration
+	a3_SpatialPose* changesStrafeL = vtable_poses.alloc(&vtable_poses);
+	a3_SpatialPose* changesStrafeR = vtable_poses.alloc(&vtable_poses);
+	a3_SpatialPose* changesWalk    = vtable_poses.alloc(&vtable_poses);
+	a3_SpatialPose* changesIdle    = vtable_poses.alloc(&vtable_poses);
+	a3_SpatialPose* changesPistol  = vtable_poses.alloc(&vtable_poses);
 
-	//Load poses into BT input nodes
-	a3clipControllerEvaluate(chr->clipCtrlStrafeL, chr->animOutputStrafeL   ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(chr->clipCtrlStrafeR, chr->animOutputStrafeR   ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(chr->clipCtrlWalk   , chr->animOutputWalk      ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(chr->clipCtrlIdle   , chr->animOutputIdle      ->out, demoMode->hierarchyPoseGroup_skel);
-	a3clipControllerEvaluate(chr->clipCtrlPistol , chr->animOutputArmsAction->out, demoMode->hierarchyPoseGroup_skel);
+	//Update clips, load poses into BT input nodes, and save integration info all in one
+	ec_clipController_updateAndEvaluate(chr->clipCtrlStrafeL, dt, &vtable_poses, chr->animOutputStrafeL   ->out, changesStrafeL, demoMode->hierarchyPoseGroup_skel);
+	ec_clipController_updateAndEvaluate(chr->clipCtrlStrafeR, dt, &vtable_poses, chr->animOutputStrafeR   ->out, changesStrafeR, demoMode->hierarchyPoseGroup_skel);
+	ec_clipController_updateAndEvaluate(chr->clipCtrlWalk   , dt, &vtable_poses, chr->animOutputWalk      ->out, changesWalk   , demoMode->hierarchyPoseGroup_skel);
+	ec_clipController_updateAndEvaluate(chr->clipCtrlIdle   , dt, &vtable_poses, chr->animOutputIdle      ->out, changesIdle   , demoMode->hierarchyPoseGroup_skel);
+	ec_clipController_updateAndEvaluate(chr->clipCtrlPistol , dt, &vtable_poses, chr->animOutputArmsAction->out, changesPistol , demoMode->hierarchyPoseGroup_skel);
 
 	//Tell blend tree to ignore IK
 	*chr->ikStrengthHead = 0;
@@ -335,7 +368,7 @@ void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animati
 
 	//Run forward (without IK) and copy output to render objects
 	ec_blendTreeEvaluate(&chr->blendTree, &vtable_poses);
-	vtable_poses.copy(activeHS->animPose->pose, chr->output->out, &vtable_poses);
+	vtable_poses.copy(activeHS->animPose->pose, chr->btOutput->out, &vtable_poses);
 	activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
 	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
 
@@ -349,9 +382,31 @@ void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animati
 
 	//Run forward again now that IK values are in
 	ec_blendTreeEvaluate(&chr->blendTree, &vtable_poses);
-	vtable_poses.copy(activeHS->animPose->pose, chr->output->out, &vtable_poses);
+	vtable_poses.copy(activeHS->animPose->pose, chr->btOutput->out, &vtable_poses);
 	activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
 	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
+
+	//Run BT one last time with integration data (ONLY for root node)
+	ec_blendTree_ensureHasSpace(&chr->blendTree, &vtable_SpatialPose);
+	vtable_vec3Additive.copy(chr->animOutputStrafeL   ->out, changesStrafeL, &vtable_SpatialPose);
+	vtable_vec3Additive.copy(chr->animOutputStrafeR   ->out, changesStrafeR, &vtable_SpatialPose);
+	vtable_vec3Additive.copy(chr->animOutputWalk      ->out, changesWalk   , &vtable_SpatialPose);
+	vtable_vec3Additive.copy(chr->animOutputIdle      ->out, changesIdle   , &vtable_SpatialPose);
+	vtable_vec3Additive.copy(chr->animOutputArmsAction->out, changesPistol , &vtable_SpatialPose);
+	ec_blendTreeEvaluate(&chr->blendTree, &vtable_vec3Additive);
+	a3_SpatialPose* rootChange = chr->btOutput->out;
+	a3vec4 posChangeWS; a3real4ProductTransform(posChangeWS.v, rootChange->translate.v, demoMode->obj_skeleton->modelMat.m);
+	a3real4MulS(posChangeWS.v, 0.035f); //RSC NOTE: I have no idea why this works, but otherwise the character goes f l y i n g
+	a3real4Add(demoMode->obj_skeleton->position.v, posChangeWS.v);
+	//demoMode->obj_skeleton->position.x += rootChange->translate.x;
+	//a3real4Add(demoMode->obj_skeleton->position.v, rootChange->translate.v);
+
+	//Free temp memory
+	vtable_poses.release(changesStrafeL);
+	vtable_poses.release(changesStrafeR);
+	vtable_poses.release(changesWalk   );
+	vtable_poses.release(changesIdle   );
+	vtable_poses.release(changesPistol );
 }
 
 

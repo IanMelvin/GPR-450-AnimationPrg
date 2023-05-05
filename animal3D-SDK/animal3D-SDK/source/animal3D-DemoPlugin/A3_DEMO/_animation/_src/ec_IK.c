@@ -8,9 +8,9 @@ a3i32 ec_applyEffector_lookAt(ec_IKEffector const* effector, a3_SpatialPose* pos
 
 a3i32 ec_applyEffector(ec_IKEffector const* effector, a3_SpatialPose* poses_out, const a3_SpatialPose* posesRef_in, a3_Hierarchy const* hierarchy)
 {
-	if(effector && !pose_out && posesRef_in && hierarchy)
+	if(effector && !poses_out && posesRef_in && hierarchy)
 	{
-		switch(effector.type)
+		switch(effector->type)
 		{
 			case IK_LOOK_AT:
 				ec_applyEffector_lookAt(effector, poses_out, posesRef_in, hierarchy);
@@ -19,7 +19,7 @@ a3i32 ec_applyEffector(ec_IKEffector const* effector, a3_SpatialPose* poses_out,
 			case IK_TRIANGLE:
 				ec_applyEffector_triangle(effector, poses_out, posesRef_in, hierarchy);
 				return 1;
-				break
+				break;
 			case IK_NO_OP:
 				return 1;
 				break;

@@ -148,7 +148,7 @@ typedef enum a3_DemoMode1_Animation_InputMode				a3_DemoMode1_Animation_InputMod
 	struct ec_DemoMode1_CharacterAnimPipeline
 	{
 		ec_BlendTree blendTree;
-		ec_BlendTreeNode* output; //For convenience
+		ec_BlendTreeNode* btOutput; //For convenience
 
 		//Clips feeding into blend tree
 		a3_ClipController clipCtrlWalk[1], clipCtrlIdle[1], clipCtrlStrafeL[1], clipCtrlStrafeR[1], clipCtrlPistol[1];
