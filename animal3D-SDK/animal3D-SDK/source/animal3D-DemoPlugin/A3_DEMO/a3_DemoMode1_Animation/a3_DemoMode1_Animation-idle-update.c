@@ -369,7 +369,7 @@ void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animati
 	//Run forward (without IK) and copy output to render objects
 	ec_blendTreeEvaluate(&chr->blendTree, &vtable_poses);
 	vtable_poses.copy(activeHS->animPose->pose, chr->btOutput->out, &vtable_poses);
-	activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
+	activeHS->hpose->pose->translate = a3vec4_w; //No root motion.
 	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
 
 	//Run IK
@@ -383,23 +383,20 @@ void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animati
 	//Run forward again now that IK values are in
 	ec_blendTreeEvaluate(&chr->blendTree, &vtable_poses);
 	vtable_poses.copy(activeHS->animPose->pose, chr->btOutput->out, &vtable_poses);
-	activeHS->hpose->pose->translate = a3vec4_w; //No root motion. TEMP testing measure, TODO remove!
+	activeHS->hpose->pose->translate = a3vec4_w; //No root motion.
 	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
 
 	//Run BT one last time with integration data (ONLY for root node)
 	ec_blendTree_ensureHasSpace(&chr->blendTree, &vtable_SpatialPose);
-	vtable_vec3Additive.copy(chr->animOutputStrafeL   ->out, changesStrafeL, &vtable_SpatialPose);
-	vtable_vec3Additive.copy(chr->animOutputStrafeR   ->out, changesStrafeR, &vtable_SpatialPose);
-	vtable_vec3Additive.copy(chr->animOutputWalk      ->out, changesWalk   , &vtable_SpatialPose);
-	vtable_vec3Additive.copy(chr->animOutputIdle      ->out, changesIdle   , &vtable_SpatialPose);
-	vtable_vec3Additive.copy(chr->animOutputArmsAction->out, changesPistol , &vtable_SpatialPose);
-	ec_blendTreeEvaluate(&chr->blendTree, &vtable_vec3Additive);
+	vtable_SpatialPose.copy(chr->animOutputStrafeL   ->out, changesStrafeL, &vtable_SpatialPose);
+	vtable_SpatialPose.copy(chr->animOutputStrafeR   ->out, changesStrafeR, &vtable_SpatialPose);
+	vtable_SpatialPose.copy(chr->animOutputWalk      ->out, changesWalk   , &vtable_SpatialPose);
+	vtable_SpatialPose.copy(chr->animOutputIdle      ->out, changesIdle   , &vtable_SpatialPose);
+	vtable_SpatialPose.copy(chr->animOutputArmsAction->out, changesPistol , &vtable_SpatialPose);
+	ec_blendTreeEvaluate(&chr->blendTree, &vtable_SpatialPose);
 	a3_SpatialPose* rootChange = chr->btOutput->out;
-	a3vec4 posChangeWS; a3real4ProductTransform(posChangeWS.v, rootChange->translate.v, demoMode->obj_skeleton->modelMat.m);
-	a3real4MulS(posChangeWS.v, 0.035f); //RSC NOTE: I have no idea why this works, but otherwise the character goes f l y i n g
-	a3real4Add(demoMode->obj_skeleton->position.v, posChangeWS.v);
-	//demoMode->obj_skeleton->position.x += rootChange->translate.x;
-	//a3real4Add(demoMode->obj_skeleton->position.v, rootChange->translate.v);
+	a3vec4 posChangeWorld; a3real4ProductTransform(posChangeWorld.v, rootChange->translate.v, demoMode->obj_skeleton->modelMat.m);
+	a3real4Add(demoMode->obj_skeleton->position.v, posChangeWorld.v);
 
 	//Free temp memory
 	vtable_poses.release(changesStrafeL);
