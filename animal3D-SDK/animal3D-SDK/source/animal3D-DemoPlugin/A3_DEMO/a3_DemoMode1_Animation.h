@@ -37,6 +37,7 @@
 #include "_animation/a3_KeyframeAnimationController.h"
 #include "_animation/a3_HierarchyStateBlend.h"
 #include "_animation/ec_BlendTree.h"
+#include "_animation/ec_IK.h"
 
 
 //-----------------------------------------------------------------------------
@@ -153,15 +154,25 @@ typedef enum a3_DemoMode1_Animation_InputMode				a3_DemoMode1_Animation_InputMod
 		//Clips feeding into blend tree
 		a3_ClipController clipCtrlWalk[1], clipCtrlIdle[1], clipCtrlStrafeL[1], clipCtrlStrafeR[1], clipCtrlPistol[1];
 		ec_BlendTreeNode *animOutputWalk, *animOutputIdle, *animOutputStrafeL, *animOutputStrafeR, *animOutputArmsAction;
-
-		//IK feeding into blend tree
-		ec_BlendTreeNode *ikOutputHead,   *ikOutputArmL,   *ikOutputArmR;
-		a3real         *ikStrengthHead, *ikStrengthArmL, *ikStrengthArmR; //Blend strength when no IK target is present
 		
 		//Control parameters
 		a3real* blendTree_ctlForward;
 		a3real *blendTree_ctlStrafe1, *blendTree_ctlStrafe2; //RSC NOTE: These belong to different nodes, but should be set to the same value at all times
 		a3real* blendTree_ctlStrafeAngle;
+
+		//IK feeding into blend tree
+		ec_BlendTreeNode *ikOutputHead,   *ikOutputArmL,   *ikOutputArmR;
+		a3real         *ikStrengthHead, *ikStrengthArmL, *ikStrengthArmR; //Blend strength when no IK target is present
+
+		#define ec_maxIKEffectors 8
+		union {
+			ec_IKEffector ikEffectors[ec_maxIKEffectors];
+			struct {
+				ec_IKEffector ikEffectorHeadLook;
+				ec_IKEffector ikEffectorArmL;
+				ec_IKEffector ikEffectorArmR;
+			};
+		};
 	};
 
 	// demo mode for basic shading

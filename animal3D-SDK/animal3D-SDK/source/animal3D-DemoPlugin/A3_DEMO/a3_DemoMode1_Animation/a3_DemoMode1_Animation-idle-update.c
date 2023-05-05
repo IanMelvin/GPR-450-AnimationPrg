@@ -281,10 +281,17 @@ void ec_character_blendPipeline_updateParameters(a3_DemoState* demoState, a3_Dem
 	*demoMode->characterAnimPipeline.blendTree_ctlStrafeAngle = (a3real)fabs( a3atan2d(-demoMode->smoothedInput.x, demoMode->smoothedInput.y)/90 );
 }
 
-void ec_kinematicsPipeline_runIK(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS)
+void ec_kinematicsPipeline_runIK(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS)
 {
-	//TODO implement IK
 	a3kinematicsSolveInverse(activeHS);
+	a3hierarchyPoseRestore(activeHS->localSpace,
+		demoMode->hierarchy_skel->numNodes,
+		demoMode->hierarchyPoseGroup_skel->channel,
+		demoMode->hierarchyPoseGroup_skel->order);
+	a3hierarchyPoseDeconcat(activeHS->localSpace,	// goal to calculate
+		baseHS->localSpace, // holds base pose
+		activeHS->animPose, // holds current sample pose
+		demoMode->hierarchy_skel->numNodes);
 }
 
 void ec_kinematicsPipeline_runForward(a3_DemoMode1_Animation* demoMode, a3_HierarchyState* activeHS, a3_HierarchyState* baseHS)
@@ -373,8 +380,9 @@ void ec_kinematicsPipeline_runFull(a3_DemoState* demoState, a3_DemoMode1_Animati
 	ec_kinematicsPipeline_runForward(demoMode, activeHS, baseHS);
 
 	//Run IK
-	ec_kinematicsPipeline_runIK(demoMode, activeHS);
-
+	for (a3index i = 0; i < ec_maxIKEffectors; ++i) ec_applyEffector(&chr->ikEffectors[i], activeHS->objectSpace->pose, chr->btOutput->out, demoMode->hierarchy_skel);
+	ec_kinematicsPipeline_runIK(demoMode, activeHS, baseHS);
+	
 	//Tell blend tree to use IK
 	*chr->ikStrengthHead = 1;
 	*chr->ikStrengthArmL = 1;

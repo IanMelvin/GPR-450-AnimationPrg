@@ -544,7 +544,7 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 
 			//Mask IK and blend in
 			ec_BlendTreeNode* maskHead = ec_blendTreeNodeCreateLerpPerNode(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], hierarchy->numNodes, demoMode->characterAnimPipeline.animOutputArmsAction, demoMode->characterAnimPipeline.ikOutputHead, 0);
-			ec_setChain(maskHead->data.lerpPerNode.params, 1, a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Neck"), hierarchy);
+			maskHead->data.lerpPerNode.params[a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Neck")] = 1;
 			ec_BlendTreeNode* blendIkHead = ec_blendTreeNodeCreateLerpUniform(&demoMode->characterAnimPipeline.blendTree.btNodes[j++], demoMode->characterAnimPipeline.animOutputArmsAction, maskHead, 1);
 			demoMode->characterAnimPipeline.ikStrengthHead = &blendIkHead->data.lerpUniform.param;
 
@@ -575,6 +575,18 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_DemoMode1_Anim
 		assert(j <= demoMode->characterAnimPipeline.blendTree.numBtNodes); //If this errors, the blend tree is too small, so allocate more
 
 		demoMode->updateBlendTree = false;
+	}
+
+	//IK effectors
+	{
+		demoMode->characterAnimPipeline.ikEffectorHeadLook.type = IK_LOOK_AT;
+		demoMode->characterAnimPipeline.ikEffectorHeadLook.data.lookAt.target = a3vec3_one;
+		demoMode->characterAnimPipeline.ikEffectorHeadLook.data.lookAt.neckID = a3hierarchyGetNodeIndex(hierarchy, "mixamorig:Neck");
+
+		demoMode->characterAnimPipeline.ikEffectorArmL.type = IK_TRIANGLE;
+		//demoMode->characterAnimPipeline.ikEffectorHeadLook.data.triangle;
+
+		demoMode->characterAnimPipeline.ikEffectorArmR.type = IK_TRIANGLE;
 	}
 }
 
