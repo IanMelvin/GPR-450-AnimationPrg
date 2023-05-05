@@ -46,6 +46,7 @@ extern "C"
 {
 #else	// !__cplusplus
 typedef struct a3_DemoMode1_Animation						a3_DemoMode1_Animation;
+typedef struct ec_DemoMode1_CharacterAnimPipeline			ec_DemoMode1_CharacterAnimPipeline;
 typedef enum a3_DemoMode1_Animation_RenderProgramName		a3_DemoMode1_Animation_RenderProgramName;
 typedef enum a3_DemoMode1_Animation_DisplayProgramName		a3_DemoMode1_Animation_DisplayProgramName;
 typedef enum a3_DemoMode1_Animation_ActiveCameraName		a3_DemoMode1_Animation_ActiveCameraName;
@@ -144,6 +145,25 @@ typedef enum a3_DemoMode1_Animation_InputMode				a3_DemoMode1_Animation_InputMod
 
 //-----------------------------------------------------------------------------
 
+	struct ec_DemoMode1_CharacterAnimPipeline
+	{
+		ec_BlendTree blendTree;
+		ec_BlendTreeNode* output; //For convenience
+
+		//Clips feeding into blend tree
+		a3_ClipController clipCtrlWalk[1], clipCtrlIdle[1], clipCtrlStrafeL[1], clipCtrlStrafeR[1], clipCtrlPistol[1];
+		ec_BlendTreeNode *animOutputWalk, *animOutputIdle, *animOutputStrafeL, *animOutputStrafeR, *animOutputArmsAction;
+
+		//IK feeding into blend tree
+		ec_BlendTreeNode *ikOutputHead,   *ikOutputArmL,   *ikOutputArmR;
+		a3real         *ikStrengthHead, *ikStrengthArmL, *ikStrengthArmR; //Blend strength when no IK target is present
+		
+		//Control parameters
+		a3real* blendTree_ctlForward;
+		a3real *blendTree_ctlStrafe1, *blendTree_ctlStrafe2; //RSC NOTE: These belong to different nodes, but should be set to the same value at all times
+		a3real* blendTree_ctlStrafeAngle;
+	};
+
 	// demo mode for basic shading
 	struct a3_DemoMode1_Animation
 	{
@@ -164,15 +184,7 @@ typedef enum a3_DemoMode1_Animation_InputMode				a3_DemoMode1_Animation_InputMod
 		a3_ClipPool clipPool[1];
 
 		//Blend tree persistent data
-		ec_BlendTree blendTree;
-		a3_ClipController clipCtrlStrafeL[1], clipCtrlStrafeR[1], clipCtrlWalk[1], clipCtrlIdle[1], clipCtrlPistol[1];
-		//Blend tree convenience stuff so we don't have to do funky indexing
-		ec_BlendTreeNode *animOutputWalk, *animOutputIdle, *animOutputStrafeL, *animOutputStrafeR, *animOutputArmsAction;
-		ec_BlendTreeNode *ikOutputHead, *ikOutputArmL, *ikOutputArmR;
-		ec_BlendTreeNode* blendTree_output;
-		a3real* blendTree_ctlForward;
-		a3real *blendTree_ctlStrafe1, *blendTree_ctlStrafe2; //RSC NOTE: These belong to different nodes, but should be set to the same value at all times
-		a3real* blendTree_ctlStrafeAngle;
+		ec_DemoMode1_CharacterAnimPipeline characterAnimPipeline;
 		//Blend tree testing rig
 		a3ui32 blend1Index, blend2Index;
 		a3boolean updateBlendTree;

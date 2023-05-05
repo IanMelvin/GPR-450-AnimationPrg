@@ -25,6 +25,9 @@ ec_BlendTreeNode* ec_blendTreeNodeCreateAdd(ec_BlendTreeNode* node_out, ec_Blend
 ec_BlendTreeNode* ec_blendTreeNodeCreateScaleUniform(ec_BlendTreeNode* node_out, ec_BlendTreeNode* in, a3real scaleFactor);
 ec_BlendTreeNode* ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out, a3ui32 numNodes, ec_BlendTreeNode* in, a3real defaultScaleFactor);
 
+//Utility function for per-node operations
+a3ret ec_setChain(a3real* paramsArray, a3real setValue, a3ret startIndex, const a3_Hierarchy* hierarchy);
+
 enum ec_BlendTreeNodeType
 {
 	BT_NO_OP = 0,

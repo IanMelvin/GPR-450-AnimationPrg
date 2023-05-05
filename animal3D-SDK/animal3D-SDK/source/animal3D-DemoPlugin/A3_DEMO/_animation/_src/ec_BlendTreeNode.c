@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <memory.h>
 
 #pragma region Evaluate family
 
@@ -205,3 +206,28 @@ ec_BlendTreeNode* ec_blendTreeNodeCreateScalePerNode(ec_BlendTreeNode* node_out,
 }
 
 #pragma endregion Lifecycle family
+
+a3ret ec_setChain(a3real* paramsArray, a3real setValue, a3ret startIndex, const a3_Hierarchy* hierarchy)
+{
+	//Step 1: Mark
+	a3boolean* isInChain = malloc(sizeof(a3boolean) * hierarchy->numNodes);
+	memset(isInChain, 0, sizeof(a3boolean) * hierarchy->numNodes);
+	isInChain[startIndex] = a3true;
+
+	for (a3index i = 0; i < hierarchy->numNodes; ++i)
+	{
+		if (hierarchy->nodes[i].parentIndex >= 0 && isInChain[hierarchy->nodes[i].parentIndex])
+		{
+			isInChain[i] = a3true;
+		}
+	}
+
+	//Step 2: Set mask
+	for (a3index i = 0; i < hierarchy->numNodes; ++i)
+	{
+		if (isInChain[i]) paramsArray[i] = setValue;
+	}
+
+	free(isInChain);
+	return hierarchy->numNodes;
+}
